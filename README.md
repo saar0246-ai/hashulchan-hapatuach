@@ -17,7 +17,7 @@
 - [x] יצירת פרויקט Supabase חדש (`hashulchan-hapatuach`, region: `eu-central-1`)
 - [x] הגדרת DB schema מלא (migrations)
 - [x] הגדרת RLS policies לכל הטבלאות
-- [x] Edge Function: `send-notification-email` (Brevo)
+- [x] Edge Function: `send-notification-email` (Resend)
 - [x] DB Triggers: עדכון אוטומטי של ratings + counters
 - [x] Vite + React + TypeScript + Tailwind setup
 - [x] Vercel deployment (GitHub → Vercel auto-deploy)
@@ -68,13 +68,13 @@
 
 ---
 
-## 📧 Email (Brevo)
+## 📧 Email (Resend)
 
-- שירות: Brevo (לשעבר Sendinblue) — 300 מיילים/יום חינם
+- שירות: Resend — 3,000 מיילים/חודש חינם
 - Secret names ב-Supabase:
-  - `BREVO_API_KEY` — מפתח API מ-brevo.com
-  - `BREVO_FROM_EMAIL` — כתובת השולח (למשל: noreply@hashulchan.co.il)
-  - `BREVO_FROM_NAME` — שם השולח: השולחן הפתוח
+  - `RESEND_API_KEY` — מפתח API מ-resend.com
+  - `RESEND_FROM_EMAIL` — כתובת השולח (למשל: noreply@hashulchan.co.il)
+  - `SITE_URL` — כתובת האתר (https://hashulchan.co.il)
 
 **להגדיר:** Supabase Dashboard → Project Settings → Edge Functions → Secrets
 
@@ -101,7 +101,7 @@ npm run dev
 | Icons | Lucide React |
 | Routing | React Router v6 |
 | Backend | Supabase (Auth + PostgreSQL + Edge Functions + Realtime) |
-| Email | Brevo REST API (דרך Edge Functions) |
+| Email | Resend SDK (דרך Edge Functions) |
 | Deployment | Vercel (מ-GitHub) |
 
 ---
@@ -149,8 +149,8 @@ opentable/
 ## ⚠️ הערות חשובות
 
 1. **Windows + Supabase CLI**: לעולם לא לכתוב עברית בתוך גוף פונקציות SQL — גורם לשגיאות encoding (למדנו מ-TEOS)
-2. **Brevo secrets**: חייבים להגדיר ב-Supabase לפני שהמיילים יעבדו
-3. **Email verification**: Supabase שולח מייל אימות מובנה — אפשר להחליף ל-Brevo ב-Auth Settings
+2. **Resend secrets**: חייבים להגדיר ב-Supabase לפני שהמיילים יעבדו
+3. **Email verification**: Supabase שולח מייל אימות מובנה — אפשר להחליף ל-Resend ב-Auth Settings
 4. **RLS**: כל הטבלאות מוגנות — לא לבטל RLS
 
 ---
