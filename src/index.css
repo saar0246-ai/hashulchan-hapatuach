@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ─── */
+@layer base {
+  :root {
+    /* Warm Shabbat Palette — Light */
+    --background: 38 55% 97%;
+    --foreground: 25 45% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 45% 12%;
+    --primary: 38 88% 42%;
+    --primary-foreground: 38 88% 97%;
+    --secondary: 350 55% 30%;
+    --secondary-foreground: 350 55% 97%;
+    --accent: 82 30% 38%;
+    --accent-foreground: 82 30% 97%;
+    --muted: 38 35% 94%;
+    --muted-foreground: 38 18% 48%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 38 28% 88%;
+    --input: 38 30% 93%;
+    --ring: 38 88% 42%;
+    --radius: 0.875rem;
+  }
+
+  .dark {
+    /* Warm Shabbat Palette — Dark */
+    --background: 28 38% 5%;
+    --foreground: 38 40% 92%;
+    --card: 28 35% 9%;
+    --card-foreground: 38 40% 92%;
+    --primary: 38 90% 52%;
+    --primary-foreground: 38 90% 5%;
+    --secondary: 350 52% 42%;
+    --secondary-foreground: 350 52% 97%;
+    --accent: 82 30% 45%;
+    --accent-foreground: 82 30% 97%;
+    --muted: 28 28% 15%;
+    --muted-foreground: 38 18% 62%;
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 28 25% 20%;
+    --input: 28 30% 14%;
+    --ring: 38 90% 52%;
+  }
+}
+
+/* ─── Base Styles ─── */
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    direction: rtl;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+  }
+
+  /* Safe area for notched phones */
+  #root {
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ─── Component Utilities ─── */
+@layer components {
+  /* Card */
+  .shulchan-card {
+    @apply bg-card rounded-2xl border border-border shadow-sm overflow-hidden;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-card/80 backdrop-blur-md border border-border/60;
+  }
+
+  /* Input */
+  .shulchan-input {
+    @apply w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground
+           placeholder:text-muted-foreground outline-none
+           focus:ring-2 focus:ring-primary/30 focus:border-primary
+           transition-all duration-200;
+  }
+
+  /* Button primary */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold rounded-xl px-6 py-3
+           active:scale-95 transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed
+           hover:bg-primary/90;
+  }
+
+  /* Button secondary */
+  .btn-secondary {
+    @apply bg-muted text-foreground font-medium rounded-xl px-6 py-3
+           active:scale-95 transition-all duration-150
+           hover:bg-muted/80;
+  }
+
+  /* Button outline */
+  .btn-outline {
+    @apply border-2 border-primary text-primary font-medium rounded-xl px-6 py-3
+           active:scale-95 transition-all duration-150
+           hover:bg-primary/10;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-muted rounded-xl;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted) / 0.6) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply max-w-lg mx-auto px-4 pb-28 pt-4;
+  }
+
+  /* Section title */
+  .section-title {
+    @apply font-display text-xl font-bold text-foreground;
+  }
+}
+
+/* ─── Stagger animations ─── */
+@layer utilities {
+  .stagger-1 { animation: slideUp 0.4s ease-out 0.05s both; }
+  .stagger-2 { animation: slideUp 0.4s ease-out 0.10s both; }
+  .stagger-3 { animation: slideUp 0.4s ease-out 0.15s both; }
+  .stagger-4 { animation: slideUp 0.4s ease-out 0.20s both; }
+  .stagger-5 { animation: slideUp 0.4s ease-out 0.25s both; }
+  .stagger-6 { animation: slideUp 0.4s ease-out 0.30s both; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
