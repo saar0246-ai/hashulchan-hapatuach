@@ -5,7 +5,6 @@
 /* ─── Design Tokens ─── */
 @layer base {
   :root {
-    /* Premium Israeli Hospitality — Light */
     --background: 0 0% 98%;
     --foreground: 220 20% 9%;
     --card: 0 0% 100%;
@@ -47,111 +46,163 @@
   }
 }
 
-/* ─── Base Styles ─── */
+/* ─── Base ─── */
 @layer base {
-  * {
-    @apply border-border;
-    box-sizing: border-box;
-  }
-
-  html {
-    direction: rtl;
-    -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
-  }
-
+  * { @apply border-border; box-sizing: border-box; }
+  html { direction: rtl; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
   body {
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
   }
-
-  #root {
-    min-height: 100dvh;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+  #root { min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
 }
 
-/* ─── Component Utilities ─── */
+/* ─── Components ─── */
 @layer components {
 
+  /* ── Cards ── */
   .shulchan-card {
     @apply bg-card rounded-2xl overflow-hidden;
     box-shadow:
-      0 0 0 1px hsl(var(--border) / 0.7),
-      0 1px 3px hsl(var(--foreground) / 0.04),
-      0 6px 20px hsl(var(--foreground) / 0.05);
+      0 0 0 1px hsl(var(--border) / 0.6),
+      0 2px 4px hsl(var(--foreground) / 0.04),
+      0 8px 24px hsl(var(--foreground) / 0.06);
     transition: box-shadow 0.2s ease, transform 0.15s ease;
   }
-
-  .shulchan-card:hover {
+  .shulchan-card-hover:hover {
     box-shadow:
       0 0 0 1px hsl(var(--border)),
-      0 2px 6px hsl(var(--foreground) / 0.06),
-      0 12px 32px hsl(var(--foreground) / 0.09);
+      0 4px 8px hsl(var(--foreground) / 0.06),
+      0 16px 40px hsl(var(--foreground) / 0.1);
+    transform: translateY(-1px);
   }
 
+  /* ── Dark page hero ── */
+  .page-hero {
+    background: linear-gradient(170deg, #6B1224 0%, #2C0712 50%, #0E0307 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,152,12,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .page-hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 60px;
+    background: linear-gradient(to bottom, transparent, hsl(var(--background)));
+    pointer-events: none;
+  }
+
+  /* ── Glass ── */
   .glass {
-    background: hsl(var(--card) / 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
+    background: hsl(var(--card) / 0.88);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+  }
+  .glass-dark {
+    background: rgba(10, 3, 7, 0.75);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
   }
 
+  /* ── Inputs ── */
   .shulchan-input {
     @apply w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground
            placeholder:text-muted-foreground outline-none
            focus:ring-2 focus:ring-primary/25 focus:border-primary/60
            transition-all duration-200 text-sm;
   }
+  .shulchan-input-dark {
+    @apply w-full rounded-xl px-4 py-3 text-white outline-none text-sm
+           placeholder:text-white/40 transition-all duration-200;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .shulchan-input-dark:focus {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(212,152,12,0.6);
+    box-shadow: 0 0 0 3px rgba(212,152,12,0.15);
+  }
 
+  /* ── Buttons ── */
   .btn-primary {
     @apply font-semibold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
            disabled:opacity-50 disabled:cursor-not-allowed text-white;
     background: linear-gradient(135deg, hsl(347, 72%, 28%) 0%, hsl(347, 72%, 20%) 100%);
     box-shadow: 0 2px 8px hsl(347, 72%, 24% / 0.35), 0 1px 2px hsl(347, 72%, 24% / 0.2);
   }
-
   .btn-primary:hover:not(:disabled) {
     background: linear-gradient(135deg, hsl(347, 72%, 32%) 0%, hsl(347, 72%, 24%) 100%);
   }
-
   .dark .btn-primary {
     background: linear-gradient(135deg, hsl(347, 55%, 58%) 0%, hsl(347, 65%, 46%) 100%);
-    box-shadow: 0 2px 8px hsl(347, 55%, 50% / 0.3);
+  }
+
+  .btn-gold {
+    @apply font-bold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #C8860A 0%, #F0B428 50%, #C8860A 100%);
+    color: #1A0800;
+    box-shadow: 0 4px 18px rgba(200,134,10,0.45), 0 1px 3px rgba(200,134,10,0.2);
+  }
+  .btn-gold:hover:not(:disabled) {
+    background: linear-gradient(135deg, #D4960A 0%, #F5C240 50%, #D4960A 100%);
+    box-shadow: 0 6px 22px rgba(200,134,10,0.5);
   }
 
   .btn-secondary {
     @apply bg-muted text-foreground font-medium rounded-xl px-6 py-3
            active:scale-[0.97] transition-all duration-150 hover:bg-muted/70 text-sm;
   }
-
   .btn-outline {
     @apply border border-primary/40 text-primary font-medium rounded-xl px-6 py-3
            active:scale-[0.97] transition-all duration-150 hover:bg-primary/10 text-sm;
   }
+  .btn-ghost-white {
+    @apply font-medium rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150 text-sm;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85);
+  }
+  .btn-ghost-white:hover {
+    background: rgba(255,255,255,0.16);
+  }
 
+  /* ── Badges ── */
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
+  /* ── Gradient text ── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #FFD166 0%, #C67C00 55%, #F0A800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Skeleton ── */
   .skeleton {
     @apply bg-muted rounded-xl;
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 25%,
-      hsl(var(--muted) / 0.5) 50%,
-      hsl(var(--muted)) 75%
-    );
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 0.5) 50%, hsl(var(--muted)) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 
+  /* ── Page container ── */
   .page-container {
     @apply max-w-lg mx-auto px-4 pb-28 pt-4;
   }
-
   .section-title {
     @apply font-display text-xl font-bold text-foreground;
   }
@@ -168,10 +219,9 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position:  200% 0; }

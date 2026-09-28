@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { KashrutLevel, ReligiousLevel } from '../types'
-import { KASHRUT_LABELS, RELIGIOUS_LABELS } from '../types'
+import { KASHRUT_LABELS } from '../types'
 
 export interface FilterState {
   kashrut: KashrutLevel | ''
@@ -15,135 +14,86 @@ interface FilterBarProps {
   onChange: (f: FilterState) => void
 }
 
-const CITIES = ['ירושלים', 'תל אביב', 'חיפה', 'ראשון לציון', 'פתח תקוה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק', 'בת ים', 'רחובות', 'רמת גן']
-const EVENT_TYPES = [
-  { value: 'shabbat_dinner', label: 'ארוחת שישי' },
-  { value: 'shabbat_lunch', label: 'ארוחת שבת' },
-  { value: 'holiday', label: 'חג' },
-  { value: 'weekday', label: 'אמצע שבוע' },
+const EVENT_TYPE_PILLS = [
+  { value: 'shabbat_dinner', label: '🕯️ שישי' },
+  { value: 'shabbat_lunch',  label: '☀️ שבת' },
+  { value: 'holiday',        label: '🎉 חג' },
+  { value: 'weekday',        label: '🍽️ חול' },
 ]
 
+const CITIES = ['ירושלים', 'תל אביב', 'חיפה', 'ראשון לציון', 'פתח תקוה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק']
+
+const KASHRUT_PILLS: { value: KashrutLevel; label: string }[] = (Object.keys(KASHRUT_LABELS) as KashrutLevel[]).map(k => ({
+  value: k,
+  label: KASHRUT_LABELS[k],
+}))
+
 export default function FilterBar({ value, onChange }: FilterBarProps) {
-  const [open, setOpen] = useState(false)
+  const active = [value.kashrut, value.religious, value.city, value.eventType].filter(Boolean).length
 
-  const hasFilters = value.kashrut || value.religious || value.city || value.eventType
-  const activeCount = [value.kashrut, value.religious, value.city, value.eventType].filter(Boolean).length
-
-  const clear = () => onChange({ kashrut: '', religious: '', city: '', eventType: '' })
+  const pill = (
+    label: string,
+    isActive: boolean,
+    onClick: () => void,
+  ) => (
+    <button
+      key={label}
+      onClick={onClick}
+      className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95"
+      style={isActive ? {
+        background: 'linear-gradient(135deg, hsl(347,72%,26%), hsl(347,72%,18%))',
+        color: '#fff',
+        boxShadow: '0 2px 8px hsl(347,72%,20%/0.35)',
+      } : {
+        background: 'hsl(var(--muted))',
+        color: 'hsl(var(--muted-foreground))',
+      }}
+    >
+      {label}
+    </button>
+  )
 
   return (
-    <div>
-      {/* Trigger */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setOpen(!open)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-            hasFilters
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80'
-          }`}
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          סינון
-          {activeCount > 0 && (
-            <span className="w-4 h-4 bg-primary-foreground text-primary text-[10px] font-bold rounded-full flex items-center justify-center">
-              {activeCount}
-            </span>
-          )}
-        </button>
-
-        {hasFilters && (
-          <button
-            onClick={clear}
-            className="flex items-center gap-1 px-3 py-2 rounded-xl text-sm text-destructive hover:bg-destructive/10 transition-all"
-          >
-            <X className="w-3.5 h-3.5" />
-            נקה
-          </button>
+    <div className="space-y-2.5">
+      {/* Event type row */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+        {EVENT_TYPE_PILLS.map(t =>
+          pill(t.label, value.eventType === t.value, () =>
+            onChange({ ...value, eventType: value.eventType === t.value ? '' : t.value })
+          )
         )}
+        {KASHRUT_PILLS.map(k =>
+          pill(k.label, value.kashrut === k.value, () =>
+            onChange({ ...value, kashrut: value.kashrut === k.value ? '' : k.value })
+          )
+        )}
+        {CITIES.slice(0, 5).map(c =>
+          pill(c, value.city === c, () =>
+            onChange({ ...value, city: value.city === c ? '' : c })
+          )
+        )}
+        {/* All cities select */}
+        <select
+          value={value.city}
+          onChange={e => onChange({ ...value, city: e.target.value })}
+          className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground outline-none cursor-pointer"
+          style={{ WebkitAppearance: 'none', appearance: 'none' }}
+        >
+          <option value="">🏙️ כל הערים</option>
+          {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
       </div>
 
-      {/* Filter panel */}
-      {open && (
-        <div className="mt-3 shulchan-card p-4 space-y-4 animate-slide-down">
-          {/* Event type */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">סוג אירוע</p>
-            <div className="flex flex-wrap gap-2">
-              {EVENT_TYPES.map(t => (
-                <button
-                  key={t.value}
-                  onClick={() => onChange({ ...value, eventType: value.eventType === t.value ? '' : t.value })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    value.eventType === t.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Kashrut */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">כשרות</p>
-            <div className="flex flex-wrap gap-2">
-              {(Object.keys(KASHRUT_LABELS) as KashrutLevel[]).map(k => (
-                <button
-                  key={k}
-                  onClick={() => onChange({ ...value, kashrut: value.kashrut === k ? '' : k })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    value.kashrut === k
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {KASHRUT_LABELS[k]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Religious level */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">רמה דתית</p>
-            <div className="flex flex-wrap gap-2">
-              {(Object.keys(RELIGIOUS_LABELS) as ReligiousLevel[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => onChange({ ...value, religious: value.religious === r ? '' : r })}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    value.religious === r
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {RELIGIOUS_LABELS[r]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* City */}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-2">עיר</p>
-            <select
-              value={value.city}
-              onChange={e => onChange({ ...value, city: e.target.value })}
-              className="shulchan-input text-sm"
-            >
-              <option value="">כל הערים</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
+      {/* Active filters summary */}
+      {active > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{active} סינונים פעילים</span>
           <button
-            onClick={() => setOpen(false)}
-            className="w-full btn-primary py-2.5 text-sm"
+            onClick={() => onChange({ kashrut: '', religious: '', city: '', eventType: '' })}
+            className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors"
           >
-            הצג תוצאות
+            <X className="w-3 h-3" />
+            נקה
           </button>
         </div>
       )}
