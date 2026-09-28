@@ -42,7 +42,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return <Navigate to="/landing" state={{ from: location }} replace />
-  if (profile && !profile.onboarding_completed && location.pathname !== '/onboarding') {
+  if ((!profile || !profile.onboarding_completed) && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />
   }
 

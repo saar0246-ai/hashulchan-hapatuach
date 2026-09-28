@@ -1,5 +1,6 @@
 export type KashrutLevel = 'mehadrin' | 'kosher' | 'traditional' | 'none'
-export type ReligiousLevel = 'haredi' | 'dati' | 'masorti' | 'hiloni'
+export type ReligiousLevel = 'haredi' | 'hardali' | 'dati' | 'dati_leumi' | 'dati_light' | 'masorti' | 'hiloni'
+export type Gender = 'male' | 'female' | 'other'
 export type EventType = 'shabbat_dinner' | 'shabbat_lunch' | 'holiday' | 'weekday'
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 export type EventStatus = 'active' | 'full' | 'cancelled' | 'completed'
@@ -17,6 +18,7 @@ export interface Profile {
   avatar_url: string | null
   age: number | null
   birthday: string | null
+  gender: Gender | null
   city: string | null
   neighborhood: string | null
   kashrut_level: KashrutLevel | null
@@ -101,10 +103,19 @@ export const KASHRUT_LABELS: Record<KashrutLevel, string> = {
 }
 
 export const RELIGIOUS_LABELS: Record<ReligiousLevel, string> = {
-  haredi: 'חרדי',
-  dati: 'דתי',
-  masorti: 'מסורתי',
-  hiloni: 'חילוני',
+  haredi:     'חרדי',
+  hardali:    'חרדל"ש',
+  dati:       'דתי',
+  dati_leumi: 'דתל"ש',
+  dati_light: 'דתי לייט',
+  masorti:    'מסורתי',
+  hiloni:     'חילוני',
+}
+
+export const GENDER_LABELS: Record<Gender, string> = {
+  male:   'זכר',
+  female: 'נקבה',
+  other:  'אחר',
 }
 
 export const EVENT_TYPE_LABELS: Record<EventType, string> = {
@@ -122,8 +133,11 @@ export const KASHRUT_COLORS: Record<KashrutLevel, string> = {
 }
 
 export const RELIGIOUS_COLORS: Record<ReligiousLevel, string> = {
-  haredi: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-  dati: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  masorti: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
-  hiloni: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
+  haredi:     'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+  hardali:    'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
+  dati:       'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+  dati_leumi: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
+  dati_light: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
+  masorti:    'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+  hiloni:     'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
 }

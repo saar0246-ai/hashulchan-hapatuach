@@ -1,23 +1,31 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, Camera, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import type { KashrutLevel, ReligiousLevel } from '../types'
+import type { KashrutLevel, ReligiousLevel, Gender } from '../types'
 import { KASHRUT_LABELS, RELIGIOUS_LABELS } from '../types'
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 6
+
+const GENDER_OPTIONS: { value: Gender; label: string; emoji: string }[] = [
+  { value: 'male',   label: 'זכר',   emoji: '👨' },
+  { value: 'female', label: 'נקבה',  emoji: '👩' },
+  { value: 'other',  label: 'אחר',   emoji: '🧑' },
+]
 
 export default function Onboarding() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     display_name: '',
     birthday: '',
+    gender: '' as Gender | '',
     city: '',
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
@@ -26,6 +34,8 @@ export default function Onboarding() {
     bio: '',
     agreed_terms: false,
   })
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
 
   const update = (field: string, value: string | boolean) =>
     setForm(f => ({ ...f, [field]: value }))
@@ -41,20 +51,45 @@ export default function Onboarding() {
   }
 
   const canNext = () => {
-    if (step === 1) return form.display_name.trim().length >= 2 && computeAge(form.birthday) >= 18
+    if (step === 1) return form.display_name.trim().length >= 2 && computeAge(form.birthday) >= 18 && !!form.gender
     if (step === 2) return form.city.trim().length >= 2
     if (step === 3) return !!form.kashrut_level && !!form.religious_level && form.phone.trim().length >= 9
     if (step === 4) return true
-    if (step === 5) return form.agreed_terms
+    if (step === 5) return true
+    if (step === 6) return form.agreed_terms
     return false
+  }
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('התמונה גדולה מדי — מקסימום 5MB'); return }
+    setAvatarFile(file)
+    const reader = new FileReader()
+    reader.onload = e => setAvatarPreview(e.target?.result as string)
+    reader.readAsDataURL(file)
   }
 
   const handleFinish = async () => {
     if (!user) return
     setLoading(true)
-    const { error } = await supabase.from('profiles').update({
+
+    let avatarUrl: string | null = null
+    if (avatarFile) {
+      const { data: up, error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(user.id, avatarFile, { upsert: true, contentType: avatarFile.type })
+      if (!upErr && up) {
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user.id)
+        avatarUrl = urlData.publicUrl
+      }
+    }
+
+    const { error } = await supabase.from('profiles').upsert({
+      id: user.id,
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
+      gender: form.gender || null,
       city: form.city.trim(),
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
@@ -62,12 +97,13 @@ export default function Onboarding() {
       phone: form.phone.trim(),
       bio: form.bio.trim() || null,
       onboarding_completed: true,
-    }).eq('id', user.id)
+      ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+    }, { onConflict: 'id' })
 
     if (error) {
       toast.error('שגיאה בשמירת הפרופיל: ' + error.message)
     } else {
-      toast.success('ברוך הבא לשולחן הפתוח!')
+      toast.success('ברוך הבא לשולחן הפתוח! 🎉')
       navigate('/home')
     }
     setLoading(false)
@@ -75,8 +111,8 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-dvh bg-background flex flex-col max-w-md mx-auto">
-      {/* Progress bar */}
-      <div className="px-6 pt-safe-top pt-6 pb-4">
+      {/* Progress */}
+      <div className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-foreground">שלב {step} מתוך {TOTAL_STEPS}</span>
           <span className="text-sm text-muted-foreground">{Math.round((step / TOTAL_STEPS) * 100)}%</span>
@@ -90,7 +126,8 @@ export default function Onboarding() {
       </div>
 
       <div className="flex-1 px-6 pb-8 overflow-y-auto">
-        {/* Step 1: Basic info */}
+
+        {/* ── Step 1: Basic info ── */}
         {step === 1 && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -120,10 +157,30 @@ export default function Onboarding() {
               />
               <p className="text-xs text-muted-foreground mt-1">חייב להיות מעל 18</p>
             </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">מגדר *</label>
+              <div className="grid grid-cols-3 gap-2">
+                {GENDER_OPTIONS.map(g => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => update('gender', g.value)}
+                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all flex flex-col items-center gap-1 ${
+                      form.gender === g.value
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-card text-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="text-xl">{g.emoji}</span>
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Step 2: Location */}
+        {/* ── Step 2: Location ── */}
         {step === 2 && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -151,7 +208,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 3: Identity */}
+        {/* ── Step 3: Table settings ── */}
         {step === 3 && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -187,7 +244,7 @@ export default function Onboarding() {
                     key={r}
                     type="button"
                     onClick={() => update('religious_level', r)}
-                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
+                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all text-right ${
                       form.religious_level === r
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-border bg-card text-foreground hover:border-primary/50'
@@ -214,7 +271,7 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 4: Bio */}
+        {/* ── Step 4: Bio ── */}
         {step === 4 && (
           <div className="space-y-6 animate-fade-in">
             <div>
@@ -241,8 +298,68 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* Step 5: Terms */}
+        {/* ── Step 5: Photo ── */}
         {step === 5 && (
+          <div className="space-y-6 animate-fade-in">
+            <div>
+              <h2 className="font-display font-bold text-2xl text-foreground">תמונת פרופיל</h2>
+              <p className="text-muted-foreground text-sm mt-1">תמונה יוצרת אמון ומגדילה את הסיכוי לאישור</p>
+            </div>
+
+            <div className="flex flex-col items-center gap-5">
+              <div className="relative">
+                {avatarPreview ? (
+                  <>
+                    <img
+                      src={avatarPreview}
+                      alt="preview"
+                      className="w-28 h-28 rounded-full object-cover ring-4 ring-primary/20"
+                    />
+                    <button
+                      onClick={() => { setAvatarFile(null); setAvatarPreview(null) }}
+                      className="absolute -top-1 -right-1 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <div
+                    className="w-28 h-28 rounded-full flex items-center justify-center font-bold text-4xl"
+                    style={{ background: 'linear-gradient(135deg, hsl(var(--primary)/0.12), hsl(var(--secondary)/0.08))' }}
+                  >
+                    {form.display_name.charAt(0).toUpperCase() || '👤'}
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handlePhotoSelect}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 btn-outline px-6 py-2.5 text-sm"
+              >
+                <Camera className="w-4 h-4" />
+                {avatarPreview ? 'החלף תמונה' : 'בחר תמונה'}
+              </button>
+            </div>
+
+            <div className="shulchan-card p-4 bg-primary/5 border-primary/20">
+              <p className="text-sm text-foreground font-medium mb-1">📸 טיפ</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                פרופילים עם תמונה מקבלים 5 פעמים יותר אישורים ממארחים. אפשר לדלג ולהוסיף תמונה מאוחר יותר מהפרופיל.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 6: Terms ── */}
+        {step === 6 && (
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="font-display font-bold text-2xl text-foreground">כמעט שם!</h2>

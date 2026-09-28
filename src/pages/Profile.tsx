@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, ChevronLeft, Edit2, Check, X } from 'lucide-react'
+import { LogOut, ChevronLeft, Edit2, Check, X, Camera } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
-import type { KashrutLevel, ReligiousLevel } from '../types'
-import { KASHRUT_LABELS, RELIGIOUS_LABELS, KASHRUT_COLORS, RELIGIOUS_COLORS } from '../types'
+import type { KashrutLevel, ReligiousLevel, Gender } from '../types'
+import { KASHRUT_LABELS, RELIGIOUS_LABELS, GENDER_LABELS, KASHRUT_COLORS, RELIGIOUS_COLORS } from '../types'
 import TopBar from '../components/TopBar'
 import ProfileAvatar from '../components/ProfileAvatar'
 import StarRating from '../components/StarRating'
@@ -18,9 +18,12 @@ export default function Profile() {
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     display_name: '',
     birthday: '',
+    gender: '' as Gender | '',
     city: '',
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
@@ -44,6 +47,7 @@ export default function Profile() {
     setForm({
       display_name: profile.display_name ?? '',
       birthday: profile.birthday ?? '',
+      gender: profile.gender ?? '',
       city: profile.city ?? '',
       neighborhood: profile.neighborhood ?? '',
       kashrut_level: profile.kashrut_level ?? '',
@@ -60,6 +64,7 @@ export default function Profile() {
     const { error } = await supabase.from('profiles').update({
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
+      gender: form.gender || null,
       city: form.city.trim() || null,
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
@@ -83,6 +88,21 @@ export default function Profile() {
     navigate('/landing')
   }
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('התמונה גדולה מדי — מקסימום 5MB'); return }
+    setAvatarUploading(true)
+    const { data: up, error: upErr } = await supabase.storage
+      .from('avatars')
+      .upload(user.id, file, { upsert: true, contentType: file.type })
+    if (upErr || !up) { toast.error('שגיאה בהעלאת התמונה'); setAvatarUploading(false); return }
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user.id)
+    const { error } = await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', user.id)
+    if (error) { toast.error('שגיאה בשמירת התמונה') } else { await refetch(); toast.success('תמונה עודכנה!') }
+    setAvatarUploading(false)
+  }
+
   if (loading) return <div className="min-h-dvh bg-background"><TopBar /><LoadingSpinner /></div>
   if (!profile) return null
 
@@ -99,7 +119,20 @@ export default function Profile() {
       <div className="page-container space-y-5">
         {/* Avatar + stats */}
         <div className="stagger-1 flex flex-col items-center pt-2 gap-3">
-          <ProfileAvatar name={profile.display_name} avatarUrl={profile.avatar_url} size="xl" />
+          <div className="relative">
+            <ProfileAvatar name={profile.display_name} avatarUrl={profile.avatar_url} size="xl" />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={avatarUploading}
+              className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all"
+              style={{ background: 'linear-gradient(135deg, #C8860A, #F0B428)' }}
+            >
+              {avatarUploading
+                ? <div className="w-3.5 h-3.5 border-2 border-amber-900/40 border-t-amber-900 rounded-full animate-spin" />
+                : <Camera className="w-3.5 h-3.5 text-amber-900" />}
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
+          </div>
           <div className="text-center">
             <h1 className="font-display font-bold text-xl text-foreground">{profile.display_name}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -132,6 +165,7 @@ export default function Profile() {
               <h3 className="text-sm font-semibold text-muted-foreground">פרטים אישיים</h3>
               {[
                 { label: 'גיל', value: profile.birthday ? `${computeAge(profile.birthday)} שנים` : null },
+                { label: 'מגדר', value: profile.gender ? GENDER_LABELS[profile.gender] : null },
                 { label: 'טלפון', value: profile.phone },
                 { label: 'מייל', value: user?.email },
               ].map(({ label, value }) => value && (
@@ -219,6 +253,20 @@ export default function Profile() {
                 max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split('T')[0] })()}
                 min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 120); return d.toISOString().split('T')[0] })()}
               />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">מגדר</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['male', 'female', 'other'] as Gender[]).map(g => (
+                  <button key={g} type="button"
+                    onClick={() => setForm(f => ({ ...f, gender: f.gender === g ? '' : g }))}
+                    className={`p-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                      form.gender === g ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-foreground'
+                    }`}>
+                    {GENDER_LABELS[g]}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
