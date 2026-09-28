@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types'
 
@@ -6,50 +6,55 @@ export function useProfile(userId: string | null | undefined) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchProfile = useCallback(async () => {
     if (!userId) {
       setProfile(null)
       setLoading(false)
       return
     }
+    setLoading(true)
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle()
+    setProfile(data ?? null)
+    setLoading(false)
+  }, [userId])
 
-    const fetchProfile = async () => {
-      setLoading(true)
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
-      setProfile(data)
-      setLoading(false)
-    }
-
+  useEffect(() => {
     fetchProfile()
+
+    if (!userId) return
 
     const channel = supabase
       .channel(`profile:${userId}`)
       .on('postgres_changes', {
-        event: 'UPDATE',
+        event: '*',
         schema: 'public',
         table: 'profiles',
         filter: `id=eq.${userId}`,
       }, payload => {
-        setProfile(payload.new as Profile)
+        if (payload.eventType === 'DELETE') {
+          setProfile(null)
+        } else {
+          setProfile(payload.new as Profile)
+        }
       })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [userId])
+  }, [userId, fetchProfile])
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     if (!userId) return
     const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single()
-    setProfile(data)
-  }
+      .maybeSingle()
+    setProfile(data ?? null)
+  }, [userId])
 
   return { profile, loading, refetch }
 }

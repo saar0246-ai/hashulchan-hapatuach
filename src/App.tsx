@@ -31,6 +31,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { profile, loading: profileLoading } = useProfile(user?.id)
   const location = useLocation()
 
+  // Still loading auth or profile — show spinner, never redirect yet
   if (loading || profileLoading) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
@@ -43,15 +44,23 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return <Navigate to="/landing" state={{ from: location }} replace />
+
   if (profile?.is_banned) return (
     <div className="min-h-dvh bg-background flex flex-col items-center justify-center gap-4 p-6 text-center">
       <div className="text-5xl">🚫</div>
       <h1 className="font-display font-bold text-xl text-foreground">החשבון הושעה</h1>
-      <p className="text-sm text-muted-foreground max-w-xs">החשבון שלך הושעה עקב הפרת תנאי השימוש. לפנייה: support@opentable-il.com</p>
+      <p className="text-sm text-muted-foreground max-w-xs">החשבון שלך הושעה עקב הפרת תנאי השימוש.</p>
     </div>
   )
+
+  // Profile missing or onboarding not done → send to onboarding (but not if already there)
   if ((!profile || !profile.onboarding_completed) && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />
+  }
+
+  // Profile exists and onboarding done but user landed on /onboarding → redirect home
+  if (profile?.onboarding_completed && location.pathname === '/onboarding') {
+    return <Navigate to="/home" replace />
   }
 
   return <>{children}</>

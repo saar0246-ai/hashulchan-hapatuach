@@ -74,6 +74,18 @@ export default function Onboarding() {
     if (!user) return
     setLoading(true)
 
+    // Ensure the profile row exists before updating
+    await supabase.from('profiles').insert({
+      id: user.id,
+      display_name: form.display_name.trim() || user.email?.split('@')[0] || 'משתמש',
+      onboarding_completed: false,
+      role: 'user',
+      is_banned: false,
+      rating_as_host: 0, rating_count_host: 0,
+      rating_as_guest: 0, rating_count_guest: 0,
+      total_hosted: 0, total_guested: 0, verified: false,
+    }).then(() => {}) // ignore conflict — row already exists
+
     let avatarUrl: string | null = null
     if (avatarFile) {
       const { data: up, error: upErr } = await supabase.storage
@@ -85,8 +97,7 @@ export default function Onboarding() {
       }
     }
 
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
+    const { error } = await supabase.from('profiles').update({
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
       gender: form.gender || null,
@@ -98,14 +109,18 @@ export default function Onboarding() {
       bio: form.bio.trim() || null,
       onboarding_completed: true,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
-    }, { onConflict: 'id' })
+    }).eq('id', user.id)
 
     if (error) {
       toast.error('שגיאה בשמירת הפרופיל: ' + error.message)
-    } else {
-      toast.success('ברוך הבא לשולחן הפתוח! 🎉')
-      navigate('/home')
+      setLoading(false)
+      return
     }
+
+    toast.success('ברוך הבא לשולחן הפתוח! 🎉')
+    // Small delay so the realtime subscription picks up the UPDATE before we navigate
+    await new Promise(r => setTimeout(r, 400))
+    navigate('/home', { replace: true })
     setLoading(false)
   }
 

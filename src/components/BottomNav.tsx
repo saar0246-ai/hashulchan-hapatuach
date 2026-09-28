@@ -3,7 +3,7 @@ import { Home, CalendarPlus, BookOpen, Bell, User } from 'lucide-react'
 import { useNotifications } from '../hooks/useNotifications'
 import { useAuth } from '../hooks/useAuth'
 
-const HIDDEN_ON = ['/auth', '/onboarding', '/landing', '/terms', '/privacy', '/accessibility']
+const HIDDEN_ON = ['/auth', '/onboarding', '/landing', '/terms', '/privacy', '/accessibility', '/admin']
 
 export default function BottomNav() {
   const location = useLocation()
