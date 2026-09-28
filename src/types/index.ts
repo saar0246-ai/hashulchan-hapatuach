@@ -16,6 +16,7 @@ export interface Profile {
   display_name: string
   avatar_url: string | null
   age: number | null
+  birthday: string | null
   city: string | null
   neighborhood: string | null
   kashrut_level: KashrutLevel | null

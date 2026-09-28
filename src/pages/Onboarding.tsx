@@ -17,7 +17,7 @@ export default function Onboarding() {
 
   const [form, setForm] = useState({
     display_name: '',
-    age: '',
+    birthday: '',
     city: '',
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
@@ -30,8 +30,18 @@ export default function Onboarding() {
   const update = (field: string, value: string | boolean) =>
     setForm(f => ({ ...f, [field]: value }))
 
+  const computeAge = (birthday: string) => {
+    if (!birthday) return 0
+    const today = new Date()
+    const bday = new Date(birthday + 'T00:00:00')
+    let age = today.getFullYear() - bday.getFullYear()
+    const m = today.getMonth() - bday.getMonth()
+    if (m < 0 || (m === 0 && today.getDate() < bday.getDate())) age--
+    return age
+  }
+
   const canNext = () => {
-    if (step === 1) return form.display_name.trim().length >= 2 && Number(form.age) >= 18
+    if (step === 1) return form.display_name.trim().length >= 2 && computeAge(form.birthday) >= 18
     if (step === 2) return form.city.trim().length >= 2
     if (step === 3) return !!form.kashrut_level && !!form.religious_level && form.phone.trim().length >= 9
     if (step === 4) return true
@@ -44,7 +54,7 @@ export default function Onboarding() {
     setLoading(true)
     const { error } = await supabase.from('profiles').update({
       display_name: form.display_name.trim(),
-      age: Number(form.age),
+      birthday: form.birthday || null,
       city: form.city.trim(),
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
@@ -99,15 +109,14 @@ export default function Onboarding() {
               <p className="text-xs text-muted-foreground mt-1">השם שיראו מארחים ואורחים</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">גיל *</label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">תאריך לידה *</label>
               <input
-                type="number"
-                value={form.age}
-                onChange={e => update('age', e.target.value)}
-                placeholder="25"
+                type="date"
+                value={form.birthday}
+                onChange={e => update('birthday', e.target.value)}
                 className="shulchan-input"
-                min="18"
-                max="120"
+                max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split('T')[0] })()}
+                min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 120); return d.toISOString().split('T')[0] })()}
               />
               <p className="text-xs text-muted-foreground mt-1">חייב להיות מעל 18</p>
             </div>

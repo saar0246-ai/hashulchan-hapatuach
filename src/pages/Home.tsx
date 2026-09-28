@@ -11,6 +11,24 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 import TopBar from '../components/TopBar'
 
+interface BirthdayProfile {
+  id: string
+  display_name: string
+  avatar_url: string | null
+  birthday: string
+}
+
+function isBirthdayThisWeek(birthday: string): boolean {
+  const today = new Date()
+  const bday = new Date(birthday + 'T00:00:00')
+  for (let i = 0; i <= 6; i++) {
+    const check = new Date(today)
+    check.setDate(today.getDate() + i)
+    if (bday.getMonth() === check.getMonth() && bday.getDate() === check.getDate()) return true
+  }
+  return false
+}
+
 export default function Home() {
   const { user } = useAuth()
   const { profile } = useProfile(user?.id)
@@ -18,6 +36,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<FilterState>({ kashrut: '', religious: '', city: '', eventType: '' })
+  const [birthdays, setBirthdays] = useState<BirthdayProfile[]>([])
 
   const fetchEvents = useCallback(async () => {
     setLoading(true)
@@ -43,6 +62,18 @@ export default function Home() {
     const t = setTimeout(fetchEvents, 300)
     return () => clearTimeout(t)
   }, [fetchEvents])
+
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('profiles')
+      .select('id, display_name, avatar_url, birthday')
+      .not('birthday', 'is', null)
+      .neq('id', user.id)
+      .then(({ data }) => {
+        if (data) setBirthdays((data as BirthdayProfile[]).filter(p => isBirthdayThisWeek(p.birthday)))
+      })
+  }, [user])
 
   const greeting = () => {
     const h = new Date().getHours()
@@ -119,6 +150,42 @@ export default function Home() {
         <div className="stagger-3 mb-5">
           <FilterBar value={filters} onChange={setFilters} />
         </div>
+
+        {/* Birthday wall */}
+        {birthdays.length > 0 && (
+          <div className="stagger-3b mb-4">
+            <div
+              className="shulchan-card p-4 overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, rgba(200,134,10,0.08), rgba(240,180,40,0.04))', borderRight: '3px solid rgba(200,134,10,0.5)' }}
+            >
+              <p className="text-sm font-bold text-foreground mb-3">🎂 ימי הולדת השבוע</p>
+              <div className="flex flex-col gap-2">
+                {birthdays.map(p => {
+                  const bday = new Date(p.birthday + 'T00:00:00')
+                  const today = new Date()
+                  const isToday = bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate()
+                  const dayLabel = isToday ? 'היום!' : `${bday.getDate()}/${bday.getMonth() + 1}`
+                  return (
+                    <div key={p.id} className="flex items-center gap-2.5">
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #C8860A, #F0B428)', color: '#1A0800' }}
+                      >
+                        {p.display_name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-foreground truncate block">{p.display_name}</span>
+                      </div>
+                      <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#C8860A' }}>
+                        {isToday ? '🎉 היום!' : dayLabel}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Events list */}
         <div className="stagger-4 space-y-3 pb-4">

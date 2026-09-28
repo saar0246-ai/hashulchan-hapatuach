@@ -20,6 +20,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     display_name: '',
+    birthday: '',
     city: '',
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
@@ -28,10 +29,21 @@ export default function Profile() {
     bio: '',
   })
 
+  const computeAge = (birthday: string) => {
+    if (!birthday) return 0
+    const today = new Date()
+    const bday = new Date(birthday + 'T00:00:00')
+    let age = today.getFullYear() - bday.getFullYear()
+    const m = today.getMonth() - bday.getMonth()
+    if (m < 0 || (m === 0 && today.getDate() < bday.getDate())) age--
+    return age
+  }
+
   const startEdit = () => {
     if (!profile) return
     setForm({
       display_name: profile.display_name ?? '',
+      birthday: profile.birthday ?? '',
       city: profile.city ?? '',
       neighborhood: profile.neighborhood ?? '',
       kashrut_level: profile.kashrut_level ?? '',
@@ -47,6 +59,7 @@ export default function Profile() {
     setSaving(true)
     const { error } = await supabase.from('profiles').update({
       display_name: form.display_name.trim(),
+      birthday: form.birthday || null,
       city: form.city.trim() || null,
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
@@ -118,7 +131,7 @@ export default function Profile() {
             <div className="shulchan-card p-4 space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground">פרטים אישיים</h3>
               {[
-                { label: 'גיל', value: profile.age ? `${profile.age} שנים` : null },
+                { label: 'גיל', value: profile.birthday ? `${computeAge(profile.birthday)} שנים` : null },
                 { label: 'טלפון', value: profile.phone },
                 { label: 'מייל', value: user?.email },
               ].map(({ label, value }) => value && (
@@ -195,6 +208,17 @@ export default function Profile() {
               <input value={form.display_name}
                 onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
                 className="shulchan-input" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">תאריך לידה</label>
+              <input
+                type="date"
+                value={form.birthday}
+                onChange={e => setForm(f => ({ ...f, birthday: e.target.value }))}
+                className="shulchan-input"
+                max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 18); return d.toISOString().split('T')[0] })()}
+                min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 120); return d.toISOString().split('T')[0] })()}
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
