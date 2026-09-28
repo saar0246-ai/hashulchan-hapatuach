@@ -12,6 +12,10 @@ export type NotificationType =
   | 'event_reminder'
   | 'system'
 
+export type UserRole = 'user' | 'admin' | 'moderator'
+export type ReportReason = 'spam' | 'inappropriate' | 'abuse' | 'fake' | 'other'
+export type ReportStatus = 'pending' | 'reviewed' | 'resolved' | 'dismissed'
+
 export interface Profile {
   id: string
   display_name: string
@@ -19,6 +23,8 @@ export interface Profile {
   age: number | null
   birthday: string | null
   gender: Gender | null
+  role: UserRole
+  is_banned: boolean
   city: string | null
   neighborhood: string | null
   kashrut_level: KashrutLevel | null
@@ -82,6 +88,29 @@ export interface Rating {
   comment: string | null
   created_at: string
   rater?: Profile
+}
+
+export interface Report {
+  id: string
+  reporter_id: string
+  reported_id: string
+  event_id: string | null
+  reason: ReportReason
+  details: string | null
+  status: ReportStatus
+  admin_notes: string | null
+  created_at: string
+  resolved_at: string | null
+  reporter?: Profile
+  reported?: Profile
+}
+
+export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
+  spam: 'ספאם',
+  inappropriate: 'תוכן לא הולם',
+  abuse: 'התנהגות פוגענית',
+  fake: 'פרופיל מזויף',
+  other: 'אחר',
 }
 
 export interface Notification {

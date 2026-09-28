@@ -226,6 +226,18 @@ export default function Profile() {
               </Link>
             </div>
 
+            {profile.role === 'admin' && (
+              <Link to="/admin">
+                <button
+                  className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all"
+                  style={{ borderRight: '3px solid hsl(var(--primary))' }}
+                >
+                  <span className="text-sm font-bold text-primary">🛡️ לוח ניהול אדמין</span>
+                  <ChevronLeft className="w-4 h-4 text-primary" />
+                </button>
+              </Link>
+            )}
+
             <button
               onClick={handleSignOut}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-destructive/30 text-destructive hover:bg-destructive/10 transition-all font-medium"

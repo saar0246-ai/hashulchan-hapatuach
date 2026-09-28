@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Accessibility from './pages/Accessibility'
+import Admin from './pages/Admin'
 
 function ThemeInit() {
   useTheme()
@@ -42,10 +43,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return <Navigate to="/landing" state={{ from: location }} replace />
+  if (profile?.is_banned) return (
+    <div className="min-h-dvh bg-background flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <div className="text-5xl">🚫</div>
+      <h1 className="font-display font-bold text-xl text-foreground">החשבון הושעה</h1>
+      <p className="text-sm text-muted-foreground max-w-xs">החשבון שלך הושעה עקב הפרת תנאי השימוש. לפנייה: support@opentable-il.com</p>
+    </div>
+  )
   if ((!profile || !profile.onboarding_completed) && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" replace />
   }
 
+  return <>{children}</>
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth()
+  const { profile, loading: profileLoading } = useProfile(user?.id)
+  if (loading || profileLoading) return null
+  if (!user || profile?.role !== 'admin') return <Navigate to="/home" replace />
   return <>{children}</>
 }
 
@@ -70,6 +86,7 @@ function AppRoutes() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
 
         {/* Default redirect */}
         <Route path="/" element={<RootRedirect />} />
