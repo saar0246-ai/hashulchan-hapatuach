@@ -5,46 +5,45 @@
 /* ─── Design Tokens ─── */
 @layer base {
   :root {
-    /* Warm Shabbat Palette — Light */
-    --background: 38 55% 97%;
-    --foreground: 25 45% 12%;
+    /* Premium Israeli Hospitality — Light */
+    --background: 0 0% 98%;
+    --foreground: 220 20% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 25 45% 12%;
-    --primary: 38 88% 42%;
-    --primary-foreground: 38 88% 97%;
-    --secondary: 350 55% 30%;
-    --secondary-foreground: 350 55% 97%;
-    --accent: 82 30% 38%;
-    --accent-foreground: 82 30% 97%;
-    --muted: 38 35% 94%;
-    --muted-foreground: 38 18% 48%;
+    --card-foreground: 220 20% 9%;
+    --primary: 347 72% 24%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 92% 48%;
+    --secondary-foreground: 220 20% 9%;
+    --accent: 347 72% 24%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 220 14% 95%;
+    --muted-foreground: 220 12% 50%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 38 28% 88%;
-    --input: 38 30% 93%;
-    --ring: 38 88% 42%;
-    --radius: 0.875rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 14% 96%;
+    --ring: 347 72% 24%;
+    --radius: 1rem;
   }
 
   .dark {
-    /* Warm Shabbat Palette — Dark */
-    --background: 28 38% 5%;
-    --foreground: 38 40% 92%;
-    --card: 28 35% 9%;
-    --card-foreground: 38 40% 92%;
-    --primary: 38 90% 52%;
-    --primary-foreground: 38 90% 5%;
-    --secondary: 350 52% 42%;
-    --secondary-foreground: 350 52% 97%;
-    --accent: 82 30% 45%;
-    --accent-foreground: 82 30% 97%;
-    --muted: 28 28% 15%;
-    --muted-foreground: 38 18% 62%;
-    --destructive: 0 65% 48%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 28 25% 20%;
-    --input: 28 30% 14%;
-    --ring: 38 90% 52%;
+    --background: 222 32% 7%;
+    --foreground: 30 12% 92%;
+    --card: 222 28% 11%;
+    --card-foreground: 30 12% 92%;
+    --primary: 347 55% 62%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 43 85% 58%;
+    --secondary-foreground: 222 32% 7%;
+    --accent: 347 55% 62%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 222 25% 17%;
+    --muted-foreground: 220 14% 58%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 20% 20%;
+    --input: 222 25% 15%;
+    --ring: 347 55% 62%;
   }
 }
 
@@ -68,7 +67,6 @@
     overscroll-behavior: none;
   }
 
-  /* Safe area for notched phones */
   #root {
     min-height: 100dvh;
     padding-bottom: env(safe-area-inset-bottom);
@@ -77,70 +75,83 @@
 
 /* ─── Component Utilities ─── */
 @layer components {
-  /* Card */
+
   .shulchan-card {
-    @apply bg-card rounded-2xl border border-border shadow-sm overflow-hidden;
+    @apply bg-card rounded-2xl overflow-hidden;
+    box-shadow:
+      0 0 0 1px hsl(var(--border) / 0.7),
+      0 1px 3px hsl(var(--foreground) / 0.04),
+      0 6px 20px hsl(var(--foreground) / 0.05);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
   }
 
-  /* Glass effect */
+  .shulchan-card:hover {
+    box-shadow:
+      0 0 0 1px hsl(var(--border)),
+      0 2px 6px hsl(var(--foreground) / 0.06),
+      0 12px 32px hsl(var(--foreground) / 0.09);
+  }
+
   .glass {
-    @apply bg-card/80 backdrop-blur-md border border-border/60;
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
   }
 
-  /* Input */
   .shulchan-input {
     @apply w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground
            placeholder:text-muted-foreground outline-none
-           focus:ring-2 focus:ring-primary/30 focus:border-primary
-           transition-all duration-200;
+           focus:ring-2 focus:ring-primary/25 focus:border-primary/60
+           transition-all duration-200 text-sm;
   }
 
-  /* Button primary */
   .btn-primary {
-    @apply bg-primary text-primary-foreground font-semibold rounded-xl px-6 py-3
-           active:scale-95 transition-all duration-150
-           disabled:opacity-50 disabled:cursor-not-allowed
-           hover:bg-primary/90;
+    @apply font-semibold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed text-white;
+    background: linear-gradient(135deg, hsl(347, 72%, 28%) 0%, hsl(347, 72%, 20%) 100%);
+    box-shadow: 0 2px 8px hsl(347, 72%, 24% / 0.35), 0 1px 2px hsl(347, 72%, 24% / 0.2);
   }
 
-  /* Button secondary */
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, hsl(347, 72%, 32%) 0%, hsl(347, 72%, 24%) 100%);
+  }
+
+  .dark .btn-primary {
+    background: linear-gradient(135deg, hsl(347, 55%, 58%) 0%, hsl(347, 65%, 46%) 100%);
+    box-shadow: 0 2px 8px hsl(347, 55%, 50% / 0.3);
+  }
+
   .btn-secondary {
     @apply bg-muted text-foreground font-medium rounded-xl px-6 py-3
-           active:scale-95 transition-all duration-150
-           hover:bg-muted/80;
+           active:scale-[0.97] transition-all duration-150 hover:bg-muted/70 text-sm;
   }
 
-  /* Button outline */
   .btn-outline {
-    @apply border-2 border-primary text-primary font-medium rounded-xl px-6 py-3
-           active:scale-95 transition-all duration-150
-           hover:bg-primary/10;
+    @apply border border-primary/40 text-primary font-medium rounded-xl px-6 py-3
+           active:scale-[0.97] transition-all duration-150 hover:bg-primary/10 text-sm;
   }
 
-  /* Badge */
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /* Skeleton loading */
   .skeleton {
     @apply bg-muted rounded-xl;
     background: linear-gradient(
       90deg,
       hsl(var(--muted)) 25%,
-      hsl(var(--muted) / 0.6) 50%,
+      hsl(var(--muted) / 0.5) 50%,
       hsl(var(--muted)) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 
-  /* Page container */
   .page-container {
     @apply max-w-lg mx-auto px-4 pb-28 pt-4;
   }
 
-  /* Section title */
   .section-title {
     @apply font-display text-xl font-bold text-foreground;
   }
@@ -148,16 +159,16 @@
 
 /* ─── Stagger animations ─── */
 @layer utilities {
-  .stagger-1 { animation: slideUp 0.4s ease-out 0.05s both; }
-  .stagger-2 { animation: slideUp 0.4s ease-out 0.10s both; }
-  .stagger-3 { animation: slideUp 0.4s ease-out 0.15s both; }
-  .stagger-4 { animation: slideUp 0.4s ease-out 0.20s both; }
-  .stagger-5 { animation: slideUp 0.4s ease-out 0.25s both; }
-  .stagger-6 { animation: slideUp 0.4s ease-out 0.30s both; }
+  .stagger-1 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.05s both; }
+  .stagger-2 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.10s both; }
+  .stagger-3 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.15s both; }
+  .stagger-4 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.20s both; }
+  .stagger-5 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.25s both; }
+  .stagger-6 { animation: slideUp 0.35s cubic-bezier(0.2, 0, 0, 1) 0.30s both; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 

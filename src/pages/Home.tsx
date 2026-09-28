@@ -67,14 +67,23 @@ export default function Home() {
         {/* Hero quick stats */}
         <div className="stagger-2 grid grid-cols-2 gap-3">
           <div className="shulchan-card p-4">
-            <div className="text-2xl mb-1">🍽️</div>
-            <p className="text-xl font-bold text-foreground">{events.length}</p>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xl">🍽️</span>
+              <p className="text-2xl font-bold text-foreground">{events.length}</p>
+            </div>
             <p className="text-xs text-muted-foreground">ארוחות זמינות</p>
+            <p className="text-[10px] text-muted-foreground/60 mt-0.5">שישי, שבת וחגים</p>
           </div>
-          <Link to="/create-event" className="shulchan-card p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:border-primary/40 active:scale-95 transition-all">
-            <div className="text-2xl mb-1">🏠</div>
-            <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
-            <p className="text-xs text-muted-foreground">הפוך למארח</p>
+          <Link
+            to="/create-event"
+            className="shulchan-card p-4 flex flex-col justify-between active:scale-[0.97] transition-all"
+            style={{ background: 'linear-gradient(135deg, hsl(var(--primary)/0.12), hsl(var(--primary)/0.05))' }}
+          >
+            <span className="text-xl">🏠</span>
+            <div>
+              <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
+              <p className="text-xs text-muted-foreground">הפוך למארח</p>
+            </div>
           </Link>
         </div>
 

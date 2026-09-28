@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Users, Calendar, Clock } from 'lucide-react'
+import { MapPin, Users, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import type { Event } from '../types'
@@ -23,63 +23,85 @@ const EVENT_TYPE_EMOJI: Record<string, string> = {
   weekday: '🍽️',
 }
 
+const EVENT_TYPE_GRADIENT: Record<string, string> = {
+  shabbat_dinner: 'linear-gradient(135deg, #6B1224 0%, #2C0712 100%)',
+  shabbat_lunch:  'linear-gradient(135deg, #C67C00 0%, #8B5000 100%)',
+  holiday:        'linear-gradient(135deg, #1a5c3a 0%, #0d3320 100%)',
+  weekday:        'linear-gradient(135deg, #1e3a5f 0%, #0e2035 100%)',
+}
+
 export default function EventCard({ event, className = '' }: EventCardProps) {
   const spotsLeft = event.max_guests - event.current_guests
   const isFull = spotsLeft <= 0
   const dateObj = new Date(event.event_date + 'T00:00:00')
-  const dateStr = format(dateObj, 'EEEE, d בMMMM', { locale: he })
+  const dateStr = format(dateObj, "EEEE, d בMMM", { locale: he })
+  const fillPct = Math.min(100, (event.current_guests / event.max_guests) * 100)
 
   return (
-    <Link to={`/events/${event.id}`} className={`block ${className}`}>
-      <div className="shulchan-card hover:shadow-md active:scale-[0.99] transition-all duration-200">
-        {/* Top accent bar */}
-        <div className="h-1.5 bg-gradient-to-l from-primary to-secondary" />
+    <Link to={`/events/${event.id}`} className={`block group ${className}`}>
+      <div className="shulchan-card">
 
-        <div className="p-4 space-y-3">
-          {/* Type + status badges */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">{EVENT_TYPE_EMOJI[event.event_type]}</span>
-              <span className="text-sm font-medium text-muted-foreground">
+        {/* Colored header strip */}
+        <div
+          className="relative px-4 pt-4 pb-3 flex items-start justify-between gap-2"
+          style={{ background: EVENT_TYPE_GRADIENT[event.event_type] }}
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-2xl">{EVENT_TYPE_EMOJI[event.event_type]}</span>
+            <div>
+              <p className="text-xs text-white/65 font-medium">
                 {EVENT_TYPE_LABELS[event.event_type]}
                 {event.holiday_name ? ` • ${event.holiday_name}` : ''}
-              </span>
+              </p>
+              <h3 className="font-display font-bold text-white text-base leading-tight line-clamp-2">
+                {event.title}
+              </h3>
             </div>
-            {isFull ? (
-              <span className="badge bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">מלא</span>
-            ) : (
-              <span className="badge bg-primary/15 text-primary">
-                {spotsLeft} מקומות
+          </div>
+          {isFull ? (
+            <span className="flex-shrink-0 badge bg-white/15 text-white/80 border border-white/20 text-[10px]">
+              מלא
+            </span>
+          ) : (
+            <span className="flex-shrink-0 badge bg-white/15 text-white text-[10px] border border-white/20">
+              {spotsLeft} מקומות
+            </span>
+          )}
+        </div>
+
+        {/* Card body */}
+        <div className="p-4 space-y-3">
+
+          {/* Date + location */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{dateStr}</span>
+              <span className="text-border">·</span>
+              <span>{event.event_time.slice(0, 5)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>{event.city}{event.neighborhood ? `, ${event.neighborhood}` : ''}</span>
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`badge text-[11px] ${KASHRUT_COLORS[event.kashrut_level]}`}>
+              {KASHRUT_LABELS[event.kashrut_level]}
+            </span>
+            {event.preferred_religious_levels.length > 0 && (
+              <span className={`badge text-[11px] ${RELIGIOUS_COLORS[event.preferred_religious_levels[0]]}`}>
+                {RELIGIOUS_LABELS[event.preferred_religious_levels[0]]}
+                {event.preferred_religious_levels.length > 1 ? ` +${event.preferred_religious_levels.length - 1}` : ''}
               </span>
             )}
           </div>
 
-          {/* Title */}
-          <h3 className="font-display font-bold text-lg text-foreground leading-tight">
-            {event.title}
-          </h3>
-
-          {/* Date + time */}
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5" />
-              {dateStr}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" />
-              {event.event_time.slice(0, 5)}
-            </span>
-          </div>
-
-          {/* Location */}
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{event.city}{event.neighborhood ? `, ${event.neighborhood}` : ''}</span>
-          </div>
-
-          {/* Host info */}
+          {/* Host row + capacity */}
           {event.host && (
-            <div className="flex items-center justify-between pt-1 border-t border-border/60">
+            <div className="flex items-center justify-between pt-1 border-t border-border/50">
               <div className="flex items-center gap-2">
                 <ProfileAvatar
                   name={event.host.display_name}
@@ -87,37 +109,27 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
                   size="sm"
                 />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{event.host.display_name}</p>
+                  <p className="text-xs font-semibold text-foreground">{event.host.display_name}</p>
                   {event.host.rating_count_host > 0 && (
                     <StarRating score={Math.round(event.host.rating_as_host)} count={event.host.rating_count_host} />
                   )}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5 justify-end">
-                <span className={`badge ${KASHRUT_COLORS[event.kashrut_level]}`}>
-                  {KASHRUT_LABELS[event.kashrut_level]}
-                </span>
-                {event.preferred_religious_levels.length > 0 && (
-                  <span className={`badge ${RELIGIOUS_COLORS[event.preferred_religious_levels[0]]}`}>
-                    {RELIGIOUS_LABELS[event.preferred_religious_levels[0]]}
-                    {event.preferred_religious_levels.length > 1 ? ` +${event.preferred_religious_levels.length - 1}` : ''}
-                  </span>
-                )}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Users className="w-3 h-3" />
+                <span>{event.current_guests}/{event.max_guests}</span>
+                <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${fillPct}%`,
+                      background: fillPct >= 80 ? '#e53e3e' : 'hsl(var(--primary))',
+                    }}
+                  />
+                </div>
               </div>
             </div>
           )}
-
-          {/* Guests count */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Users className="w-3.5 h-3.5" />
-            <span>{event.current_guests} אורחים רשומים מתוך {event.max_guests}</span>
-            <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${Math.min(100, (event.current_guests / event.max_guests) * 100)}%` }}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </Link>
