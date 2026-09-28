@@ -31,8 +31,8 @@ export default function Landing() {
             🕯️
           </div>
           <div>
-            <p className="font-display font-bold text-base text-foreground leading-tight">השולחן הפתוח</p>
-            <p className="text-[10px] tracking-widest text-muted-foreground leading-tight font-medium">OPEN TABLE</p>
+            <p className="font-display font-bold text-base text-foreground leading-tight tracking-tight">Open Table</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">השולחן הפתוח</p>
           </div>
         </div>
         <button

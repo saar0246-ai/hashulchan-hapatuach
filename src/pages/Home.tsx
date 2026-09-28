@@ -53,7 +53,7 @@ export default function Home() {
 
   return (
     <div className="min-h-dvh bg-background">
-      <TopBar />
+      <TopBar logo />
 
       <div className="page-container space-y-5">
         {/* Welcome */}

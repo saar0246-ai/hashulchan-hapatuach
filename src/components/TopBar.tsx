@@ -7,9 +7,10 @@ interface TopBarProps {
   showBack?: boolean
   right?: React.ReactNode
   transparent?: boolean
+  logo?: boolean
 }
 
-export default function TopBar({ title, showBack = false, right, transparent = false }: TopBarProps) {
+export default function TopBar({ title, showBack = false, right, transparent = false, logo = false }: TopBarProps) {
   const navigate = useNavigate()
   const { theme, toggle } = useTheme()
 
@@ -38,12 +39,20 @@ export default function TopBar({ title, showBack = false, right, transparent = f
           {right}
         </div>
 
-        {/* Center title */}
-        {title && (
+        {/* Center: title or logo */}
+        {title ? (
           <h1 className="font-display font-bold text-base text-foreground absolute left-1/2 -translate-x-1/2 truncate max-w-[55%] text-center">
             {title}
           </h1>
-        )}
+        ) : logo ? (
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <span className="text-lg">🕯️</span>
+            <div className="text-center">
+              <p className="font-display font-bold text-sm text-foreground leading-none tracking-tight">Open Table</p>
+              <p className="text-[9px] text-muted-foreground leading-none mt-0.5">השולחן הפתוח</p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Left side — theme toggle */}
         <button
