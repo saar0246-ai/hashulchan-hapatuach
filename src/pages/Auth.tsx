@@ -3,10 +3,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Auth() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const [mode, setMode] = useState<'login' | 'register' | 'verify'>(
     params.get('mode') === 'register' ? 'register' : 'login'
   )
@@ -16,11 +18,10 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
+  // Navigate away as soon as a session exists (covers email-confirm redirect + immediate signups)
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate('/home')
-    })
-  }, [navigate])
+    if (!authLoading && user) navigate('/home', { replace: true })
+  }, [user, authLoading, navigate])
 
   const handleRegister = async () => {
     if (!agreed) { toast.error('יש לאשר את תנאי השימוש'); return }

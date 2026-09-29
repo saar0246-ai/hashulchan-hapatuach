@@ -79,18 +79,6 @@ export default function Onboarding() {
     if (!user) return
     setLoading(true)
 
-    // Ensure the profile row exists before updating
-    await supabase.from('profiles').insert({
-      id: user.id,
-      display_name: form.display_name.trim() || user.email?.split('@')[0] || 'משתמש',
-      onboarding_completed: false,
-      role: 'user',
-      is_banned: false,
-      rating_as_host: 0, rating_count_host: 0,
-      rating_as_guest: 0, rating_count_guest: 0,
-      total_hosted: 0, total_guested: 0, verified: false,
-    }).then(() => {}) // ignore conflict — row already exists
-
     let avatarUrl: string | null = null
     if (avatarFile) {
       const { data: up, error: upErr } = await supabase.storage
@@ -102,7 +90,9 @@ export default function Onboarding() {
       }
     }
 
-    const baseUpdate = {
+    // upsert: creates the row if missing, updates if it exists
+    const upsertPayload: Record<string, unknown> = {
+      id: user.id,
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
       gender: form.gender || null,
@@ -113,17 +103,24 @@ export default function Onboarding() {
       phone: form.phone.trim(),
       bio: form.bio.trim() || null,
       onboarding_completed: true,
+      role: 'user',
+      is_banned: false,
+      verified: false,
+      rating_as_host: 0, rating_count_host: 0,
+      rating_as_guest: 0, rating_count_guest: 0,
+      total_hosted: 0, total_guested: 0,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
     }
 
-    let { error } = await supabase.from('profiles').update({
-      ...baseUpdate,
-      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
-    }).eq('id', user.id)
+    let { error } = await supabase
+      .from('profiles')
+      .upsert(upsertPayload, { onConflict: 'id' })
 
-    // Fall back without guest_kashrut_prefs if column doesn't exist yet
+    // If upsert failed only because of the new column not existing yet, retry without it
     if (error && error.message?.includes('guest_kashrut_prefs')) {
-      const fallback = await supabase.from('profiles').update(baseUpdate).eq('id', user.id)
+      const { guest_kashrut_prefs: _drop, ...withoutNew } = upsertPayload
+      const fallback = await supabase.from('profiles').upsert(withoutNew, { onConflict: 'id' })
       error = fallback.error
     }
 
