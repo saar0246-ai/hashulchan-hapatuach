@@ -102,7 +102,7 @@ export default function Onboarding() {
       }
     }
 
-    const { error } = await supabase.from('profiles').update({
+    const baseUpdate = {
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
       gender: form.gender || null,
@@ -110,12 +110,22 @@ export default function Onboarding() {
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
       religious_level: form.religious_level || null,
-      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
       phone: form.phone.trim(),
       bio: form.bio.trim() || null,
       onboarding_completed: true,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
+    }
+
+    let { error } = await supabase.from('profiles').update({
+      ...baseUpdate,
+      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
     }).eq('id', user.id)
+
+    // Fall back without guest_kashrut_prefs if column doesn't exist yet
+    if (error && error.message?.includes('guest_kashrut_prefs')) {
+      const fallback = await supabase.from('profiles').update(baseUpdate).eq('id', user.id)
+      error = fallback.error
+    }
 
     if (error) {
       toast.error('שגיאה בשמירת הפרופיל: ' + error.message)

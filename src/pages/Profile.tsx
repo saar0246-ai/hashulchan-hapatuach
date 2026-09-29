@@ -71,7 +71,8 @@ export default function Profile() {
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
-    const { error } = await supabase.from('profiles').update({
+
+    const basePayload = {
       display_name: form.display_name.trim(),
       birthday: form.birthday || null,
       gender: form.gender || null,
@@ -79,13 +80,23 @@ export default function Profile() {
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
       religious_level: form.religious_level || null,
-      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
       phone: form.phone.trim() || null,
       bio: form.bio.trim() || null,
+    }
+
+    // Try with guest_kashrut_prefs first; fall back without it if column doesn't exist yet
+    let { error } = await supabase.from('profiles').update({
+      ...basePayload,
+      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
     }).eq('id', user.id)
 
+    if (error && error.message?.includes('guest_kashrut_prefs')) {
+      const fallback = await supabase.from('profiles').update(basePayload).eq('id', user.id)
+      error = fallback.error
+    }
+
     if (error) {
-      toast.error('שגיאה בשמירה')
+      toast.error('שגיאה בשמירה: ' + error.message)
     } else {
       await refetch()
       setEditing(false)
