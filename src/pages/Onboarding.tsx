@@ -7,7 +7,10 @@ import { useAuth } from '../hooks/useAuth'
 import type { KashrutLevel, ReligiousLevel, Gender } from '../types'
 import { KASHRUT_LABELS, RELIGIOUS_LABELS } from '../types'
 
-const TOTAL_STEPS = 6
+const TOTAL_STEPS = 7
+
+const toggleArr = <T,>(arr: T[], val: T): T[] =>
+  arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]
 
 const GENDER_OPTIONS: { value: Gender; label: string; emoji: string }[] = [
   { value: 'male',   label: 'זכר',   emoji: '👨' },
@@ -30,6 +33,7 @@ export default function Onboarding() {
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
     religious_level: '' as ReligiousLevel | '',
+    guest_kashrut_prefs: [] as KashrutLevel[],
     phone: '',
     bio: '',
     agreed_terms: false,
@@ -56,7 +60,8 @@ export default function Onboarding() {
     if (step === 3) return !!form.kashrut_level && !!form.religious_level && form.phone.trim().length >= 9
     if (step === 4) return true
     if (step === 5) return true
-    if (step === 6) return form.agreed_terms
+    if (step === 6) return true
+    if (step === 7) return form.agreed_terms
     return false
   }
 
@@ -105,6 +110,7 @@ export default function Onboarding() {
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
       religious_level: form.religious_level || null,
+      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
       phone: form.phone.trim(),
       bio: form.bio.trim() || null,
       onboarding_completed: true,
@@ -286,8 +292,46 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* ── Step 4: Bio ── */}
+        {/* ── Step 4: Attendance preferences ── */}
         {step === 4 && (
+          <div className="space-y-6 animate-fade-in">
+            <div>
+              <h2 className="font-display font-bold text-2xl text-foreground">העדפות השתתפות</h2>
+              <p className="text-muted-foreground text-sm mt-1">באילו סוגי ארוחות תרצה להשתתף?</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                רמות כשרות שמתאימות לי כאורח (ניתן לבחור כמה)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.keys(KASHRUT_LABELS) as KashrutLevel[]).map(k => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, guest_kashrut_prefs: toggleArr(f.guest_kashrut_prefs, k) }))}
+                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
+                      form.guest_kashrut_prefs.includes(k)
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-card text-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    {KASHRUT_LABELS[k]}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">לא חובה — ניתן לשנות בהגדרות הפרופיל</p>
+            </div>
+            <div className="shulchan-card p-4 bg-primary/5 border-primary/20">
+              <p className="text-sm text-foreground font-medium mb-1">💡 מה זה עושה?</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                דף הבית יציג אוטומטית רק ארוחות ברמות הכשרות שבחרת. אפשר תמיד לסנן ידנית.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ── Step 5: Bio ── */}
+        {step === 5 && (
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="font-display font-bold text-2xl text-foreground">קצת עלייך</h2>
@@ -313,8 +357,8 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* ── Step 5: Photo ── */}
-        {step === 5 && (
+        {/* ── Step 6: Photo ── */}
+        {step === 6 && (
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="font-display font-bold text-2xl text-foreground">תמונת פרופיל</h2>
@@ -373,8 +417,8 @@ export default function Onboarding() {
           </div>
         )}
 
-        {/* ── Step 6: Terms ── */}
-        {step === 6 && (
+        {/* ── Step 7: Terms ── */}
+        {step === 7 && (
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="font-display font-bold text-2xl text-foreground">כמעט שם!</h2>

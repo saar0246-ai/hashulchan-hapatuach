@@ -3,7 +3,7 @@ import type { KashrutLevel, ReligiousLevel } from '../types'
 import { KASHRUT_LABELS } from '../types'
 
 export interface FilterState {
-  kashrut: KashrutLevel | ''
+  kashrut: KashrutLevel[]
   religious: ReligiousLevel | ''
   city: string
   eventType: string
@@ -29,7 +29,14 @@ const KASHRUT_PILLS: { value: KashrutLevel; label: string }[] = (Object.keys(KAS
 }))
 
 export default function FilterBar({ value, onChange }: FilterBarProps) {
-  const active = [value.kashrut, value.religious, value.city, value.eventType].filter(Boolean).length
+  const active = [value.kashrut.length > 0, !!value.religious, !!value.city, !!value.eventType].filter(Boolean).length
+
+  const toggleKashrut = (k: KashrutLevel) => {
+    const next = value.kashrut.includes(k)
+      ? value.kashrut.filter(v => v !== k)
+      : [...value.kashrut, k]
+    onChange({ ...value, kashrut: next })
+  }
 
   const pill = (
     label: string,
@@ -63,9 +70,7 @@ export default function FilterBar({ value, onChange }: FilterBarProps) {
           )
         )}
         {KASHRUT_PILLS.map(k =>
-          pill(k.label, value.kashrut === k.value, () =>
-            onChange({ ...value, kashrut: value.kashrut === k.value ? '' : k.value })
-          )
+          pill(k.label, value.kashrut.includes(k.value), () => toggleKashrut(k.value))
         )}
         {CITIES.slice(0, 5).map(c =>
           pill(c, value.city === c, () =>
@@ -89,7 +94,7 @@ export default function FilterBar({ value, onChange }: FilterBarProps) {
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{active} סינונים פעילים</span>
           <button
-            onClick={() => onChange({ kashrut: '', religious: '', city: '', eventType: '' })}
+            onClick={() => onChange({ kashrut: [], religious: '', city: '', eventType: '' })}
             className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors"
           >
             <X className="w-3 h-3" />

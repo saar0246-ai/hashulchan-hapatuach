@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarPlus, ChevronLeft, Clock, Users } from 'lucide-react'
-import { format } from 'date-fns'
+import { CalendarPlus, ChevronLeft, Clock, Users, Star } from 'lucide-react'
+import { format, addDays } from 'date-fns'
 import { he } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
@@ -12,6 +12,7 @@ import TopBar from '../components/TopBar'
 import GuestCard from '../components/GuestCard'
 import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
+import StarRating from '../components/StarRating'
 
 export default function MyEvents() {
   const { user } = useAuth()
@@ -20,6 +21,10 @@ export default function MyEvents() {
   const [registrations, setRegistrations] = useState<EventRegistration[]>([])
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
+  const [guestRatingModal, setGuestRatingModal] = useState<{ eventId: string; guestId: string; guestName: string } | null>(null)
+  const [guestRatingScore, setGuestRatingScore] = useState(5)
+  const [guestRatingComment, setGuestRatingComment] = useState('')
+  const [guestRatingLoading, setGuestRatingLoading] = useState(false)
 
   const fetchEvents = useCallback(async () => {
     if (!user) return
@@ -117,10 +122,40 @@ export default function MyEvents() {
     }
   }
 
+  const canRateGuest = (reg: EventRegistration) => {
+    if (!selectedEvent || reg.status !== 'approved') return false
+    const eventDate = new Date(selectedEvent.event_date)
+    const now = new Date()
+    return now >= eventDate && now <= addDays(eventDate, 7)
+  }
+
+  const handleRateGuest = async () => {
+    if (!guestRatingModal || !user) return
+    setGuestRatingLoading(true)
+    const { error } = await supabase.from('ratings').insert({
+      event_id: guestRatingModal.eventId,
+      rater_id: user.id,
+      rated_id: guestRatingModal.guestId,
+      role: 'as_guest',
+      score: guestRatingScore,
+      comment: guestRatingComment.trim() || null,
+    })
+    if (error) {
+      toast.error(error.message.includes('duplicate') ? 'כבר דירגת אורח זה' : 'שגיאה בשמירת הדירוג')
+    } else {
+      toast.success('תודה על הדירוג! ⭐')
+      setGuestRatingModal(null)
+      setGuestRatingComment('')
+      setGuestRatingScore(5)
+    }
+    setGuestRatingLoading(false)
+  }
+
   const pendingCount = registrations.filter(r => r.status === 'pending').length
   const approvedCount = registrations.filter(r => r.status === 'approved').length
 
   return (
+    <>
     <div className="min-h-dvh bg-background">
       <TopBar title="הארוחות שלי" />
 
@@ -264,13 +299,24 @@ export default function MyEvents() {
               ) : (
                 <div className="space-y-3">
                   {registrations.map(reg => (
-                    <GuestCard
-                      key={reg.id}
-                      registration={reg}
-                      onApprove={reg.status === 'pending' ? handleApprove : undefined}
-                      onReject={reg.status === 'pending' ? handleReject : undefined}
-                      loading={actionLoading}
-                    />
+                    <div key={reg.id}>
+                      <GuestCard
+                        registration={reg}
+                        onApprove={reg.status === 'pending' ? handleApprove : undefined}
+                        onReject={reg.status === 'pending' ? handleReject : undefined}
+                        loading={actionLoading}
+                      />
+                      {canRateGuest(reg) && reg.guest && (
+                        <button
+                          onClick={() => setGuestRatingModal({ eventId: selectedEvent!.id, guestId: reg.guest_id, guestName: reg.guest!.display_name })}
+                          className="mt-1.5 mr-2 flex items-center gap-1.5 text-xs font-bold"
+                          style={{ color: '#C8860A' }}
+                        >
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          דרג את {reg.guest.display_name}
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -279,5 +325,36 @@ export default function MyEvents() {
         )}
       </div>
     </div>
+    {/* Rate guest modal */}
+    {guestRatingModal && (
+      <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.65)' }} onClick={() => setGuestRatingModal(null)}>
+        <div
+          className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-5"
+          style={{ background: 'hsl(var(--card))', boxShadow: '0 -8px 40px rgba(0,0,0,0.2)' }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="w-10 h-1 bg-border rounded-full mx-auto" />
+          <h3 className="font-display font-black text-xl text-foreground text-center">
+            דרג את {guestRatingModal.guestName} ⭐
+          </h3>
+          <div className="flex justify-center">
+            <StarRating score={guestRatingScore} interactive onChange={setGuestRatingScore} size="md" />
+          </div>
+          <textarea
+            value={guestRatingComment}
+            onChange={e => setGuestRatingComment(e.target.value)}
+            placeholder="ספר על האורח (אופציונלי)..."
+            className="shulchan-input resize-none h-24 text-sm"
+            maxLength={300}
+          />
+          <button onClick={handleRateGuest} disabled={guestRatingLoading} className="w-full btn-gold py-4 font-bold text-base">
+            {guestRatingLoading
+              ? <div className="w-5 h-5 border-2 border-amber-900/40 border-t-amber-900 rounded-full animate-spin mx-auto" />
+              : 'שלח דירוג'}
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   )
 }

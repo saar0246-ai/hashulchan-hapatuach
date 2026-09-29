@@ -29,6 +29,7 @@ export interface Profile {
   neighborhood: string | null
   kashrut_level: KashrutLevel | null
   religious_level: ReligiousLevel | null
+  guest_kashrut_prefs: KashrutLevel[] | null
   phone: string | null
   bio: string | null
   verified: boolean

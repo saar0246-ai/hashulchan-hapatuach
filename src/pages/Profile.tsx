@@ -28,9 +28,18 @@ export default function Profile() {
     neighborhood: '',
     kashrut_level: '' as KashrutLevel | '',
     religious_level: '' as ReligiousLevel | '',
+    guest_kashrut_prefs: [] as KashrutLevel[],
     phone: '',
     bio: '',
   })
+
+  const toggleKashrut = (k: KashrutLevel) =>
+    setForm(f => ({
+      ...f,
+      guest_kashrut_prefs: f.guest_kashrut_prefs.includes(k)
+        ? f.guest_kashrut_prefs.filter(v => v !== k)
+        : [...f.guest_kashrut_prefs, k],
+    }))
 
   const computeAge = (birthday: string) => {
     if (!birthday) return 0
@@ -52,6 +61,7 @@ export default function Profile() {
       neighborhood: profile.neighborhood ?? '',
       kashrut_level: profile.kashrut_level ?? '',
       religious_level: profile.religious_level ?? '',
+      guest_kashrut_prefs: profile.guest_kashrut_prefs ?? [],
       phone: profile.phone ?? '',
       bio: profile.bio ?? '',
     })
@@ -69,6 +79,7 @@ export default function Profile() {
       neighborhood: form.neighborhood.trim() || null,
       kashrut_level: form.kashrut_level || null,
       religious_level: form.religious_level || null,
+      guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
       phone: form.phone.trim() || null,
       bio: form.bio.trim() || null,
     }).eq('id', user.id)
@@ -190,6 +201,18 @@ export default function Profile() {
                   </span>
                 )}
               </div>
+              {profile.guest_kashrut_prefs && profile.guest_kashrut_prefs.length > 0 && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">כאורח — מוכן להשתתף ב:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {profile.guest_kashrut_prefs.map(k => (
+                      <span key={k} className={`badge text-xs ${KASHRUT_COLORS[k]}`}>
+                        {KASHRUT_LABELS[k]}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {profile.bio && (
@@ -302,6 +325,23 @@ export default function Profile() {
                     onClick={() => setForm(f => ({ ...f, kashrut_level: f.kashrut_level === k ? '' : k }))}
                     className={`p-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
                       form.kashrut_level === k ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-foreground'
+                    }`}>
+                    {KASHRUT_LABELS[k]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">
+                כשרות לאירוח — אני מוכן לאכול
+                <span className="text-xs font-normal text-muted-foreground mr-1">(ניתן לבחור כמה)</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.keys(KASHRUT_LABELS) as KashrutLevel[]).map(k => (
+                  <button key={k} type="button"
+                    onClick={() => toggleKashrut(k)}
+                    className={`p-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                      form.guest_kashrut_prefs.includes(k) ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-foreground'
                     }`}>
                     {KASHRUT_LABELS[k]}
                   </button>

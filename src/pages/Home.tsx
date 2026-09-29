@@ -35,8 +35,18 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
-  const [filters, setFilters] = useState<FilterState>({ kashrut: '', religious: '', city: '', eventType: '' })
+  const [filters, setFilters] = useState<FilterState>({ kashrut: [], religious: '', city: '', eventType: '' })
+  const [filtersInitialized, setFiltersInitialized] = useState(false)
   const [birthdays, setBirthdays] = useState<BirthdayProfile[]>([])
+
+  useEffect(() => {
+    if (profile && !filtersInitialized) {
+      if (profile.guest_kashrut_prefs && profile.guest_kashrut_prefs.length > 0) {
+        setFilters(f => ({ ...f, kashrut: profile.guest_kashrut_prefs! }))
+      }
+      setFiltersInitialized(true)
+    }
+  }, [profile, filtersInitialized])
 
   const fetchEvents = useCallback(async () => {
     setLoading(true)
@@ -47,7 +57,7 @@ export default function Home() {
       .gt('event_date', new Date(Date.now() - 86400000).toISOString().split('T')[0])
       .order('event_date', { ascending: true })
 
-    if (filters.kashrut)   query = query.eq('kashrut_level', filters.kashrut)
+    if (filters.kashrut.length > 0) query = query.in('kashrut_level', filters.kashrut)
     if (filters.eventType) query = query.eq('event_type', filters.eventType)
     if (filters.city)      query = query.eq('city', filters.city)
     if (filters.religious) query = query.contains('preferred_religious_levels', [filters.religious])
@@ -82,7 +92,7 @@ export default function Home() {
     return 'ערב טוב'
   }
 
-  const hasFilters = filters.kashrut || filters.city || filters.religious || filters.eventType || search
+  const hasFilters = filters.kashrut.length > 0 || filters.city || filters.religious || filters.eventType || search
 
   return (
     <div className="min-h-dvh bg-background">
