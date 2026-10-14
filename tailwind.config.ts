@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ['Heebo', 'sans-serif'],
-        display: ['"Frank Ruhl Libre"', 'serif'],
+        display: ['Heebo', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

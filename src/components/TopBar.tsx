@@ -1,6 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { ArrowRight, Sun, Moon } from 'lucide-react'
 import { useTheme } from '../hooks/useTheme'
+import LogoMark from './LogoMark'
 
 interface TopBarProps {
   title?: string
@@ -45,13 +46,13 @@ export default function TopBar({ title, showBack = false, right, transparent = f
             {title}
           </h1>
         ) : logo ? (
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-            <span className="text-lg">🕯️</span>
-            <div className="text-center">
-              <p className="font-display font-bold text-sm text-foreground leading-none tracking-tight">Open Table</p>
-              <p className="text-[9px] text-muted-foreground leading-none mt-0.5">השולחן הפתוח</p>
+          <Link to="/about" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5 active:opacity-80 transition-opacity">
+            <LogoMark size={32} />
+            <div>
+              <p className="font-bold text-sm text-foreground leading-none tracking-tight">השולחן הפתוח</p>
+              <p className="text-[9px] text-muted-foreground leading-none mt-0.5 tracking-wide">Open Table</p>
             </div>
-          </div>
+          </Link>
         ) : null}
 
         {/* Left side — theme toggle */}

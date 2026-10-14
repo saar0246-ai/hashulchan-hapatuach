@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTheme } from '../hooks/useTheme'
 import { Sun, Moon } from 'lucide-react'
+import LogoMark from '../components/LogoMark'
 
 const FEATURES = [
   { emoji: '🍽️', title: 'שישי, שבת וחגים', desc: 'ארוחות שישי, ראש השנה, פסח ועוד — כל אירוע על שולחן ביתי' },
@@ -23,18 +24,13 @@ export default function Landing() {
 
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-md"
-            style={{ background: 'linear-gradient(135deg, #6B1224 0%, #2C0712 100%)' }}
-          >
-            🕯️
-          </div>
+        <Link to="/about" className="flex items-center gap-3 active:opacity-75 transition-opacity">
+          <LogoMark size={40} />
           <div>
-            <p className="font-display font-bold text-base text-foreground leading-tight tracking-tight">Open Table</p>
-            <p className="text-[10px] text-muted-foreground leading-tight">השולחן הפתוח</p>
+            <p className="font-bold text-base text-foreground leading-tight tracking-tight">השולחן הפתוח</p>
+            <p className="text-[10px] text-muted-foreground leading-tight tracking-wide">Open Table</p>
           </div>
-        </div>
+        </Link>
         <button
           onClick={toggle}
           className="w-9 h-9 flex items-center justify-center rounded-xl bg-muted hover:bg-muted/70 transition-all"
@@ -78,7 +74,7 @@ export default function Landing() {
               color: '#F5C240',
             }}
           >
-            ✨ חינם לחלוטין — ללא עמלות לעולם
+            ✨ חינם לחלוטין — לעולם ועד
           </div>
 
           {/* Headline */}
@@ -178,20 +174,21 @@ export default function Landing() {
       </div>
 
       {/* ── Footer ── */}
-      <div className="mt-auto px-4 pb-10 pt-8 text-center space-y-2.5 border-t border-border mt-8">
-        <p className="text-xs text-muted-foreground">
-          בהמשך אתה מאשר את{' '}
-          <Link to="/terms" className="text-primary underline underline-offset-2 hover:opacity-80">תנאי השימוש</Link>
-          {' '}ו
-          <Link to="/privacy" className="text-primary underline underline-offset-2 hover:opacity-80">מדיניות הפרטיות</Link>
-        </p>
-        <div className="flex items-center justify-center gap-4">
-          <Link to="/accessibility" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            ♿ הצהרת נגישות
+      <div className="mt-auto px-4 pb-10 pt-8 text-center space-y-3 border-t border-border mt-8">
+        <div className="flex items-center justify-center gap-5 flex-wrap">
+          <Link to="/about" className="text-xs font-semibold text-primary hover:opacity-80 transition-opacity">
+            אודות המיזם
           </Link>
+          <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">תנאי שימוש</Link>
+          <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">פרטיות</Link>
+          <Link to="/accessibility" className="text-xs text-muted-foreground hover:text-foreground transition-colors">נגישות</Link>
         </div>
-        <p className="text-[10px] text-muted-foreground/50 pt-1">
-          השולחן הפתוח • Open Table © 2026
+        <p className="text-xs text-muted-foreground/70">
+          בהצטרפות אתה מאשר את{' '}
+          <Link to="/terms" className="text-primary hover:opacity-80">תנאי השימוש</Link>
+        </p>
+        <p className="text-[10px] text-muted-foreground/40 pt-1">
+          השולחן הפתוח © 2026 — מיזם קהילתי חינמי
         </p>
       </div>
 

@@ -20,6 +20,7 @@ import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Accessibility from './pages/Accessibility'
 import Admin from './pages/Admin'
+import About from './pages/About'
 
 function ThemeInit() {
   useTheme()
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/accessibility" element={<Accessibility />} />
+        <Route path="/about" element={<About />} />
 
         {/* Auth required */}
         <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
