@@ -4,7 +4,7 @@ import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import LogoMark from '../components/LogoMark'
+import BrandLogo from '../components/BrandLogo'
 
 export default function Auth() {
   const [params] = useSearchParams()
@@ -60,7 +60,7 @@ export default function Auth() {
   /* ── Verify screen ── */
   if (mode === 'verify') {
     return (
-      <div className="min-h-dvh page-hero flex flex-col items-center justify-center px-6 text-center gap-8">
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-8" style={{ background: 'linear-gradient(160deg, #2B201A 0%, #1C1510 55%, #120D09 100%)' }}>
         <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
           background: 'linear-gradient(135deg, rgba(212,152,12,0.25), rgba(212,152,12,0.1))',
           border: '2px solid rgba(212,152,12,0.5)',
@@ -97,10 +97,8 @@ export default function Auth() {
       </div>
 
       {/* Logo */}
-      <div className="flex flex-col items-center pt-6 pb-8 px-6">
-        <LogoMark size={64} className="mb-4" />
-        <h1 className="font-bold text-2xl text-white mb-1">שולחן פתוח</h1>
-        <p className="text-white/50 text-xs tracking-wide">Open Table</p>
+      <div className="flex flex-col items-center pt-8 pb-8 px-6">
+        <BrandLogo size="lg" onDark />
       </div>
 
       {/* Card form */}
@@ -174,17 +172,17 @@ export default function Auth() {
                 onClick={() => setAgreed(!agreed)}
                 className="w-5 h-5 flex-shrink-0 rounded-md mt-0.5 flex items-center justify-center transition-all"
                 style={{
-                  background: agreed ? 'linear-gradient(135deg, #B87800, #F0B828)' : 'rgba(255,255,255,0.1)',
+                  background: agreed ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.1)',
                   border: agreed ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
                 }}
               >
-                {agreed && <CheckCircle className="w-3.5 h-3.5 text-yellow-900" />}
+                {agreed && <CheckCircle className="w-3.5 h-3.5 text-white" />}
               </div>
               <span className="text-xs text-white/55 leading-relaxed">
                 קראתי ואני מסכים ל
-                <Link to="/terms" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">תנאי השימוש</Link>
+                <Link to="/terms" className="text-[#F0A080] underline mx-1 hover:text-[#F5B090]">תנאי השימוש</Link>
                 ול
-                <Link to="/privacy" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">מדיניות הפרטיות</Link>
+                <Link to="/privacy" className="text-[#F0A080] underline mx-1 hover:text-[#F5B090]">מדיניות הפרטיות</Link>
               </span>
             </label>
           )}
@@ -209,7 +207,7 @@ export default function Auth() {
             {' '}
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-yellow-400/80 font-semibold hover:text-yellow-300 transition-colors"
+              className="text-[#F0A080] font-semibold hover:text-[#F5B090] transition-colors"
             >
               {mode === 'login' ? 'הצטרף' : 'כניסה'}
             </button>

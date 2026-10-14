@@ -5,44 +5,44 @@
 /* ─── Design Tokens ─── */
 @layer base {
   :root {
-    --background: 220 25% 98%;
-    --foreground: 220 22% 11%;
+    --background: 38 35% 97%;
+    --foreground: 20 28% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 220 22% 11%;
-    --primary: 228 58% 32%;
+    --card-foreground: 20 28% 9%;
+    --primary: 15 63% 43%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 88% 48%;
+    --secondary: 38 72% 44%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 228 58% 32%;
+    --accent: 15 63% 43%;
     --accent-foreground: 0 0% 100%;
-    --muted: 220 16% 94%;
-    --muted-foreground: 220 12% 50%;
+    --muted: 35 22% 92%;
+    --muted-foreground: 28 12% 47%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 14% 90%;
-    --input: 220 16% 95%;
-    --ring: 228 58% 32%;
-    --radius: 1rem;
+    --border: 30 16% 87%;
+    --input: 35 22% 94%;
+    --ring: 15 63% 43%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222 35% 7%;
-    --foreground: 220 15% 92%;
-    --card: 222 30% 11%;
-    --card-foreground: 220 15% 92%;
-    --primary: 228 55% 62%;
+    --background: 28 14% 8%;
+    --foreground: 34 20% 87%;
+    --card: 28 14% 11%;
+    --card-foreground: 34 20% 87%;
+    --primary: 15 57% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 88% 55%;
+    --secondary: 38 68% 52%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 228 55% 62%;
+    --accent: 15 57% 53%;
     --accent-foreground: 0 0% 100%;
-    --muted: 222 25% 17%;
-    --muted-foreground: 220 14% 58%;
-    --destructive: 0 65% 55%;
+    --muted: 28 13% 16%;
+    --muted-foreground: 28 10% 55%;
+    --destructive: 0 63% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 20% 20%;
-    --input: 222 25% 15%;
-    --ring: 228 55% 62%;
+    --border: 28 12% 20%;
+    --input: 28 13% 13%;
+    --ring: 15 57% 53%;
   }
 }
 
@@ -62,38 +62,25 @@
 /* ─── Components ─── */
 @layer components {
 
-  /* ── Cards ── */
+  /* ── Cards — crisp 1px border, no heavy shadow ── */
   .shulchan-card {
-    @apply bg-card rounded-2xl overflow-hidden;
-    box-shadow:
-      0 0 0 1px hsl(var(--border) / 0.6),
-      0 2px 4px hsl(var(--foreground) / 0.04),
-      0 8px 24px hsl(var(--foreground) / 0.06);
-    transition: box-shadow 0.2s ease, transform 0.15s ease;
+    @apply bg-card rounded-lg overflow-hidden;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 3px 8px hsl(var(--foreground) / 0.03);
+    transition: box-shadow 0.18s ease, transform 0.15s ease;
   }
   .shulchan-card-hover:hover {
-    box-shadow:
-      0 0 0 1px hsl(var(--border)),
-      0 4px 8px hsl(var(--foreground) / 0.06),
-      0 16px 40px hsl(var(--foreground) / 0.1);
+    box-shadow: 0 1px 3px hsl(var(--foreground) / 0.06), 0 8px 24px hsl(var(--foreground) / 0.07);
     transform: translateY(-1px);
   }
 
-  /* ── Dark page hero ── */
+  /* ── Warm dark hero (replaces cold blue gradient) ── */
   .page-hero {
-    background: linear-gradient(170deg, #1A2A6C 0%, #0E1845 50%, #050A1C 100%);
+    background: linear-gradient(160deg, #2B201A 0%, #1C1510 55%, #120D09 100%);
     position: relative;
     overflow: hidden;
   }
-  .page-hero::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 220px; height: 220px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(96,128,240,0.22) 0%, transparent 70%);
-    pointer-events: none;
-  }
+  .page-hero::before { display: none; }
   .page-hero::after {
     content: '';
     position: absolute;
@@ -110,72 +97,73 @@
     -webkit-backdrop-filter: blur(24px) saturate(180%);
   }
   .glass-dark {
-    background: rgba(5, 10, 28, 0.75);
+    background: rgba(28, 20, 14, 0.82);
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
   }
 
   /* ── Inputs ── */
   .shulchan-input {
-    @apply w-full bg-input border border-border rounded-xl px-4 py-3 text-foreground
+    @apply w-full bg-input border border-border rounded-lg px-4 py-3 text-foreground
            placeholder:text-muted-foreground outline-none
-           focus:ring-2 focus:ring-primary/25 focus:border-primary/60
+           focus:ring-2 focus:ring-primary/20 focus:border-primary/50
            transition-all duration-200 text-sm;
   }
   .shulchan-input-dark {
-    @apply w-full rounded-xl px-4 py-3 text-white outline-none text-sm
-           placeholder:text-white/40 transition-all duration-200;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
+    @apply w-full rounded-lg px-4 py-3 text-white outline-none text-sm
+           placeholder:text-white/35 transition-all duration-200;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.11);
   }
   .shulchan-input-dark:focus {
-    background: rgba(255,255,255,0.14);
-    border-color: rgba(224,112,48,0.6);
-    box-shadow: 0 0 0 3px rgba(224,112,48,0.15);
+    background: rgba(255,255,255,0.10);
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.10);
   }
 
   /* ── Buttons ── */
   .btn-primary {
-    @apply font-semibold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
+    @apply font-semibold rounded-lg px-6 py-3 active:scale-[0.97] transition-all duration-150
            disabled:opacity-50 disabled:cursor-not-allowed text-white;
-    background: linear-gradient(135deg, hsl(228, 58%, 36%) 0%, hsl(228, 58%, 26%) 100%);
-    box-shadow: 0 2px 8px hsl(228, 58%, 32% / 0.35), 0 1px 2px hsl(228, 58%, 32% / 0.2);
+    background: hsl(var(--primary));
+    box-shadow: 0 1px 2px hsl(var(--primary) / 0.30), 0 1px 1px rgba(0,0,0,0.08);
   }
   .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, hsl(228, 58%, 40%) 0%, hsl(228, 58%, 30%) 100%);
-  }
-  .dark .btn-primary {
-    background: linear-gradient(135deg, hsl(228, 55%, 58%) 0%, hsl(228, 65%, 46%) 100%);
+    background: hsl(15 63% 38%);
+    box-shadow: 0 2px 6px hsl(var(--primary) / 0.35);
   }
 
+  /* Terracotta CTA (replaces neon gold) */
   .btn-gold {
-    @apply font-bold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
-           disabled:opacity-50 disabled:cursor-not-allowed;
-    background: linear-gradient(135deg, #B87800 0%, #F0B828 50%, #B87800 100%);
-    box-shadow: 0 4px 18px rgba(184,120,0,0.45), 0 1px 3px rgba(184,120,0,0.2);
-    color: #1A0E00;
+    @apply font-semibold rounded-lg px-6 py-3 active:scale-[0.97] transition-all duration-150
+           disabled:opacity-50 disabled:cursor-not-allowed text-white;
+    background: hsl(var(--primary));
+    box-shadow: 0 1px 2px hsl(var(--primary) / 0.30), 0 1px 1px rgba(0,0,0,0.08);
   }
   .btn-gold:hover:not(:disabled) {
-    background: linear-gradient(135deg, #CC8C00 0%, #F8C840 50%, #CC8C00 100%);
-    box-shadow: 0 6px 22px rgba(184,120,0,0.55);
+    background: hsl(15 63% 38%);
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.35);
+  }
+  .dark .btn-gold {
+    background: hsl(var(--primary));
   }
 
   .btn-secondary {
-    @apply bg-muted text-foreground font-medium rounded-xl px-6 py-3
+    @apply bg-muted text-foreground font-medium rounded-lg px-6 py-3
            active:scale-[0.97] transition-all duration-150 hover:bg-muted/70 text-sm;
   }
   .btn-outline {
-    @apply border border-primary/40 text-primary font-medium rounded-xl px-6 py-3
-           active:scale-[0.97] transition-all duration-150 hover:bg-primary/[0.08] text-sm;
+    @apply border border-border text-foreground font-medium rounded-lg px-6 py-3
+           active:scale-[0.97] transition-all duration-150 hover:bg-muted/50 text-sm;
   }
   .btn-ghost-white {
-    @apply font-medium rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150 text-sm;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    @apply font-medium rounded-lg px-6 py-3 active:scale-[0.97] transition-all duration-150 text-sm;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
     color: rgba(255,255,255,0.85);
   }
   .btn-ghost-white:hover {
-    background: rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.13);
   }
 
   /* ── Badges ── */
@@ -183,9 +171,9 @@
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /* ── Gradient text ── */
+  /* ── Warm gradient text (replaces cold blue) ── */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #A0BAFF 0%, #6080E0 55%, #8099E8 100%);
+    background: linear-gradient(135deg, #F5B090 0%, #D05528 55%, #E8804A 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -193,7 +181,7 @@
 
   /* ── Skeleton ── */
   .skeleton {
-    @apply bg-muted rounded-xl;
+    @apply bg-muted rounded-lg;
     background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--muted) / 0.5) 50%, hsl(var(--muted)) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -219,7 +207,7 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes shimmer {
@@ -234,11 +222,5 @@
 
 /* ─── Desktop responsive ─── */
 @media (min-width: 768px) {
-  .page-hero {
-    min-height: 320px;
-  }
-  .page-hero::before {
-    width: 360px; height: 360px;
-    top: -60px; right: -60px;
-  }
+  .page-hero { min-height: 280px; }
 }
