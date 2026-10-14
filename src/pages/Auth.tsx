@@ -4,6 +4,7 @@ import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import LogoMark from '../components/LogoMark'
 
 export default function Auth() {
   const [params] = useSearchParams()
@@ -97,11 +98,9 @@ export default function Auth() {
 
       {/* Logo */}
       <div className="flex flex-col items-center pt-6 pb-8 px-6">
-        <div className="text-5xl mb-4">🕯️</div>
-        <h1 className="font-display font-black text-2xl text-gold-gradient mb-1">
-          Open Table
-        </h1>
-        <p className="text-white/50 text-xs tracking-wide">השולחן הפתוח</p>
+        <LogoMark size={64} className="mb-4" />
+        <h1 className="font-bold text-2xl text-white mb-1">שולחן פתוח</h1>
+        <p className="text-white/50 text-xs tracking-wide">Open Table</p>
       </div>
 
       {/* Card form */}
@@ -175,7 +174,7 @@ export default function Auth() {
                 onClick={() => setAgreed(!agreed)}
                 className="w-5 h-5 flex-shrink-0 rounded-md mt-0.5 flex items-center justify-center transition-all"
                 style={{
-                  background: agreed ? 'linear-gradient(135deg, #C8860A, #F0B428)' : 'rgba(255,255,255,0.1)',
+                  background: agreed ? 'linear-gradient(135deg, #C85010, #E87030)' : 'rgba(255,255,255,0.1)',
                   border: agreed ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
                 }}
               >
@@ -183,9 +182,9 @@ export default function Auth() {
               </div>
               <span className="text-xs text-white/55 leading-relaxed">
                 קראתי ואני מסכים ל
-                <Link to="/terms" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">תנאי השימוש</Link>
+                <Link to="/terms" className="text-orange-400/80 underline mx-1 hover:text-orange-300">תנאי השימוש</Link>
                 ול
-                <Link to="/privacy" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">מדיניות הפרטיות</Link>
+                <Link to="/privacy" className="text-orange-400/80 underline mx-1 hover:text-orange-300">מדיניות הפרטיות</Link>
               </span>
             </label>
           )}
@@ -210,7 +209,7 @@ export default function Auth() {
             {' '}
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-yellow-400/80 font-semibold hover:text-yellow-300 transition-colors"
+              className="text-orange-400/80 font-semibold hover:text-orange-300 transition-colors"
             >
               {mode === 'login' ? 'הצטרף' : 'כניסה'}
             </button>

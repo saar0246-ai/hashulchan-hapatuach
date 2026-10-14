@@ -5,8 +5,8 @@ import LogoMark from '../components/LogoMark'
 const VALUES = [
   {
     icon: Heart,
-    title: 'חינם לחלוטין — לעולם',
-    desc: 'השולחן הפתוח הוא מיזם קהילתי. אין עמלות, אין דמי שירות, אין תשלום. אנשים מזמינים אנשים — פשוט.',
+    title: 'חינמי לחלוטין',
+    desc: 'שולחן פתוח הוא מיזם קהילתי. אין עמלות, אין דמי שירות, אין תשלום. אנשים מזמינים אנשים — פשוט.',
     color: 'hsl(var(--primary))',
     bg: 'hsl(var(--primary) / 0.08)',
   },
@@ -21,8 +21,8 @@ const VALUES = [
     icon: Star,
     title: 'קהילה אמיתית',
     desc: 'לא מסעדה ולא בית מלון. שולחן ביתי אמיתי, אנשים אמיתיים, שיחה אמיתית. כזה שקשה למצוא בחוץ.',
-    color: '#C8860A',
-    bg: 'rgba(200,134,10,0.08)',
+    color: '#E87030',
+    bg: 'rgba(232,112,48,0.08)',
   },
   {
     icon: Users,
@@ -35,7 +35,7 @@ const VALUES = [
 
 const STEPS = [
   { n: '1', emoji: '📝', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
-  { n: '2', emoji: '🔍', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — שישי, שבת, ראש השנה, פסח ועוד.' },
+  { n: '2', emoji: '🔍', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — ארוחות שבת וחגים.' },
   { n: '3', emoji: '✅', title: 'מבקשים מקום', desc: 'שולחים בקשה למארח. הוא בוחר מי מגיע — ואז מגיעה הכתובת ישירות למייל.' },
   { n: '4', emoji: '🍽️', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
 ]
@@ -47,14 +47,14 @@ export default function About() {
       {/* ── Hero ── */}
       <div
         className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(170deg, #6B1224 0%, #350A14 45%, #110306 100%)' }}
+        style={{ background: 'linear-gradient(170deg, #1E2E7A 0%, #0E1845 45%, #050A1C 100%)' }}
       >
         <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 0)',
           backgroundSize: '22px 22px',
         }} />
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(212,152,12,0.18) 0%, transparent 68%)',
+          background: 'radial-gradient(circle, rgba(96,128,240,0.22) 0%, transparent 68%)',
         }} />
 
         <div className="max-w-lg mx-auto px-5 pt-14 pb-12 relative z-10">
@@ -64,28 +64,28 @@ export default function About() {
           <h1
             className="text-center text-4xl font-black mb-3 leading-tight"
             style={{
-              background: 'linear-gradient(135deg, #FFD166 0%, #C67C00 55%, #F0A800 100%)',
+              background: 'linear-gradient(135deg, #A0BAFF 0%, #6080E0 55%, #8099E8 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}
           >
-            השולחן הפתוח
+            שולחן פתוח
           </h1>
           <p className="text-center text-white/60 text-base leading-relaxed max-w-xs mx-auto">
-            פלטפורמה קהילתית לחיבור בין מארחים לאורחים — לארוחות שישי, שבת וחגים
+            פלטפורמה קהילתית לחיבור בין מארחים לאורחים — לארוחות שבת וחגים
           </p>
 
           <div
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mt-6 mx-auto flex justify-center text-xs font-semibold"
             style={{
-              background: 'rgba(212,152,12,0.15)',
-              border: '1px solid rgba(212,152,12,0.35)',
-              color: '#F5C240',
+              background: 'rgba(224,112,48,0.18)',
+              border: '1px solid rgba(224,112,48,0.38)',
+              color: '#F09050',
             }}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            חינם לחלוטין — ללא עמלות, לעולם
+            חינמי לחלוטין
           </div>
         </div>
       </div>
@@ -96,17 +96,17 @@ export default function About() {
         <section className="shulchan-card p-6">
           <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
             <ChefHat className="w-5 h-5 text-primary" />
-            מה זה השולחן הפתוח?
+            מה זה שולחן פתוח?
           </h2>
           <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
             <p>
-              השולחן הפתוח הוא כמו Airbnb — אבל לא לחדרים, לארוחות שישי.
+              שולחן פתוח הוא כמו Airbnb — אבל לא לחדרים, לארוחות שישי.
               מארחים פותחים את ביתם לאורחים חדשים, ואורחים מוצאים שולחן חם לחג,
-              לשבת, לראש השנה או סתם לשישי ערב.
+              לשבת, או סתם לשישי בערב.
             </p>
             <p>
               המיזם נולד מתוך הכמיהה לחיבור אנושי אמיתי. כשעוברים לעיר חדשה,
-              כשהמשפחה רחוקה, כשצריך שולחן לחג — השולחן הפתוח שם.
+              כשהמשפחה רחוקה, כשצריך שולחן לחג — שולחן פתוח שם.
               ולהפך: כשיש שפע ורוצים לשתף — כאן אפשר.
             </p>
           </div>
@@ -175,14 +175,13 @@ export default function About() {
         <div className="space-y-3 pt-2">
           <Link to="/auth?mode=register" className="block">
             <button
-              className="w-full py-4 rounded-2xl font-black text-base transition-all active:scale-[0.97]"
+              className="w-full py-4 rounded-2xl font-black text-base transition-all active:scale-[0.97] text-white"
               style={{
-                background: 'linear-gradient(135deg, #D4980C 0%, #F5C240 50%, #D4980C 100%)',
-                color: '#1A0800',
-                boxShadow: '0 4px 20px rgba(212,152,12,0.40)',
+                background: 'linear-gradient(135deg, #C85010 0%, #E87030 50%, #C85010 100%)',
+                boxShadow: '0 4px 20px rgba(200,80,16,0.40)',
               }}
             >
-              הצטרף עכשיו — חינם לחלוטין
+              הצטרף עכשיו — חינמי
             </button>
           </Link>
           <Link to="/auth?mode=login" className="block">
@@ -201,7 +200,7 @@ export default function About() {
             <span>·</span>
             <Link to="/accessibility" className="hover:text-primary transition-colors">נגישות</Link>
           </div>
-          <p className="text-[11px] text-muted-foreground/50">השולחן הפתוח © 2026 — מיזם קהילתי</p>
+          <p className="text-[11px] text-muted-foreground/50">שולחן פתוח © 2026 — מיזם קהילתי</p>
         </div>
       </div>
     </div>

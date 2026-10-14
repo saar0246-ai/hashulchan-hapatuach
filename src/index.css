@@ -5,36 +5,36 @@
 /* ─── Design Tokens ─── */
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 20% 9%;
+    --background: 220 25% 98%;
+    --foreground: 220 22% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 9%;
-    --primary: 347 72% 24%;
+    --card-foreground: 220 22% 11%;
+    --primary: 228 58% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 92% 48%;
-    --secondary-foreground: 220 20% 9%;
-    --accent: 347 72% 24%;
+    --secondary: 24 80% 52%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 228 58% 32%;
     --accent-foreground: 0 0% 100%;
-    --muted: 220 14% 95%;
+    --muted: 220 16% 94%;
     --muted-foreground: 220 12% 50%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 14% 96%;
-    --ring: 347 72% 24%;
+    --border: 220 14% 90%;
+    --input: 220 16% 95%;
+    --ring: 228 58% 32%;
     --radius: 1rem;
   }
 
   .dark {
-    --background: 222 32% 7%;
-    --foreground: 30 12% 92%;
-    --card: 222 28% 11%;
-    --card-foreground: 30 12% 92%;
-    --primary: 347 55% 62%;
+    --background: 222 35% 7%;
+    --foreground: 220 15% 92%;
+    --card: 222 30% 11%;
+    --card-foreground: 220 15% 92%;
+    --primary: 228 55% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 85% 58%;
-    --secondary-foreground: 222 32% 7%;
-    --accent: 347 55% 62%;
+    --secondary: 24 75% 58%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 228 55% 62%;
     --accent-foreground: 0 0% 100%;
     --muted: 222 25% 17%;
     --muted-foreground: 220 14% 58%;
@@ -42,7 +42,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 222 20% 20%;
     --input: 222 25% 15%;
-    --ring: 347 55% 62%;
+    --ring: 228 55% 62%;
   }
 }
 
@@ -81,7 +81,7 @@
 
   /* ── Dark page hero ── */
   .page-hero {
-    background: linear-gradient(170deg, #6B1224 0%, #2C0712 50%, #0E0307 100%);
+    background: linear-gradient(170deg, #1E2E7A 0%, #0E1845 50%, #050A1C 100%);
     position: relative;
     overflow: hidden;
   }
@@ -91,7 +91,7 @@
     top: -40px; right: -40px;
     width: 220px; height: 220px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(212,152,12,0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(96,128,240,0.22) 0%, transparent 70%);
     pointer-events: none;
   }
   .page-hero::after {
@@ -110,7 +110,7 @@
     -webkit-backdrop-filter: blur(24px) saturate(180%);
   }
   .glass-dark {
-    background: rgba(10, 3, 7, 0.75);
+    background: rgba(5, 10, 28, 0.75);
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
   }
@@ -130,34 +130,33 @@
   }
   .shulchan-input-dark:focus {
     background: rgba(255,255,255,0.14);
-    border-color: rgba(212,152,12,0.6);
-    box-shadow: 0 0 0 3px rgba(212,152,12,0.15);
+    border-color: rgba(224,112,48,0.6);
+    box-shadow: 0 0 0 3px rgba(224,112,48,0.15);
   }
 
   /* ── Buttons ── */
   .btn-primary {
     @apply font-semibold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
            disabled:opacity-50 disabled:cursor-not-allowed text-white;
-    background: linear-gradient(135deg, hsl(347, 72%, 28%) 0%, hsl(347, 72%, 20%) 100%);
-    box-shadow: 0 2px 8px hsl(347, 72%, 24% / 0.35), 0 1px 2px hsl(347, 72%, 24% / 0.2);
+    background: linear-gradient(135deg, hsl(228, 58%, 36%) 0%, hsl(228, 58%, 26%) 100%);
+    box-shadow: 0 2px 8px hsl(228, 58%, 32% / 0.35), 0 1px 2px hsl(228, 58%, 32% / 0.2);
   }
   .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(135deg, hsl(347, 72%, 32%) 0%, hsl(347, 72%, 24%) 100%);
+    background: linear-gradient(135deg, hsl(228, 58%, 40%) 0%, hsl(228, 58%, 30%) 100%);
   }
   .dark .btn-primary {
-    background: linear-gradient(135deg, hsl(347, 55%, 58%) 0%, hsl(347, 65%, 46%) 100%);
+    background: linear-gradient(135deg, hsl(228, 55%, 58%) 0%, hsl(228, 65%, 46%) 100%);
   }
 
   .btn-gold {
     @apply font-bold rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150
-           disabled:opacity-50 disabled:cursor-not-allowed;
-    background: linear-gradient(135deg, #C8860A 0%, #F0B428 50%, #C8860A 100%);
-    color: #1A0800;
-    box-shadow: 0 4px 18px rgba(200,134,10,0.45), 0 1px 3px rgba(200,134,10,0.2);
+           disabled:opacity-50 disabled:cursor-not-allowed text-white;
+    background: linear-gradient(135deg, #C85010 0%, #E87030 50%, #C85010 100%);
+    box-shadow: 0 4px 18px rgba(200,80,16,0.40), 0 1px 3px rgba(200,80,16,0.2);
   }
   .btn-gold:hover:not(:disabled) {
-    background: linear-gradient(135deg, #D4960A 0%, #F5C240 50%, #D4960A 100%);
-    box-shadow: 0 6px 22px rgba(200,134,10,0.5);
+    background: linear-gradient(135deg, #D46020 0%, #F07840 50%, #D46020 100%);
+    box-shadow: 0 6px 22px rgba(200,80,16,0.5);
   }
 
   .btn-secondary {
@@ -166,7 +165,7 @@
   }
   .btn-outline {
     @apply border border-primary/40 text-primary font-medium rounded-xl px-6 py-3
-           active:scale-[0.97] transition-all duration-150 hover:bg-primary/10 text-sm;
+           active:scale-[0.97] transition-all duration-150 hover:bg-primary/[0.08] text-sm;
   }
   .btn-ghost-white {
     @apply font-medium rounded-xl px-6 py-3 active:scale-[0.97] transition-all duration-150 text-sm;
@@ -185,7 +184,7 @@
 
   /* ── Gradient text ── */
   .text-gold-gradient {
-    background: linear-gradient(135deg, #FFD166 0%, #C67C00 55%, #F0A800 100%);
+    background: linear-gradient(135deg, #A0BAFF 0%, #6080E0 55%, #8099E8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -201,10 +200,10 @@
 
   /* ── Page container ── */
   .page-container {
-    @apply max-w-lg mx-auto px-4 pb-28 pt-4;
+    @apply max-w-lg mx-auto px-4 pb-28 pt-4 md:max-w-2xl lg:max-w-3xl;
   }
   .section-title {
-    @apply font-display text-xl font-bold text-foreground;
+    @apply font-sans text-xl font-bold text-foreground;
   }
 }
 
@@ -231,3 +230,14 @@
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+
+/* ─── Desktop responsive ─── */
+@media (min-width: 768px) {
+  .page-hero {
+    min-height: 320px;
+  }
+  .page-hero::before {
+    width: 360px; height: 360px;
+    top: -60px; right: -60px;
+  }
+}

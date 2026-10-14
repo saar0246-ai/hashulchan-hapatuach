@@ -24,7 +24,7 @@ const EVENT_TYPE_EMOJI: Record<string, string> = {
 }
 
 const EVENT_TYPE_GRADIENT: Record<string, string> = {
-  shabbat_dinner: 'linear-gradient(135deg, #6B1224 0%, #2C0712 100%)',
+  shabbat_dinner: 'linear-gradient(135deg, #1E2E7A 0%, #0E1845 100%)',
   shabbat_lunch:  'linear-gradient(135deg, #C67C00 0%, #8B5000 100%)',
   holiday:        'linear-gradient(135deg, #1a5c3a 0%, #0d3320 100%)',
   weekday:        'linear-gradient(135deg, #1e3a5f 0%, #0e2035 100%)',

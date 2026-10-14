@@ -49,7 +49,7 @@ export default function TopBar({ title, showBack = false, right, transparent = f
           <Link to="/about" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5 active:opacity-80 transition-opacity">
             <LogoMark size={32} />
             <div>
-              <p className="font-bold text-sm text-foreground leading-none tracking-tight">השולחן הפתוח</p>
+              <p className="font-bold text-sm text-foreground leading-none tracking-tight">שולחן פתוח</p>
               <p className="text-[9px] text-muted-foreground leading-none mt-0.5 tracking-wide">Open Table</p>
             </div>
           </Link>

@@ -100,7 +100,7 @@ export default function Home() {
 
       {/* Greeting hero */}
       <div className="page-hero px-5 pt-5 pb-10">
-        <div className="max-w-lg mx-auto relative z-10">
+        <div className="max-w-lg mx-auto md:max-w-3xl relative z-10">
           <p className="text-white/50 text-sm mb-1">{greeting()},</p>
           <h1 className="font-display font-black text-2xl text-white leading-tight">
             {profile?.display_name
@@ -111,7 +111,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 -mt-4 relative z-20">
+      <div className="max-w-lg mx-auto md:max-w-3xl px-4 -mt-4 relative z-20">
 
         {/* Quick actions */}
         <div className="stagger-1 grid grid-cols-2 gap-3 mb-5">
@@ -126,7 +126,7 @@ export default function Home() {
           <Link to="/create-event" className="block">
             <div
               className="shulchan-card p-4 h-full flex flex-col justify-between shulchan-card-hover cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, hsl(347,72%,24%/0.08), hsl(347,72%,24%/0.03))' }}
+              style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))' }}
             >
               <span className="text-xl">🏠</span>
               <div>
@@ -225,7 +225,7 @@ export default function Home() {
               }
             />
           ) : (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {events.map(event => (
                 <EventCard key={event.id} event={event} />
               ))}
