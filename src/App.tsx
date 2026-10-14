@@ -36,10 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (loading || profileLoading) {
     return (
       <div className="min-h-dvh bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <span className="text-4xl animate-bounce">🕯️</span>
-          <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-        </div>
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
       </div>
     )
   }

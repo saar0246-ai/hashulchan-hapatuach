@@ -79,9 +79,9 @@ export default function About() {
           <div
             className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mt-6 mx-auto flex justify-center text-xs font-semibold"
             style={{
-              background: 'rgba(224,112,48,0.18)',
-              border: '1px solid rgba(224,112,48,0.38)',
-              color: '#F09050',
+              background: 'rgba(192,128,8,0.18)',
+              border: '1px solid rgba(192,128,8,0.38)',
+              color: '#F0C040',
             }}
           >
             <Sparkles className="w-3.5 h-3.5" />

@@ -70,9 +70,9 @@ export default function Landing() {
               <div
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 mb-7 text-xs font-semibold"
                 style={{
-                  background: 'rgba(224,112,48,0.18)',
-                  border: '1px solid rgba(224,112,48,0.38)',
-                  color: '#F09050',
+                  background: 'rgba(192,128,8,0.18)',
+                  border: '1px solid rgba(192,128,8,0.38)',
+                  color: '#F0C040',
                 }}
               >
                 🎁 חינמי לחלוטין
@@ -106,10 +106,11 @@ export default function Landing() {
               <div className="space-y-3 md:flex md:gap-3 md:space-y-0">
                 <Link to="/auth?mode=register" className="block md:flex-1">
                   <button
-                    className="w-full py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.97] text-white"
+                    className="w-full py-3.5 rounded-2xl font-bold text-base transition-all active:scale-[0.97]"
                     style={{
-                      background: 'linear-gradient(135deg, #C85010 0%, #E87030 50%, #C85010 100%)',
-                      boxShadow: '0 4px 18px rgba(200,80,16,0.40)',
+                      background: 'linear-gradient(135deg, #B87800 0%, #F0B828 50%, #B87800 100%)',
+                      boxShadow: '0 4px 18px rgba(184,120,0,0.45)',
+                      color: '#1A0E00',
                     }}
                   >
                     הצטרף עכשיו — חינמי

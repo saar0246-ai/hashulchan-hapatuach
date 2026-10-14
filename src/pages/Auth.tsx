@@ -174,17 +174,17 @@ export default function Auth() {
                 onClick={() => setAgreed(!agreed)}
                 className="w-5 h-5 flex-shrink-0 rounded-md mt-0.5 flex items-center justify-center transition-all"
                 style={{
-                  background: agreed ? 'linear-gradient(135deg, #C85010, #E87030)' : 'rgba(255,255,255,0.1)',
+                  background: agreed ? 'linear-gradient(135deg, #B87800, #F0B828)' : 'rgba(255,255,255,0.1)',
                   border: agreed ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
                 }}
               >
-                {agreed && <CheckCircle className="w-3.5 h-3.5 text-amber-900" />}
+                {agreed && <CheckCircle className="w-3.5 h-3.5 text-yellow-900" />}
               </div>
               <span className="text-xs text-white/55 leading-relaxed">
                 קראתי ואני מסכים ל
-                <Link to="/terms" className="text-orange-400/80 underline mx-1 hover:text-orange-300">תנאי השימוש</Link>
+                <Link to="/terms" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">תנאי השימוש</Link>
                 ול
-                <Link to="/privacy" className="text-orange-400/80 underline mx-1 hover:text-orange-300">מדיניות הפרטיות</Link>
+                <Link to="/privacy" className="text-yellow-400/80 underline mx-1 hover:text-yellow-300">מדיניות הפרטיות</Link>
               </span>
             </label>
           )}
@@ -209,7 +209,7 @@ export default function Auth() {
             {' '}
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-orange-400/80 font-semibold hover:text-orange-300 transition-colors"
+              className="text-yellow-400/80 font-semibold hover:text-yellow-300 transition-colors"
             >
               {mode === 'login' ? 'הצטרף' : 'כניסה'}
             </button>

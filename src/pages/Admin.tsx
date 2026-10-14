@@ -136,6 +136,12 @@ export default function Admin() {
     else { toast.success('הרשאות אדמין ניתנו'); fetchUsers() }
   }
 
+  const removeAdmin = async (userId: string) => {
+    const { error } = await supabase.from('profiles').update({ role: 'user' }).eq('id', userId)
+    if (error) toast.error('שגיאה')
+    else { toast.success('הרשאות אדמין הוסרו'); fetchUsers() }
+  }
+
   const cancelEvent = async (eventId: string) => {
     const { error } = await supabase.rpc('admin_cancel_event', { target_event_id: eventId })
     if (error) toast.error('שגיאה')
@@ -319,12 +325,19 @@ export default function Admin() {
                           >
                             {u.is_banned ? <><CheckCircle className="w-3.5 h-3.5" />בטל השעיה</> : <><Ban className="w-3.5 h-3.5" />השעה</>}
                           </button>
-                          {u.role !== 'admin' && (
+                          {u.role !== 'admin' ? (
                             <button
                               onClick={() => makeAdmin(u.id)}
                               className="px-3 text-xs py-1.5 rounded-lg bg-amber-100 text-amber-800 font-medium hover:bg-amber-200 transition-all flex items-center gap-1"
                             >
-                              <Shield className="w-3.5 h-3.5" />אדמין
+                              <Shield className="w-3.5 h-3.5" />הפוך לאדמין
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => { if (confirm('להסיר הרשאות אדמין?')) removeAdmin(u.id) }}
+                              className="px-3 text-xs py-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-300 font-medium hover:bg-amber-100 transition-all flex items-center gap-1"
+                            >
+                              <Shield className="w-3.5 h-3.5" />הסר אדמין
                             </button>
                           )}
                         </>
@@ -408,7 +421,7 @@ export default function Admin() {
         {tab === 'shabbat' && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <h2 className="font-display font-bold text-xl text-foreground flex-1">🕯️ ארוחות השבת הקרובות</h2>
+              <h2 className="font-display font-bold text-xl text-foreground flex-1">🍽️ ארוחות השבת הקרובות</h2>
               <button onClick={fetchShabbat} className="text-xs text-primary">רענן</button>
             </div>
             <p className="text-xs text-muted-foreground">14 הימים הקרובים — ארוחות שישי ושבת</p>
@@ -419,7 +432,7 @@ export default function Admin() {
                 {shabbatEvents.map(ev => (
                   <div key={ev.id} className="shulchan-card p-4">
                     <div className="flex items-start gap-3 mb-3">
-                      <span className="text-2xl">{ev.event_type === 'shabbat_dinner' ? '🕯️' : '☀️'}</span>
+                      <span className="text-2xl">{ev.event_type === 'shabbat_dinner' ? '🌙' : '☀️'}</span>
                       <div className="flex-1">
                         <p className="font-bold text-foreground text-sm">{ev.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
