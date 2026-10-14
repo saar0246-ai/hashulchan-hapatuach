@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Star, Users, ChefHat, Sparkles } from 'lucide-react'
+import { Heart, Shield, Star, Users, ChefHat } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo'
 
 const VALUES = [
@@ -34,10 +34,10 @@ const VALUES = [
 ]
 
 const STEPS = [
-  { n: '1', emoji: '📝', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
-  { n: '2', emoji: '🔍', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — ארוחות שבת וחגים.' },
-  { n: '3', emoji: '✅', title: 'מבקשים מקום', desc: 'שולחים בקשה למארח. הוא בוחר מי מגיע — ואז מגיעה הכתובת ישירות למייל.' },
-  { n: '4', emoji: '🍽️', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
+  { n: '1', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
+  { n: '2', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — ארוחות שבת וחגים.' },
+  { n: '3', title: 'מבקשים מקום', desc: 'שולחים בקשה למארח. הוא בוחר מי מגיע — ואז מגיעה הכתובת ישירות למייל.' },
+  { n: '4', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
 ]
 
 export default function About() {
@@ -76,7 +76,7 @@ export default function About() {
               color: '#F0A080',
             }}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#F0A080' }} />
             חינמי לחלוטין
           </div>
         </div>
@@ -142,10 +142,7 @@ export default function About() {
                   {s.n}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span>{s.emoji}</span>
-                    <p className="font-bold text-sm text-foreground">{s.title}</p>
-                  </div>
+                  <p className="font-bold text-sm text-foreground mb-1">{s.title}</p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
                 </div>
               </div>
