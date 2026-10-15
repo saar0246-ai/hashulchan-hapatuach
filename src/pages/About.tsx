@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Star, Users, ChefHat } from 'lucide-react'
+import { Heart, Shield, Star, Users, ChefHat, Instagram, Facebook, Linkedin, Sparkles } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo'
 
 const VALUES = [
@@ -32,6 +32,50 @@ const VALUES = [
     bg: 'rgba(30,95,165,0.08)',
   },
 ]
+
+type Social = { label: string; url: string; icon: 'instagram' | 'facebook' | 'linkedin' }
+type TeamMember = {
+  name: string
+  role: string
+  desc: string | null
+  socials: Social[]
+  placeholder?: boolean
+}
+
+const TEAM: TeamMember[] = [
+  {
+    name: 'צחי מרום',
+    role: 'מייסד שותף',
+    desc: 'בונה קהילות ויזם חברתי — מאמין שחיבורים אמיתיים בין אנשים מתחילים ממקום של נתינה. אחד מהאנשים שהפכו את הרעיון לשולחן פתוח.',
+    socials: [
+      { label: 'Instagram', url: 'https://instagram.com/tzachi_marom', icon: 'instagram' },
+      { label: 'Facebook', url: 'https://www.facebook.com/share/19jGiRrFeL/', icon: 'facebook' },
+      { label: 'LinkedIn', url: 'https://www.linkedin.com/in/tzachi-marom-%D7%A6%D7%97%D7%99-%D7%9E%D7%A8%D7%95%D7%9D-6b0665240', icon: 'linkedin' },
+    ],
+  },
+  {
+    name: 'תאיר דייני',
+    role: 'מייסדת שותפת',
+    desc: '"לך איפה שאין דרך ותשאיר עקבות." מגיעה מבאר שבע עם חשיבה של חדשנות חברתית — מאמינה ששינוי תרבותי אמיתי יכול להתחיל מארוחת שישי.',
+    socials: [
+      { label: 'Instagram', url: 'https://instagram.com/tair_dayani', icon: 'instagram' },
+      { label: 'Facebook', url: 'https://www.facebook.com/share/18rEERomnV/', icon: 'facebook' },
+    ],
+  },
+  {
+    name: 'טל',
+    role: 'מייסדת שותפת',
+    desc: null,
+    socials: [],
+    placeholder: true,
+  },
+]
+
+function SocialIcon({ icon }: { icon: Social['icon'] }) {
+  if (icon === 'instagram') return <Instagram className="w-4 h-4" />
+  if (icon === 'facebook') return <Facebook className="w-4 h-4" />
+  return <Linkedin className="w-4 h-4" />
+}
 
 const STEPS = [
   { n: '1', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
@@ -158,6 +202,89 @@ export default function About() {
             הסינון מאפשר לכל אחד למצוא שולחן שמתאים לו — חילוני, מסורתי, דתי,
             חרדי. כולם מוזמנים, ולכולם יש שולחן.
           </p>
+        </section>
+
+        {/* ── הצוות ── */}
+        <section>
+          <h2 className="text-xl font-black text-foreground mb-1 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            הצוות שמאחורי השולחן
+          </h2>
+          <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+            שלושה אנשים שהאמינו שאפשר לחבר אנשים סביב שולחן — ועשו את זה.
+          </p>
+          <div className="space-y-3">
+            {TEAM.map((member, i) => (
+              <div
+                key={i}
+                className="shulchan-card p-4"
+                style={member.placeholder ? { opacity: 0.6 } : undefined}
+              >
+                <div className="flex items-start gap-4">
+                  {/* Avatar */}
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-lg font-black"
+                    style={{
+                      background: member.placeholder
+                        ? 'hsl(var(--muted))'
+                        : 'linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.06) 100%)',
+                      border: '1.5px solid hsl(var(--primary) / 0.2)',
+                      color: 'hsl(var(--primary))',
+                    }}
+                  >
+                    {member.placeholder ? '?' : member.name.charAt(0)}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="font-black text-sm text-foreground">{member.name}</span>
+                      <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{
+                          background: 'hsl(var(--primary) / 0.1)',
+                          color: 'hsl(var(--primary))',
+                          border: '1px solid hsl(var(--primary) / 0.2)',
+                        }}
+                      >
+                        {member.role}
+                      </span>
+                    </div>
+
+                    {member.placeholder ? (
+                      <p className="text-xs text-muted-foreground italic">פרטים בקרוב...</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                        {member.desc}
+                      </p>
+                    )}
+
+                    {member.socials.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {member.socials.map((s) => (
+                          <a
+                            key={s.label}
+                            href={s.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={s.label}
+                            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full transition-all hover:scale-105 active:scale-95"
+                            style={{
+                              background: 'hsl(var(--muted))',
+                              color: 'hsl(var(--muted-foreground))',
+                              border: '1px solid hsl(var(--border))',
+                            }}
+                          >
+                            <SocialIcon icon={s.icon} />
+                            <span>{s.label}</span>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ── CTA ── */}
