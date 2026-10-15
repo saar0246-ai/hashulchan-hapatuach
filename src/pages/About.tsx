@@ -1,14 +1,20 @@
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Star, Users, ChefHat, Instagram, Facebook, Linkedin, Sparkles } from 'lucide-react'
+import { Heart, Shield, Star, Users, Instagram, Facebook, Linkedin } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo'
+
+const A = '#C4782A'      // amber accent
+const FG = '#1A1510'     // warm near-black
+const MID = '#7A6E62'    // warm mid-gray
+const BD = '#E8E0D0'     // linen border
+const TINT = '#F5F0E8'   // warm tint background
 
 const VALUES = [
   {
     icon: Heart,
     title: 'חינמי לחלוטין',
     desc: 'שולחן פתוח הוא מיזם קהילתי. אין עמלות, אין דמי שירות, אין תשלום. אנשים מזמינים אנשים — פשוט.',
-    color: 'hsl(var(--primary))',
-    bg: 'hsl(var(--primary) / 0.08)',
+    color: A,
+    bg: `${A}18`,
   },
   {
     icon: Shield,
@@ -71,12 +77,6 @@ const TEAM: TeamMember[] = [
   },
 ]
 
-function SocialIcon({ icon }: { icon: Social['icon'] }) {
-  if (icon === 'instagram') return <Instagram className="w-4 h-4" />
-  if (icon === 'facebook') return <Facebook className="w-4 h-4" />
-  return <Linkedin className="w-4 h-4" />
-}
-
 const STEPS = [
   { n: '1', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
   { n: '2', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — ארוחות שבת וחגים.' },
@@ -84,110 +84,147 @@ const STEPS = [
   { n: '4', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
 ]
 
+function SocialIcon({ icon }: { icon: Social['icon'] }) {
+  if (icon === 'instagram') return <Instagram className="w-3.5 h-3.5" />
+  if (icon === 'facebook') return <Facebook className="w-3.5 h-3.5" />
+  return <Linkedin className="w-3.5 h-3.5" />
+}
+
+function Eyebrow({ children }: { children: string }) {
+  return (
+    <p
+      className="text-[10px] font-bold uppercase mb-4"
+      style={{ color: A, letterSpacing: '0.14em' }}
+    >
+      {children}
+    </p>
+  )
+}
+
 export default function About() {
   return (
-    <div className="min-h-dvh bg-background pb-24">
+    <div className="min-h-dvh pb-28" style={{ background: '#FDFBF7' }}>
 
-      {/* ── Hero ── */}
-      <div
-        className="relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #2B201A 0%, #1C1510 55%, #120D09 100%)' }}
-      >
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{
-          backgroundImage: 'radial-gradient(circle, white 1px, transparent 0)',
-          backgroundSize: '22px 22px',
-        }} />
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(180,80,40,0.15) 0%, transparent 70%)',
-        }} />
+      {/* ── Hero — editorial stamp ── */}
+      <div className="max-w-lg mx-auto px-5 pt-14 pb-12">
 
-        <div className="max-w-lg mx-auto px-5 pt-14 pb-12 relative z-10">
-          <div className="flex justify-center mb-6">
-            <BrandLogo size="lg" onDark />
-          </div>
-          <h1 className="text-center text-4xl font-black text-white mb-3 leading-tight">
-            שולחן פתוח
-          </h1>
-          <p className="text-center text-white/60 text-base leading-relaxed max-w-xs mx-auto">
-            פלטפורמה קהילתית לחיבור בין מארחים לאורחים — לארוחות שבת וחגים
-          </p>
+        <div className="flex justify-end mb-10">
+          <BrandLogo size="sm" />
+        </div>
 
-          <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mt-6 mx-auto flex justify-center text-xs font-semibold"
+        {/* Display headline — the signature element */}
+        <h1
+          className="leading-none mb-5 text-right"
+          style={{
+            fontFamily: "'Frank Ruhl Libre', serif",
+            fontSize: 'clamp(64px, 17vw, 84px)',
+            fontWeight: 900,
+            color: FG,
+            letterSpacing: '-0.025em',
+          }}
+        >
+          שולחן
+          <br />
+          פתוח.
+        </h1>
+
+        {/* Short amber rule */}
+        <div
+          className="mb-5"
+          style={{ width: 44, height: 2, background: A }}
+        />
+
+        <p
+          className="text-sm leading-relaxed text-right"
+          style={{ color: MID, maxWidth: 240, marginLeft: 'auto' }}
+        >
+          פלטפורמה קהילתית לחיבור בין מארחים לאורחים — לארוחות שבת וחגים
+        </p>
+
+        <div className="flex justify-end mt-5">
+          <span
+            className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full"
             style={{
-              background: 'rgba(180,80,40,0.18)',
-              border: '1px solid rgba(180,80,40,0.35)',
-              color: '#F0A080',
+              background: `${A}15`,
+              border: `1px solid ${A}38`,
+              color: A,
             }}
           >
-            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#F0A080' }} />
+            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: A }} />
             חינמי לחלוטין
-          </div>
+          </span>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 mt-8 space-y-8">
+      {/* page-width rule */}
+      <div style={{ borderTop: `1px solid ${BD}` }} />
 
-        {/* ── מה זה ── */}
-        <section className="shulchan-card p-6">
-          <h2 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
-            <ChefHat className="w-5 h-5 text-primary" />
-            מה זה שולחן פתוח?
+      <div className="max-w-lg mx-auto px-5 mt-12 space-y-14">
+
+        {/* ── על המיזם ── */}
+        <section>
+          <Eyebrow>על המיזם</Eyebrow>
+          <h2
+            className="text-xl font-black mb-4 leading-snug text-right"
+            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
+          >
+            כמו Airbnb —
+            <br />
+            אבל לשולחן הישראלי
           </h2>
-          <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+          <div className="space-y-3 text-sm leading-relaxed text-right" style={{ color: MID }}>
             <p>
-              שולחן פתוח הוא כמו Airbnb — אבל לא לחדרים, לארוחות שישי.
               מארחים פותחים את ביתם לאורחים חדשים, ואורחים מוצאים שולחן חם לחג,
               לשבת, או סתם לשישי בערב.
             </p>
             <p>
               המיזם נולד מתוך הכמיהה לחיבור אנושי אמיתי. כשעוברים לעיר חדשה,
-              כשהמשפחה רחוקה, כשצריך שולחן לחג — שולחן פתוח שם.
-              ולהפך: כשיש שפע ורוצים לשתף — כאן אפשר.
+              כשהמשפחה רחוקה, כשצריך שולחן לחג — שולחן פתוח שם. ולהפך: כשיש
+              שפע ורוצים לשתף — כאן אפשר.
             </p>
           </div>
         </section>
 
-        {/* ── הערכים ── */}
+        {/* ── למה להצטרף ── */}
         <section>
-          <h2 className="text-xl font-black text-foreground mb-4">למה להצטרף?</h2>
-          <div className="grid grid-cols-1 gap-3">
+          <Eyebrow>למה להצטרף</Eyebrow>
+          <div style={{ borderTop: `1px solid ${BD}` }}>
             {VALUES.map((v, i) => (
-              <div key={i} className="shulchan-card p-4 flex items-start gap-4">
+              <div
+                key={i}
+                className="py-5 flex items-start gap-4"
+                style={{ borderBottom: `1px solid ${BD}` }}
+              >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
                   style={{ background: v.bg }}
                 >
-                  <v.icon className="w-5 h-5" style={{ color: v.color }} />
+                  <v.icon className="w-4 h-4" style={{ color: v.color }} />
                 </div>
-                <div>
-                  <p className="font-bold text-sm text-foreground mb-1">{v.title}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
+                <div className="text-right">
+                  <p className="font-bold text-sm mb-1" style={{ color: FG }}>{v.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: MID }}>{v.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── איך זה עובד ── */}
+        {/* ── תהליך ── */}
         <section>
-          <h2 className="text-xl font-black text-foreground mb-4">איך זה עובד?</h2>
-          <div className="shulchan-card divide-y divide-border/50">
+          <Eyebrow>תהליך</Eyebrow>
+          <div className="space-y-6">
             {STEPS.map((s, i) => (
-              <div key={i} className="p-4 flex items-start gap-4">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-black"
-                  style={{
-                    background: 'hsl(var(--primary) / 0.1)',
-                    border: '1.5px solid hsl(var(--primary) / 0.22)',
-                    color: 'hsl(var(--primary))',
-                  }}
+              <div key={i} className="flex items-start gap-3">
+                <span
+                  className="text-[11px] font-black flex-shrink-0 mt-0.5"
+                  style={{ color: A, width: 18, textAlign: 'right' }}
                 >
                   {s.n}
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-sm text-foreground mb-1">{s.title}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
+                </span>
+                <div className="text-right">
+                  <p className="font-bold text-sm mb-1" style={{ color: FG }}>{s.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: MID }}>{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -195,92 +232,92 @@ export default function About() {
         </section>
 
         {/* ── כשרות ── */}
-        <section className="shulchan-card p-5">
-          <h2 className="font-black text-base text-foreground mb-2">כשרות ודת — כל אחד על מקומו</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+        <section
+          className="px-5 py-5 rounded-xl"
+          style={{ background: TINT, border: `1px solid ${BD}` }}
+        >
+          <Eyebrow>כשרות ודת</Eyebrow>
+          <h3
+            className="font-black text-base mb-2 text-right"
+            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
+          >
+            כל אחד על מקומו
+          </h3>
+          <p className="text-sm leading-relaxed text-right" style={{ color: MID }}>
             המארח מגדיר את רמת הכשרות ואת הסגנון הדתי של האירוח.
-            הסינון מאפשר לכל אחד למצוא שולחן שמתאים לו — חילוני, מסורתי, דתי,
-            חרדי. כולם מוזמנים, ולכולם יש שולחן.
+            הסינון מאפשר לכל אחד למצוא שולחן שמתאים לו — חילוני, מסורתי, דתי, חרדי.
+            כולם מוזמנים, ולכולם יש שולחן.
           </p>
         </section>
 
         {/* ── הצוות ── */}
         <section>
-          <h2 className="text-xl font-black text-foreground mb-1 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            הצוות שמאחורי השולחן
+          <Eyebrow>הצוות</Eyebrow>
+          <h2
+            className="text-lg font-black mb-6 leading-snug text-right"
+            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
+          >
+            האנשים שמאחורי השולחן
           </h2>
-          <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-            שלושה אנשים שהאמינו שאפשר לחבר אנשים סביב שולחן — ועשו את זה.
-          </p>
-          <div className="space-y-3">
+          <div style={{ borderTop: `1px solid ${BD}` }}>
             {TEAM.map((member, i) => (
               <div
                 key={i}
-                className="shulchan-card p-4"
-                style={member.placeholder ? { opacity: 0.6 } : undefined}
+                className="py-5 flex items-start gap-4"
+                style={{
+                  borderBottom: `1px solid ${BD}`,
+                  opacity: member.placeholder ? 0.4 : 1,
+                }}
               >
-                <div className="flex items-start gap-4">
-                  {/* Avatar */}
-                  <div
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-lg font-black"
-                    style={{
-                      background: member.placeholder
-                        ? 'hsl(var(--muted))'
-                        : 'linear-gradient(135deg, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.06) 100%)',
-                      border: '1.5px solid hsl(var(--primary) / 0.2)',
-                      color: 'hsl(var(--primary))',
-                    }}
-                  >
-                    {member.placeholder ? '?' : member.name.charAt(0)}
+                {/* Initial avatar */}
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-black"
+                  style={{
+                    background: member.placeholder ? '#EDE8E0' : `${A}18`,
+                    color: member.placeholder ? '#C0B9AF' : A,
+                    fontFamily: "'Frank Ruhl Libre', serif",
+                  }}
+                >
+                  {member.placeholder ? '?' : member.name.charAt(0)}
+                </div>
+
+                <div className="flex-1 min-w-0 text-right">
+                  <div className="flex items-baseline justify-end gap-2 mb-1">
+                    <span className="text-[10px]" style={{ color: MID }}>{member.role}</span>
+                    <span className="font-black text-sm" style={{ color: FG }}>{member.name}</span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="font-black text-sm text-foreground">{member.name}</span>
-                      <span
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{
-                          background: 'hsl(var(--primary) / 0.1)',
-                          color: 'hsl(var(--primary))',
-                          border: '1px solid hsl(var(--primary) / 0.2)',
-                        }}
-                      >
-                        {member.role}
-                      </span>
-                    </div>
-
-                    {member.placeholder ? (
-                      <p className="text-xs text-muted-foreground italic">פרטים בקרוב...</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground leading-relaxed mb-3">
+                  {member.placeholder ? (
+                    <p className="text-xs italic" style={{ color: '#C0B9AF' }}>פרטים בקרוב</p>
+                  ) : (
+                    <>
+                      <p className="text-xs leading-relaxed mb-3" style={{ color: MID }}>
                         {member.desc}
                       </p>
-                    )}
-
-                    {member.socials.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {member.socials.map((s) => (
-                          <a
-                            key={s.label}
-                            href={s.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={s.label}
-                            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full transition-all hover:scale-105 active:scale-95"
-                            style={{
-                              background: 'hsl(var(--muted))',
-                              color: 'hsl(var(--muted-foreground))',
-                              border: '1px solid hsl(var(--border))',
-                            }}
-                          >
-                            <SocialIcon icon={s.icon} />
-                            <span>{s.label}</span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      {member.socials.length > 0 && (
+                        <div className="flex items-center justify-end gap-2 flex-wrap">
+                          {member.socials.map((s) => (
+                            <a
+                              key={s.label}
+                              href={s.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={s.label}
+                              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full transition-opacity hover:opacity-60 active:scale-95"
+                              style={{
+                                background: TINT,
+                                color: MID,
+                                border: `1px solid ${BD}`,
+                              }}
+                            >
+                              <SocialIcon icon={s.icon} />
+                              <span>{s.label}</span>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             ))}
@@ -301,17 +338,32 @@ export default function About() {
           </Link>
         </div>
 
-        {/* ── Footer links ── */}
-        <div className="text-center space-y-2 pt-4 border-t border-border">
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            <Link to="/terms" className="hover:text-primary transition-colors">תנאי שימוש</Link>
-            <span>·</span>
-            <Link to="/privacy" className="hover:text-primary transition-colors">פרטיות</Link>
-            <span>·</span>
-            <Link to="/accessibility" className="hover:text-primary transition-colors">נגישות</Link>
+        {/* ── Footer ── */}
+        <div
+          className="text-center space-y-2 pt-4"
+          style={{ borderTop: `1px solid ${BD}` }}
+        >
+          <div
+            className="flex items-center justify-center gap-4 text-xs"
+            style={{ color: MID }}
+          >
+            <Link to="/terms" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
+              תנאי שימוש
+            </Link>
+            <span style={{ opacity: 0.35 }}>·</span>
+            <Link to="/privacy" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
+              פרטיות
+            </Link>
+            <span style={{ opacity: 0.35 }}>·</span>
+            <Link to="/accessibility" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
+              נגישות
+            </Link>
           </div>
-          <p className="text-[11px] text-muted-foreground/50">שולחן פתוח © 2026 — מיזם קהילתי</p>
+          <p className="text-[11px]" style={{ color: `${MID}70` }}>
+            שולחן פתוח © 2026 — מיזם קהילתי
+          </p>
         </div>
+
       </div>
     </div>
   )
