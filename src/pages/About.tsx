@@ -1,365 +1,359 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, Shield, Star, Users, Instagram, Facebook, Linkedin } from 'lucide-react'
 import BrandLogo from '../components/BrandLogo'
 
-const A = '#C4782A'      // amber accent
-const FG = '#1A1510'     // warm near-black
-const MID = '#7A6E62'    // warm mid-gray
-const BD = '#E8E0D0'     // linen border
-const TINT = '#F5F0E8'   // warm tint background
-
-const VALUES = [
-  {
-    icon: Heart,
-    title: 'חינמי לחלוטין',
-    desc: 'שולחן פתוח הוא מיזם קהילתי. אין עמלות, אין דמי שירות, אין תשלום. אנשים מזמינים אנשים — פשוט.',
-    color: A,
-    bg: `${A}18`,
-  },
-  {
-    icon: Shield,
-    title: 'בטוח ומאומת',
-    desc: 'כל פרופיל מאומת דרך כתובת מייל. מערכת דירוגים שקופה — מארחים ואורחים מדרגים זה את זה אחרי כל ארוחה.',
-    color: '#1a7a4a',
-    bg: 'rgba(26,122,74,0.08)',
-  },
-  {
-    icon: Star,
-    title: 'קהילה אמיתית',
-    desc: 'לא מסעדה ולא בית מלון. שולחן ביתי אמיתי, אנשים אמיתיים, שיחה אמיתית. כזה שקשה למצוא בחוץ.',
-    color: '#E87030',
-    bg: 'rgba(232,112,48,0.08)',
-  },
-  {
-    icon: Users,
-    title: 'מארחים מכל הארץ',
-    desc: 'ממשפחות דתיות בירושלים ועד זוגות צעירים בתל אביב — כולם מוזמנים לפתוח את ביתם.',
-    color: '#1e5fa5',
-    bg: 'rgba(30,95,165,0.08)',
-  },
-]
-
-type Social = { label: string; url: string; icon: 'instagram' | 'facebook' | 'linkedin' }
-type TeamMember = {
-  name: string
-  role: string
-  desc: string | null
-  socials: Social[]
-  placeholder?: boolean
+/* ─── Design tokens — forced warm light mode ─── */
+const C = {
+  bg:    '#FDFBF7',
+  fg:    '#1A1510',
+  mid:   '#7A6E62',
+  a:     '#C4782A',   // amber / terracotta
+  bd:    '#E8E0D0',   // linen border
+  tint:  '#F5F0E8',   // warm tint
 }
 
-const TEAM: TeamMember[] = [
+/* ─── Data ─── */
+const VALUES = [
   {
-    name: 'צחי מרום',
-    role: 'מייסד שותף',
-    desc: 'בונה קהילות ויזם חברתי — מאמין שחיבורים אמיתיים בין אנשים מתחילים ממקום של נתינה. אחד מהאנשים שהפכו את הרעיון לשולחן פתוח.',
-    socials: [
-      { label: 'Instagram', url: 'https://instagram.com/tzachi_marom', icon: 'instagram' },
-      { label: 'Facebook', url: 'https://www.facebook.com/share/19jGiRrFeL/', icon: 'facebook' },
-      { label: 'LinkedIn', url: 'https://www.linkedin.com/in/tzachi-marom-%D7%A6%D7%97%D7%99-%D7%9E%D7%A8%D7%95%D7%9D-6b0665240', icon: 'linkedin' },
-    ],
+    icon: Heart, color: C.a, bg: 'rgba(196,120,42,0.1)',
+    title: 'חינמי לחלוטין',
+    desc:  'שולחן פתוח הוא מיזם קהילתי. אין עמלות, אין דמי שירות — אנשים מזמינים אנשים.',
   },
   {
-    name: 'תאיר דייני',
-    role: 'מייסדת שותפת',
-    desc: '"לך איפה שאין דרך ותשאיר עקבות." מגיעה מבאר שבע עם חשיבה של חדשנות חברתית — מאמינה ששינוי תרבותי אמיתי יכול להתחיל מארוחת שישי.',
-    socials: [
-      { label: 'Instagram', url: 'https://instagram.com/tair_dayani', icon: 'instagram' },
-      { label: 'Facebook', url: 'https://www.facebook.com/share/18rEERomnV/', icon: 'facebook' },
-    ],
+    icon: Shield, color: '#1a7a4a', bg: 'rgba(26,122,74,0.09)',
+    title: 'בטוח ומאומת',
+    desc:  'כל פרופיל מאומת דרך כתובת מייל. מערכת דירוגים שקופה לאחר כל ארוחה.',
   },
   {
-    name: 'טל',
-    role: 'מייסדת שותפת',
-    desc: null,
-    socials: [],
-    placeholder: true,
+    icon: Star, color: '#E87030', bg: 'rgba(232,112,48,0.09)',
+    title: 'קהילה אמיתית',
+    desc:  'שולחן ביתי אמיתי, אנשים אמיתיים, שיחה אמיתית. כזה שקשה למצוא בחוץ.',
+  },
+  {
+    icon: Users, color: '#1e5fa5', bg: 'rgba(30,95,165,0.09)',
+    title: 'מארחים מכל הארץ',
+    desc:  'ממשפחות דתיות בירושלים ועד זוגות צעירים בתל אביב — כולם מוזמנים.',
   },
 ]
 
 const STEPS = [
-  { n: '1', title: 'נרשמים', desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
-  { n: '2', title: 'מוצאים שולחן', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע — ארוחות שבת וחגים.' },
-  { n: '3', title: 'מבקשים מקום', desc: 'שולחים בקשה למארח. הוא בוחר מי מגיע — ואז מגיעה הכתובת ישירות למייל.' },
-  { n: '4', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
+  { n: '01', title: 'נרשמים',        desc: 'פרופיל חינמי עם העדפות כשרות, דת וסגנון. תהליך קצר של 5 שלבים.' },
+  { n: '02', title: 'מוצאים שולחן',   desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע.' },
+  { n: '03', title: 'מבקשים מקום',    desc: 'שולחים בקשה למארח. לאחר אישור — הכתובת מגיעה ישירות למייל.' },
+  { n: '04', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
 ]
 
-function SocialIcon({ icon }: { icon: Social['icon'] }) {
-  if (icon === 'instagram') return <Instagram className="w-3.5 h-3.5" />
-  if (icon === 'facebook') return <Facebook className="w-3.5 h-3.5" />
-  return <Linkedin className="w-3.5 h-3.5" />
+type Social = { label: string; url: string; icon: 'instagram' | 'facebook' | 'linkedin' }
+type Member = {
+  name: string; role: string; desc: string | null
+  img: string | null; socials: Social[]; placeholder?: boolean
 }
 
-function Eyebrow({ children }: { children: string }) {
+const TEAM: Member[] = [
+  {
+    name: 'צחי מרום', role: 'מייסד שותף',
+    desc: 'בונה קהילות ויזם חברתי — מאמין שחיבורים אמיתיים בין אנשים מתחילים ממקום של נתינה.',
+    img: '/images/team/tzachi.jpg',
+    socials: [
+      { label: 'Instagram', url: 'https://instagram.com/tzachi_marom',                                                             icon: 'instagram' },
+      { label: 'Facebook',  url: 'https://www.facebook.com/share/19jGiRrFeL/',                                                     icon: 'facebook'  },
+      { label: 'LinkedIn',  url: 'https://www.linkedin.com/in/tzachi-marom-%D7%A6%D7%97%D7%99-%D7%9E%D7%A8%D7%95%D7%9D-6b0665240', icon: 'linkedin'  },
+    ],
+  },
+  {
+    name: 'תאיר דייני', role: 'מייסדת שותפת',
+    desc: '"לך איפה שאין דרך ותשאיר עקבות." מגיעה מבאר שבע, מאמינה ששינוי תרבותי מתחיל מארוחת שישי.',
+    img: '/images/team/tair.jpg',
+    socials: [
+      { label: 'Instagram', url: 'https://instagram.com/tair_dayani',              icon: 'instagram' },
+      { label: 'Facebook',  url: 'https://www.facebook.com/share/18rEERomnV/', icon: 'facebook'  },
+    ],
+  },
+  {
+    name: 'טל', role: 'מייסדת שותפת',
+    desc: null, img: null, socials: [], placeholder: true,
+  },
+]
+
+/* ─── Sub-components ─── */
+function Eyebrow({ label }: { label: string }) {
   return (
-    <p
-      className="text-[10px] font-bold uppercase mb-4"
-      style={{ color: A, letterSpacing: '0.14em' }}
-    >
-      {children}
+    <p style={{ color: C.a, letterSpacing: '0.15em', fontSize: 10 }}
+       className="font-bold uppercase mb-3 md:mb-4">
+      {label}
     </p>
   )
 }
 
+function SocialPill({ s }: { s: Social }) {
+  const Icon = s.icon === 'instagram' ? Instagram : s.icon === 'facebook' ? Facebook : Linkedin
+  return (
+    <a href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+       className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full
+                  transition-all duration-150 hover:opacity-70 active:scale-95"
+       style={{ background: '#fff', color: C.mid, border: `1px solid ${C.bd}` }}>
+      <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+      <span>{s.label}</span>
+    </a>
+  )
+}
+
+function MemberCard({ m }: { m: Member }) {
+  const [imgErr, setImgErr] = useState(false)
+  return (
+    <div className="flex flex-col gap-3 p-5 rounded-2xl h-full
+                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+         style={{
+           border:     `1px solid ${C.bd}`,
+           background: C.tint,
+           opacity:    m.placeholder ? 0.45 : 1,
+           boxShadow:  `0 2px 12px rgba(26,21,16,0.04)`,
+         }}>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        {m.img && !imgErr ? (
+          <img src={m.img} alt={m.name} onError={() => setImgErr(true)}
+               className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+               style={{ border: `1.5px solid ${C.bd}` }} />
+        ) : (
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
+                          text-lg font-black"
+               style={{
+                 background: m.placeholder ? '#EDE8E0' : `rgba(196,120,42,0.14)`,
+                 color:      m.placeholder ? '#C0B9AF' : C.a,
+                 fontFamily: "'Frank Ruhl Libre', serif",
+               }}>
+            {m.placeholder ? '?' : m.name.charAt(0)}
+          </div>
+        )}
+        <div>
+          <p className="font-black text-sm leading-tight" style={{ color: C.fg }}>{m.name}</p>
+          <p className="text-[11px] mt-0.5"               style={{ color: C.mid }}>{m.role}</p>
+        </div>
+      </div>
+
+      {/* Bio */}
+      {m.placeholder
+        ? <p className="text-xs italic" style={{ color: '#C0B9AF' }}>פרטים בקרוב</p>
+        : <p className="text-xs leading-relaxed flex-1" style={{ color: C.mid }}>{m.desc}</p>
+      }
+
+      {/* Socials */}
+      {m.socials.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
+          {m.socials.map(s => <SocialPill key={s.label} s={s} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Page ─── */
 export default function About() {
   return (
-    <div className="min-h-dvh pb-28" style={{ background: '#FDFBF7' }}>
+    <div className="relative min-h-dvh pb-28 overflow-hidden" style={{ background: C.bg }}>
 
-      {/* ── Hero — editorial stamp ── */}
-      <div className="max-w-lg mx-auto px-5 pt-14 pb-12">
+      {/* ── Ambient floating blobs ── */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="ambient-blob absolute rounded-full"
+             style={{
+               width: 640, height: 640, top: -240, right: -180,
+               background: 'radial-gradient(circle, rgba(196,120,42,0.13) 0%, transparent 68%)',
+               animation: 'blob-drift-1 16s ease-in-out infinite',
+             }} />
+        <div className="ambient-blob absolute rounded-full"
+             style={{
+               width: 500, height: 500, bottom: 120, left: -200,
+               background: 'radial-gradient(circle, rgba(232,148,72,0.10) 0%, transparent 70%)',
+               animation: 'blob-drift-2 22s ease-in-out infinite',
+             }} />
+        <div className="ambient-blob absolute rounded-full"
+             style={{
+               width: 360, height: 360, top: '45%', left: '30%',
+               background: 'radial-gradient(circle, rgba(245,208,168,0.09) 0%, transparent 70%)',
+               animation: 'blob-drift-3 28s ease-in-out infinite',
+             }} />
+      </div>
 
-        <div className="flex justify-end mb-10">
+      {/* ── Hero ── */}
+      <div className="relative z-10 max-w-4xl mx-auto px-5 md:px-10 lg:px-14
+                      pt-14 pb-12 md:pt-20 md:pb-16 lg:pt-28 lg:pb-20">
+
+        {/* Logo — top right (RTL start) */}
+        <div className="flex justify-end mb-10 md:mb-14">
           <BrandLogo size="sm" />
         </div>
 
-        {/* Display headline — the signature element */}
-        <h1
-          className="leading-none mb-5 text-right"
-          style={{
-            fontFamily: "'Frank Ruhl Libre', serif",
-            fontSize: 'clamp(64px, 17vw, 84px)',
-            fontWeight: 900,
-            color: FG,
-            letterSpacing: '-0.025em',
-          }}
-        >
+        {/* Display headline — signature element */}
+        <h1 className="leading-none mb-5 md:mb-6 text-right stagger-1"
+            style={{
+              fontFamily:   "'Frank Ruhl Libre', serif",
+              fontSize:     'clamp(58px, 9vw, 104px)',
+              fontWeight:   900,
+              color:        C.fg,
+              letterSpacing: '-0.025em',
+            }}>
           שולחן
           <br />
           פתוח.
         </h1>
 
-        {/* Short amber rule */}
-        <div
-          className="mb-5"
-          style={{ width: 44, height: 2, background: A }}
-        />
+        {/* Amber rule — the editorial stamp */}
+        <div className="mb-5 md:mb-6 stagger-2"
+             style={{ width: 48, height: 2, background: C.a }} />
 
-        <p
-          className="text-sm leading-relaxed text-right"
-          style={{ color: MID, maxWidth: 240, marginLeft: 'auto' }}
-        >
-          פלטפורמה קהילתית לחיבור בין מארחים לאורחים — לארוחות שבת וחגים
-        </p>
-
-        <div className="flex justify-end mt-5">
-          <span
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full"
-            style={{
-              background: `${A}15`,
-              border: `1px solid ${A}38`,
-              color: A,
-            }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: A }} />
+        {/* Subtitle + badge */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 stagger-3">
+          <p className="text-sm md:text-base leading-relaxed text-right"
+             style={{ color: C.mid, maxWidth: 320, marginLeft: 'auto' }}>
+            פלטפורמה קהילתית לחיבור בין מארחים לאורחים —<br className="hidden md:block" />
+            לארוחות שבת וחגים ברחבי הארץ
+          </p>
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold
+                           px-3 py-1.5 rounded-full self-end md:self-auto flex-shrink-0"
+                style={{
+                  background: `rgba(196,120,42,0.12)`,
+                  border:     `1px solid rgba(196,120,42,0.3)`,
+                  color:       C.a,
+                }}>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: C.a }} />
             חינמי לחלוטין
           </span>
         </div>
       </div>
 
-      {/* page-width rule */}
-      <div style={{ borderTop: `1px solid ${BD}` }} />
+      {/* Page-width rule */}
+      <div className="relative z-10" style={{ borderTop: `1px solid ${C.bd}` }} />
 
-      <div className="max-w-lg mx-auto px-5 mt-12 space-y-14">
+      {/* ── Content ── */}
+      <div className="relative z-10 max-w-4xl mx-auto px-5 md:px-10 lg:px-14 mt-12 md:mt-16 space-y-14 md:space-y-20">
 
-        {/* ── על המיזם ── */}
-        <section>
-          <Eyebrow>על המיזם</Eyebrow>
-          <h2
-            className="text-xl font-black mb-4 leading-snug text-right"
-            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
-          >
-            כמו Airbnb —
-            <br />
-            אבל לשולחן הישראלי
+        {/* על המיזם */}
+        <section className="stagger-2">
+          <Eyebrow label="על המיזם" />
+          <h2 className="text-xl md:text-3xl font-black mb-4 leading-snug text-right"
+              style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
+            כמו Airbnb —<br />אבל לשולחן הישראלי
           </h2>
-          <div className="space-y-3 text-sm leading-relaxed text-right" style={{ color: MID }}>
+          <div className="space-y-3 text-sm md:text-base leading-relaxed text-right md:max-w-2xl md:mr-0 md:ml-auto"
+               style={{ color: C.mid }}>
             <p>
               מארחים פותחים את ביתם לאורחים חדשים, ואורחים מוצאים שולחן חם לחג,
               לשבת, או סתם לשישי בערב.
             </p>
             <p>
-              המיזם נולד מתוך הכמיהה לחיבור אנושי אמיתי. כשעוברים לעיר חדשה,
-              כשהמשפחה רחוקה, כשצריך שולחן לחג — שולחן פתוח שם. ולהפך: כשיש
-              שפע ורוצים לשתף — כאן אפשר.
+              המיזם נולד מתוך הכמיהה לחיבור אנושי אמיתי. כשעוברים לעיר חדשה, כשהמשפחה רחוקה,
+              כשצריך שולחן לחג — שולחן פתוח שם. ולהפך: כשיש שפע ורוצים לשתף — כאן אפשר.
             </p>
           </div>
         </section>
 
-        {/* ── למה להצטרף ── */}
+        {/* למה להצטרף */}
         <section>
-          <Eyebrow>למה להצטרף</Eyebrow>
-          <div style={{ borderTop: `1px solid ${BD}` }}>
+          <Eyebrow label="למה להצטרף" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"
+               style={{ borderTop: `1px solid ${C.bd}` }}>
             {VALUES.map((v, i) => (
-              <div
-                key={i}
-                className="py-5 flex items-start gap-4"
-                style={{ borderBottom: `1px solid ${BD}` }}
-              >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: v.bg }}
-                >
+              <div key={i}
+                   className="py-5 flex items-start gap-4 transition-all duration-150
+                              hover:bg-[rgba(196,120,42,0.03)] rounded-lg px-1
+                              md:border-b-0"
+                   style={{ borderBottom: `1px solid ${C.bd}` }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                     style={{ background: v.bg }}>
                   <v.icon className="w-4 h-4" style={{ color: v.color }} />
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-sm mb-1" style={{ color: FG }}>{v.title}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: MID }}>{v.desc}</p>
+                  <p className="font-bold text-sm mb-1" style={{ color: C.fg }}>{v.title}</p>
+                  <p className="text-xs leading-relaxed"  style={{ color: C.mid }}>{v.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── תהליך ── */}
+        {/* תהליך */}
         <section>
-          <Eyebrow>תהליך</Eyebrow>
-          <div className="space-y-6">
+          <Eyebrow label="תהליך" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-7">
             {STEPS.map((s, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span
-                  className="text-[11px] font-black flex-shrink-0 mt-0.5"
-                  style={{ color: A, width: 18, textAlign: 'right' }}
-                >
+                <span className="text-xs font-black flex-shrink-0 mt-0.5 tabular-nums"
+                      style={{ color: C.a, width: 28, textAlign: 'right', letterSpacing: '0.04em' }}>
                   {s.n}
                 </span>
                 <div className="text-right">
-                  <p className="font-bold text-sm mb-1" style={{ color: FG }}>{s.title}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: MID }}>{s.desc}</p>
+                  <p className="font-bold text-sm mb-1" style={{ color: C.fg }}>{s.title}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: C.mid }}>{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── כשרות ── */}
-        <section
-          className="px-5 py-5 rounded-xl"
-          style={{ background: TINT, border: `1px solid ${BD}` }}
-        >
-          <Eyebrow>כשרות ודת</Eyebrow>
-          <h3
-            className="font-black text-base mb-2 text-right"
-            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
-          >
+        {/* כשרות — callout */}
+        <section className="px-5 py-6 md:px-8 rounded-2xl"
+                 style={{ background: C.tint, border: `1px solid ${C.bd}` }}>
+          <Eyebrow label="כשרות ודת" />
+          <h3 className="font-black text-base md:text-xl mb-2 text-right"
+              style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             כל אחד על מקומו
           </h3>
-          <p className="text-sm leading-relaxed text-right" style={{ color: MID }}>
+          <p className="text-sm leading-relaxed text-right md:max-w-xl md:mr-0 md:ml-auto"
+             style={{ color: C.mid }}>
             המארח מגדיר את רמת הכשרות ואת הסגנון הדתי של האירוח.
             הסינון מאפשר לכל אחד למצוא שולחן שמתאים לו — חילוני, מסורתי, דתי, חרדי.
             כולם מוזמנים, ולכולם יש שולחן.
           </p>
         </section>
 
-        {/* ── הצוות ── */}
+        {/* הצוות */}
         <section>
-          <Eyebrow>הצוות</Eyebrow>
-          <h2
-            className="text-lg font-black mb-6 leading-snug text-right"
-            style={{ fontFamily: "'Frank Ruhl Libre', serif", color: FG }}
-          >
+          <Eyebrow label="הצוות" />
+          <h2 className="text-lg md:text-2xl font-black mb-6 text-right"
+              style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             האנשים שמאחורי השולחן
           </h2>
-          <div style={{ borderTop: `1px solid ${BD}` }}>
-            {TEAM.map((member, i) => (
-              <div
-                key={i}
-                className="py-5 flex items-start gap-4"
-                style={{
-                  borderBottom: `1px solid ${BD}`,
-                  opacity: member.placeholder ? 0.4 : 1,
-                }}
-              >
-                {/* Initial avatar */}
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-base font-black"
-                  style={{
-                    background: member.placeholder ? '#EDE8E0' : `${A}18`,
-                    color: member.placeholder ? '#C0B9AF' : A,
-                    fontFamily: "'Frank Ruhl Libre', serif",
-                  }}
-                >
-                  {member.placeholder ? '?' : member.name.charAt(0)}
-                </div>
-
-                <div className="flex-1 min-w-0 text-right">
-                  <div className="flex items-baseline justify-end gap-2 mb-1">
-                    <span className="text-[10px]" style={{ color: MID }}>{member.role}</span>
-                    <span className="font-black text-sm" style={{ color: FG }}>{member.name}</span>
-                  </div>
-
-                  {member.placeholder ? (
-                    <p className="text-xs italic" style={{ color: '#C0B9AF' }}>פרטים בקרוב</p>
-                  ) : (
-                    <>
-                      <p className="text-xs leading-relaxed mb-3" style={{ color: MID }}>
-                        {member.desc}
-                      </p>
-                      {member.socials.length > 0 && (
-                        <div className="flex items-center justify-end gap-2 flex-wrap">
-                          {member.socials.map((s) => (
-                            <a
-                              key={s.label}
-                              href={s.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={s.label}
-                              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full transition-opacity hover:opacity-60 active:scale-95"
-                              style={{
-                                background: TINT,
-                                color: MID,
-                                border: `1px solid ${BD}`,
-                              }}
-                            >
-                              <SocialIcon icon={s.icon} />
-                              <span>{s.label}</span>
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {TEAM.map((m, i) => <MemberCard key={i} m={m} />)}
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <div className="space-y-3 pt-2">
+        {/* CTA */}
+        <div className="space-y-3 pt-2 max-w-md mx-auto md:max-w-sm md:mx-0 md:mr-auto">
           <Link to="/auth?mode=register" className="block">
-            <button className="w-full py-4 rounded-lg font-semibold text-base transition-all active:scale-[0.97] btn-gold">
+            <button className="w-full py-4 rounded-xl font-semibold text-base
+                               transition-all duration-150 active:scale-[0.97]
+                               hover:shadow-lg btn-gold">
               הצטרף עכשיו — חינמי
             </button>
           </Link>
           <Link to="/auth?mode=login" className="block">
-            <button className="btn-outline w-full py-3.5 text-sm font-semibold">
+            <button className="btn-outline w-full py-3.5 text-sm font-semibold rounded-xl">
               כבר יש לי חשבון
             </button>
           </Link>
         </div>
 
-        {/* ── Footer ── */}
-        <div
-          className="text-center space-y-2 pt-4"
-          style={{ borderTop: `1px solid ${BD}` }}
-        >
-          <div
-            className="flex items-center justify-center gap-4 text-xs"
-            style={{ color: MID }}
-          >
-            <Link to="/terms" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
-              תנאי שימוש
-            </Link>
-            <span style={{ opacity: 0.35 }}>·</span>
-            <Link to="/privacy" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
-              פרטיות
-            </Link>
-            <span style={{ opacity: 0.35 }}>·</span>
-            <Link to="/accessibility" className="hover:opacity-70 transition-opacity" style={{ color: MID }}>
-              נגישות
-            </Link>
+        {/* Footer */}
+        <div className="text-center space-y-2 pt-4"
+             style={{ borderTop: `1px solid ${C.bd}` }}>
+          <div className="flex items-center justify-center gap-5 text-xs flex-wrap"
+               style={{ color: C.mid }}>
+            {[
+              { to: '/terms',         label: 'תנאי שימוש' },
+              { to: '/privacy',       label: 'פרטיות'     },
+              { to: '/accessibility', label: 'נגישות'     },
+            ].map(({ to, label }) => (
+              <Link key={to} to={to}
+                    className="hover:opacity-70 transition-opacity"
+                    style={{ color: C.mid }}>
+                {label}
+              </Link>
+            ))}
           </div>
-          <p className="text-[11px]" style={{ color: `${MID}70` }}>
+          <p className="text-[11px]" style={{ color: `${C.mid}65` }}>
             שולחן פתוח © 2026 — מיזם קהילתי
           </p>
         </div>

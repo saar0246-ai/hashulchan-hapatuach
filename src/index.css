@@ -224,3 +224,22 @@
 @media (min-width: 768px) {
   .page-hero { min-height: 280px; }
 }
+
+/* ─── Ambient blob animations (About page) ─── */
+@keyframes blob-drift-1 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33%     { transform: translate(50px,-35px) scale(1.07); }
+  66%     { transform: translate(-20px,18px) scale(0.95); }
+}
+@keyframes blob-drift-2 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  40%     { transform: translate(-55px,28px) scale(1.05); }
+  75%     { transform: translate(30px,-22px) scale(0.97); }
+}
+@keyframes blob-drift-3 {
+  0%,100% { transform: translate(0,0) scale(1); }
+  50%     { transform: translate(22px,30px) scale(1.04); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-blob { animation: none !important; }
+}
