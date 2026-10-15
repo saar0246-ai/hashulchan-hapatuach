@@ -122,27 +122,29 @@ export default function Home() {
   return (
     <div className="relative min-h-dvh" style={{ background: '#FDFBF7' }}>
 
-      {/* ── Ambient background orbs ── */}
+      {/* ── Ambient background orbs — Framer Motion ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <div
-          className="ambient-blob absolute rounded-full"
+        <motion.div
+          className="absolute rounded-full"
           style={{
             width: 700, height: 700,
             top: -200, right: -250,
-            background: 'radial-gradient(circle at center, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.06) 45%, transparent 70%)',
+            background: 'radial-gradient(circle at center, rgba(245,158,11,0.26) 0%, rgba(245,158,11,0.08) 45%, transparent 70%)',
             filter: 'blur(50px)',
-            animation: 'blob-drift-1 22s ease-in-out infinite',
           }}
+          animate={{ x: [0, 50, -20, 0], y: [0, -40, 25, 0], scale: [1, 1.1, 0.93, 1] }}
+          transition={{ repeat: Infinity, duration: 22, ease: 'easeInOut' }}
         />
-        <div
-          className="ambient-blob absolute rounded-full"
+        <motion.div
+          className="absolute rounded-full"
           style={{
             width: 550, height: 550,
             bottom: 100, left: -180,
-            background: 'radial-gradient(circle at center, rgba(200,90,50,0.16) 0%, rgba(200,90,50,0.05) 50%, transparent 70%)',
+            background: 'radial-gradient(circle at center, rgba(192,82,42,0.22) 0%, rgba(192,82,42,0.07) 50%, transparent 70%)',
             filter: 'blur(45px)',
-            animation: 'blob-drift-2 28s ease-in-out infinite',
           }}
+          animate={{ x: [0, -35, 45, 0], y: [0, 55, -30, 0], scale: [1, 0.92, 1.07, 1] }}
+          transition={{ repeat: Infinity, duration: 28, ease: 'easeInOut', delay: 4 }}
         />
       </div>
 
@@ -152,10 +154,25 @@ export default function Home() {
         {/* ── Greeting hero ── */}
         <motion.div
           {...fadeUp(0.05)}
-          className="px-5 pt-6 pb-5"
+          className="px-5 pt-6 pb-5 relative overflow-hidden"
           style={{ borderBottom: '1px solid hsl(var(--border))' }}
         >
-          <div className="max-w-lg mx-auto md:max-w-3xl">
+          <div
+            className="absolute inset-0 pointer-events-none select-none flex items-center justify-end pr-4"
+            aria-hidden
+          >
+            <motion.span
+              key={events.length}
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="font-black leading-none"
+              style={{ fontSize: 'clamp(4rem, 20vw, 8rem)', color: 'rgba(192,82,42,0.06)' }}
+            >
+              {loading ? '' : events.length}
+            </motion.span>
+          </div>
+          <div className="max-w-lg mx-auto md:max-w-3xl relative">
             <p className="text-muted-foreground text-sm mb-1">{greeting()},</p>
             <h1 className="font-display font-black text-2xl text-foreground leading-tight">
               {profile?.display_name ? profile.display_name : 'ברוך הבא'}
@@ -170,14 +187,29 @@ export default function Home() {
           <motion.div {...fadeUp(0.08)} className="grid grid-cols-2 gap-3 mb-5">
             <motion.div
               className="shulchan-card p-4"
-              whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
+              whileHover={{ y: -3, boxShadow: '0 14px 36px rgba(44,24,8,0.10)' }}
               transition={spring}
             >
               <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
+                <div className="relative w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
                   <UtensilsCrossed className="w-4 h-4 text-primary" />
+                  {!loading && events.length > 0 && (
+                    <motion.span
+                      className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+                      style={{ background: 'hsl(var(--primary))' }}
+                      animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                    />
+                  )}
                 </div>
-                <p className="text-2xl font-black text-foreground">{events.length}</p>
+                <motion.p
+                  key={events.length}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-2xl font-black text-foreground"
+                >
+                  {events.length}
+                </motion.p>
               </div>
               <p className="text-xs font-medium text-foreground">ארוחות זמינות</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">שישי, שבת וחגים</p>
@@ -186,13 +218,18 @@ export default function Home() {
             <Link to="/create-event" className="block">
               <motion.div
                 className="shulchan-card p-4 h-full flex flex-col justify-between cursor-pointer"
-                style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))' }}
-                whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
+                style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.10), hsl(var(--primary) / 0.04))' }}
+                whileHover={{ y: -3, boxShadow: '0 14px 36px rgba(192,82,42,0.14)' }}
                 transition={spring}
               >
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.15)' }}>
+                <motion.div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'hsl(var(--primary) / 0.15)' }}
+                  whileHover={{ rotate: [0, -8, 8, 0] }}
+                  transition={{ duration: 0.4 }}
+                >
                   <HomeIcon className="w-4 h-4 text-primary" />
-                </div>
+                </motion.div>
                 <div>
                   <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
                   <p className="text-xs text-muted-foreground">הפוך למארח</p>

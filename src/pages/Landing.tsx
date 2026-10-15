@@ -186,41 +186,41 @@ export default function Landing() {
     <div className="relative min-h-dvh flex flex-col overflow-x-hidden" style={{ background: C.bg }}>
 
       {/* ══════════════════════════════════════════════════
-          AMBIENT BACKGROUND — highly visible warm orbs
+          AMBIENT BACKGROUND — Framer Motion live orbs
       ══════════════════════════════════════════════════ */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden style={{ zIndex: 0 }}>
-        {/* Large amber orb — top right */}
-        <div
-          className="ambient-blob absolute rounded-full"
+        <motion.div
+          className="absolute rounded-full"
           style={{
             width: 900, height: 900,
             top: -350, right: -300,
-            background: 'radial-gradient(circle at center, rgba(245,158,11,0.28) 0%, rgba(245,158,11,0.10) 40%, transparent 70%)',
+            background: 'radial-gradient(circle at center, rgba(245,158,11,0.32) 0%, rgba(245,158,11,0.12) 40%, transparent 70%)',
             filter: 'blur(60px)',
-            animation: 'blob-drift-1 20s ease-in-out infinite',
           }}
+          animate={{ x: [0, 60, -30, 0], y: [0, -50, 30, 0], scale: [1, 1.12, 0.94, 1] }}
+          transition={{ repeat: Infinity, duration: 22, ease: 'easeInOut' }}
         />
-        {/* Terracotta orb — bottom left */}
-        <div
-          className="ambient-blob absolute rounded-full"
+        <motion.div
+          className="absolute rounded-full"
           style={{
             width: 700, height: 700,
             bottom: -200, left: -250,
-            background: 'radial-gradient(circle at center, rgba(200,90,50,0.24) 0%, rgba(200,90,50,0.08) 45%, transparent 70%)',
+            background: 'radial-gradient(circle at center, rgba(192,82,42,0.28) 0%, rgba(192,82,42,0.09) 45%, transparent 70%)',
             filter: 'blur(55px)',
-            animation: 'blob-drift-2 26s ease-in-out infinite',
           }}
+          animate={{ x: [0, -40, 50, 0], y: [0, 60, -40, 0], scale: [1, 0.9, 1.08, 1] }}
+          transition={{ repeat: Infinity, duration: 28, ease: 'easeInOut', delay: 3 }}
         />
-        {/* Warm cream mid orb */}
-        <div
-          className="ambient-blob absolute rounded-full"
+        <motion.div
+          className="absolute rounded-full"
           style={{
-            width: 600, height: 600,
-            top: '40%', left: '20%',
-            background: 'radial-gradient(circle at center, rgba(245,195,100,0.18) 0%, rgba(245,195,100,0.05) 50%, transparent 70%)',
+            width: 550, height: 550,
+            top: '38%', left: '18%',
+            background: 'radial-gradient(circle at center, rgba(245,195,100,0.20) 0%, rgba(245,195,100,0.06) 50%, transparent 70%)',
             filter: 'blur(50px)',
-            animation: 'blob-drift-3 32s ease-in-out infinite',
           }}
+          animate={{ x: [0, 35, -50, 20, 0], y: [0, -30, 45, -20, 0], scale: [1, 1.06, 0.96, 1.04, 1] }}
+          transition={{ repeat: Infinity, duration: 35, ease: 'easeInOut', delay: 6 }}
         />
       </div>
 
@@ -355,15 +355,48 @@ export default function Landing() {
             </motion.div>
           </div>
 
-          {/* Preview card — desktop */}
+          {/* Preview card — desktop, floating */}
           <div className="hidden md:flex flex-col items-center gap-2 flex-shrink-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: 'rgba(192,82,42,0.55)' }}>
               ארוחה קרובה
             </p>
-            <EventPreviewCard />
+            <motion.div
+              animate={{ y: [0, -14, 0] }}
+              transition={{ repeat: Infinity, duration: 4.5, ease: 'easeInOut' }}
+            >
+              <EventPreviewCard />
+            </motion.div>
           </div>
         </div>
       </section>
+
+      {/* ═══ TICKER STRIP ═══ */}
+      <div
+        className="overflow-hidden py-3.5 select-none"
+        style={{ borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}`, zIndex: 1, position: 'relative', background: 'rgba(192,82,42,0.04)' }}
+        aria-hidden
+      >
+        <motion.div
+          className="flex gap-8 whitespace-nowrap"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
+          style={{ width: 'max-content' }}
+        >
+          {[...Array(2)].flatMap(() => [
+            '200+ מארחים פעילים', '·', '400+ ארוחות בחודש', '·', '4.8 דירוג ממוצע', '·',
+            'ירושלים', '·', 'תל אביב', '·', 'חיפה', '·', 'הנגב', '·', 'הגליל', '·',
+            'שבת · חג · חול', '·', 'כולם מוזמנים', '·',
+          ]).map((item, i) => (
+            <span
+              key={i}
+              className="text-xs font-semibold"
+              style={{ color: item === '·' ? 'rgba(192,82,42,0.35)' : C.muted }}
+            >
+              {item}
+            </span>
+          ))}
+        </motion.div>
+      </div>
 
       {/* ═══════════════════════════════════════════════════
           GEOGRAPHIC SHOWCASE — interactive region grid
