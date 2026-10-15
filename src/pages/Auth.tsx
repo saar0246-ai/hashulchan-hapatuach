@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
+import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -19,7 +20,6 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
-  // Navigate away as soon as a session exists (covers email-confirm redirect + immediate signups)
   useEffect(() => {
     if (!authLoading && user) navigate('/home', { replace: true })
   }, [user, authLoading, navigate])
@@ -57,20 +57,19 @@ export default function Auth() {
     setLoading(false)
   }
 
-  /* ── Verify screen ── */
   if (mode === 'verify') {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-8" style={{ background: 'linear-gradient(160deg, #2B201A 0%, #1C1510 55%, #120D09 100%)' }}>
+      <div className="min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-8" style={{ background: '#FDFBF7' }}>
         <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{
-          background: 'linear-gradient(135deg, rgba(212,152,12,0.25), rgba(212,152,12,0.1))',
-          border: '2px solid rgba(212,152,12,0.5)',
+          background: 'rgba(192,82,42,0.1)',
+          border: '2px solid rgba(192,82,42,0.3)',
         }}>
-          <CheckCircle className="w-9 h-9" style={{ color: '#F5C240' }} />
+          <CheckCircle className="w-9 h-9" style={{ color: 'hsl(var(--primary))' }} />
         </div>
         <div>
-          <h1 className="font-display font-black text-3xl text-white mb-3">בדוק את המייל</h1>
-          <p className="text-white/60 text-sm max-w-xs leading-relaxed">
-            שלחנו קישור אימות ל-<span className="text-white font-medium">{email}</span>.
+          <h1 className="font-display font-black text-3xl text-foreground mb-3">בדוק את המייל</h1>
+          <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
+            שלחנו קישור אימות ל-<span className="text-foreground font-medium">{email}</span>.
             לחץ על הקישור להפעלת החשבון.
           </p>
         </div>
@@ -81,113 +80,108 @@ export default function Auth() {
     )
   }
 
-  /* ── Login / Register ── */
   return (
-    <div className="min-h-dvh page-hero flex flex-col">
+    <div className="min-h-dvh flex flex-col" style={{ background: '#FDFBF7' }}>
 
-      {/* Back */}
       <div className="px-5 pt-5 pb-2">
         <Link
           to="/landing"
-          className="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-sm"
+          className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm"
         >
           <ArrowRight className="w-4 h-4" />
           חזור
         </Link>
       </div>
 
-      {/* Logo */}
       <div className="flex flex-col items-center pt-8 pb-8 px-6">
-        <BrandLogo size="lg" onDark />
+        <BrandLogo size="lg" />
       </div>
 
-      {/* Card form */}
       <div className="flex-1 mx-4 mb-6">
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
           className="rounded-3xl p-6 space-y-5"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(20px)',
+            background: '#FFFFFF',
+            border: '1px solid #E8E2D8',
+            boxShadow: '0 4px 24px rgba(44,24,8,0.06)',
           }}
         >
           <div className="text-center mb-2">
-            <h2 className="font-bold text-xl text-white">
+            <h2 className="font-bold text-xl text-foreground">
               {mode === 'login' ? 'ברוך הבא בחזרה' : 'הצטרף לשולחן'}
             </h2>
-            <p className="text-white/50 text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               {mode === 'login' ? 'התחבר לחשבון שלך' : 'צור חשבון חינמי'}
             </p>
           </div>
 
-          {/* Email */}
           <div>
-            <label className="text-xs font-semibold text-white/60 mb-2 block uppercase tracking-wide">
+            <label className="text-xs font-semibold text-muted-foreground mb-2 block uppercase tracking-wide">
               אימייל
             </label>
             <div className="relative">
-              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+              <Mail className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="shulchan-input-dark w-full pr-10"
+                className="shulchan-input w-full pr-10"
                 dir="ltr"
                 autoComplete="email"
               />
             </div>
           </div>
 
-          {/* Password */}
           <div>
-            <label className="text-xs font-semibold text-white/60 mb-2 block uppercase tracking-wide">
+            <label className="text-xs font-semibold text-muted-foreground mb-2 block uppercase tracking-wide">
               סיסמה
             </label>
             <div className="relative">
-              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+              <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type={showPass ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder={mode === 'register' ? 'לפחות 8 תווים' : '••••••••'}
-                className="shulchan-input-dark w-full pr-10 pl-10"
+                className="shulchan-input w-full pr-10 pl-10"
                 dir="ltr"
                 autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
               />
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35 hover:text-white/70 transition-colors"
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Terms */}
           {mode === 'register' && (
             <label className="flex items-start gap-3 cursor-pointer select-none">
               <div
                 onClick={() => setAgreed(!agreed)}
                 className="w-5 h-5 flex-shrink-0 rounded-md mt-0.5 flex items-center justify-center transition-all"
                 style={{
-                  background: agreed ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.1)',
-                  border: agreed ? 'none' : '1.5px solid rgba(255,255,255,0.25)',
+                  background: agreed ? 'hsl(var(--primary))' : 'transparent',
+                  border: agreed ? 'none' : '1.5px solid #E8E2D8',
                 }}
               >
                 {agreed && <CheckCircle className="w-3.5 h-3.5 text-white" />}
               </div>
-              <span className="text-xs text-white/55 leading-relaxed">
+              <span className="text-xs text-muted-foreground leading-relaxed">
                 קראתי ואני מסכים ל
-                <Link to="/terms" className="text-[#F0A080] underline mx-1 hover:text-[#F5B090]">תנאי השימוש</Link>
+                <Link to="/terms" className="text-primary underline mx-1 hover:opacity-80">תנאי השימוש</Link>
                 ול
-                <Link to="/privacy" className="text-[#F0A080] underline mx-1 hover:text-[#F5B090]">מדיניות הפרטיות</Link>
+                <Link to="/privacy" className="text-primary underline mx-1 hover:opacity-80">מדיניות הפרטיות</Link>
               </span>
             </label>
           )}
 
-          {/* CTA */}
           <button
             onClick={mode === 'login' ? handleLogin : handleRegister}
             disabled={loading || !email || !password}
@@ -201,18 +195,17 @@ export default function Auth() {
             ) : mode === 'login' ? 'כניסה לחשבון' : 'הצטרף עכשיו — חינם'}
           </button>
 
-          {/* Toggle */}
-          <p className="text-center text-sm text-white/45">
+          <p className="text-center text-sm text-muted-foreground">
             {mode === 'login' ? 'אין לך חשבון עדיין?' : 'כבר יש לך חשבון?'}
             {' '}
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-[#F0A080] font-semibold hover:text-[#F5B090] transition-colors"
+              className="text-primary font-semibold hover:opacity-80 transition-opacity"
             >
               {mode === 'login' ? 'הצטרף' : 'כניסה'}
             </button>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
