@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, Shield, Star, Users, Instagram, Facebook, Linkedin } from 'lucide-react'
+import { motion } from 'framer-motion'
 import BrandLogo from '../components/BrandLogo'
 
 /* ─── Design tokens — forced warm light mode ─── */
@@ -102,14 +103,17 @@ function SocialPill({ s }: { s: Social }) {
 function MemberCard({ m }: { m: Member }) {
   const [imgErr, setImgErr] = useState(false)
   return (
-    <div className="flex flex-col gap-3 p-5 rounded-2xl h-full
-                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-         style={{
-           border:     `1px solid ${C.bd}`,
-           background: C.tint,
-           opacity:    m.placeholder ? 0.45 : 1,
-           boxShadow:  `0 2px 12px rgba(26,21,16,0.04)`,
-         }}>
+    <motion.div
+      className="flex flex-col gap-3 p-5 rounded-2xl h-full"
+      style={{
+        border:     `1px solid ${C.bd}`,
+        background: C.tint,
+        opacity:    m.placeholder ? 0.45 : 1,
+        boxShadow:  `0 2px 12px rgba(26,21,16,0.04)`,
+      }}
+      whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(26,21,16,0.09)' }}
+      transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+    >
       {/* Header */}
       <div className="flex items-center gap-3">
         {m.img && !imgErr ? (
@@ -145,7 +149,7 @@ function MemberCard({ m }: { m: Member }) {
           {m.socials.map(s => <SocialPill key={s.label} s={s} />)}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -252,14 +256,21 @@ export default function About() {
         {/* למה להצטרף */}
         <section>
           <Eyebrow label="למה להצטרף" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"
-               style={{ borderTop: `1px solid ${C.bd}` }}>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"
+            style={{ borderTop: `1px solid ${C.bd}` }}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+          >
             {VALUES.map((v, i) => (
-              <div key={i}
-                   className="py-5 flex items-start gap-4 transition-all duration-150
-                              hover:bg-[rgba(196,120,42,0.03)] rounded-lg px-1
-                              md:border-b-0"
-                   style={{ borderBottom: `1px solid ${C.bd}` }}>
+              <motion.div
+                key={i}
+                className="py-5 flex items-start gap-4 rounded-lg px-1 md:border-b-0"
+                style={{ borderBottom: `1px solid ${C.bd}` }}
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } }}
+              >
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
                      style={{ background: v.bg }}>
                   <v.icon className="w-4 h-4" style={{ color: v.color }} />
@@ -268,9 +279,9 @@ export default function About() {
                   <p className="font-bold text-sm mb-1" style={{ color: C.fg }}>{v.title}</p>
                   <p className="text-xs leading-relaxed"  style={{ color: C.mid }}>{v.desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </section>
 
         {/* תהליך */}
@@ -315,9 +326,22 @@ export default function About() {
               style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             האנשים שמאחורי השולחן
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TEAM.map((m, i) => <MemberCard key={i} m={m} />)}
-          </div>
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: '-60px' }}
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+          >
+            {TEAM.map((m, i) => (
+              <motion.div
+                key={i}
+                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } }}
+              >
+                <MemberCard m={m} />
+              </motion.div>
+            ))}
+          </motion.div>
         </section>
 
         {/* CTA */}

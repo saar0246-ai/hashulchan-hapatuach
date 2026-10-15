@@ -4,6 +4,7 @@ import { CalendarPlus, ChevronLeft, Clock, Users, Star } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { he } from 'date-fns/locale'
 import toast from 'react-hot-toast'
+import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Event, EventRegistration } from '../types'
@@ -156,173 +157,198 @@ export default function MyEvents() {
 
   return (
     <>
-    <div className="min-h-dvh bg-background">
-      <TopBar title="הארוחות שלי" />
+    <div className="relative min-h-dvh" style={{ background: '#FDFBF7' }}>
+      {/* Ambient background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <div className="ambient-blob absolute rounded-full" style={{
+          width: 600, height: 600, top: -150, right: -200,
+          background: 'radial-gradient(circle at center, rgba(245,158,11,0.18) 0%, transparent 65%)',
+          filter: 'blur(50px)', animation: 'blob-drift-1 22s ease-in-out infinite',
+        }} />
+        <div className="ambient-blob absolute rounded-full" style={{
+          width: 500, height: 500, bottom: 50, left: -150,
+          background: 'radial-gradient(circle at center, rgba(200,90,50,0.14) 0%, transparent 65%)',
+          filter: 'blur(45px)', animation: 'blob-drift-2 28s ease-in-out infinite',
+        }} />
+      </div>
 
-      <div className="page-container space-y-4">
-        {/* Event list or selected */}
-        {!selectedEvent ? (
-          <>
-            <div className="flex items-center justify-between stagger-1">
-              <h2 className="section-title">הארוחות שפרסמתי</h2>
-              <Link to="/create-event">
-                <button className="flex items-center gap-1.5 text-sm text-primary font-medium">
-                  <CalendarPlus className="w-4 h-4" />
-                  חדשה
-                </button>
-              </Link>
-            </div>
+      <div className="relative" style={{ zIndex: 1 }}>
+        <TopBar title="הארוחות שלי" />
 
-            {loading ? <LoadingSpinner /> : events.length === 0 ? (
-              <EmptyState
-                icon={<CalendarPlus className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
-                title="עוד לא פרסמת ארוחה"
-                description="פתח את ביתך לאורחים חדשים!"
-                action={
-                  <Link to="/create-event">
-                    <button className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2">
-                      <CalendarPlus className="w-4 h-4" />
-                      פרסם ארוחה ראשונה
-                    </button>
-                  </Link>
-                }
-              />
-            ) : (
-              <div className="space-y-3">
-                {events.map(event => {
-                  const dateStr = format(new Date(event.event_date + 'T00:00:00'), 'd בMMM', { locale: he })
-                  const statusColor = {
-                    active: 'text-emerald-600',
-                    full: 'text-amber-600',
-                    cancelled: 'text-red-500',
-                    completed: 'text-muted-foreground',
-                  }[event.status]
-                  const statusLabel = {
-                    active: 'פעיל',
-                    full: 'מלא',
-                    cancelled: 'בוטל',
-                    completed: 'הסתיים',
-                  }[event.status]
-
-                  return (
-                    <button
-                      key={event.id}
-                      onClick={() => handleSelectEvent(event)}
-                      className="shulchan-card p-4 w-full text-right hover:shadow-md active:scale-[0.99] transition-all"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground text-sm">{event.title}</p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {dateStr} • {event.event_time.slice(0, 5)}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Users className="w-3 h-3" />
-                              {event.current_guests}/{event.max_guests}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs badge bg-muted text-muted-foreground">
-                              {KASHRUT_LABELS[event.kashrut_level]}
-                            </span>
-                            <span className="text-xs badge bg-muted text-muted-foreground">
-                              {EVENT_TYPE_LABELS[event.event_type]}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className={`text-xs font-semibold ${statusColor}`}>{statusLabel}</span>
-                          <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Back button */}
-            <button
-              onClick={() => setSelectedEvent(null)}
-              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4 rotate-180" />
-              כל הארוחות
-            </button>
-
-            {/* Event header */}
-            <div className="shulchan-card p-4 space-y-2">
-              <h2 className="font-display font-bold text-lg text-foreground">{selectedEvent.title}</h2>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>{format(new Date(selectedEvent.event_date + 'T00:00:00'), 'd בMMM yyyy', { locale: he })}</span>
-                <span>{selectedEvent.event_time.slice(0, 5)}</span>
+        <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-4 md:max-w-2xl">
+          {/* Event list or selected */}
+          {!selectedEvent ? (
+            <>
+              <div className="flex items-center justify-between">
+                <h2 className="section-title">הארוחות שפרסמתי</h2>
+                <Link to="/create-event">
+                  <button className="flex items-center gap-1.5 text-sm text-primary font-medium">
+                    <CalendarPlus className="w-4 h-4" />
+                    חדשה
+                  </button>
+                </Link>
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full"
-                    style={{ width: `${(selectedEvent.current_guests / selectedEvent.max_guests) * 100}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {selectedEvent.current_guests}/{selectedEvent.max_guests}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs">
-                <span className="badge bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
-                  {pendingCount} ממתינים
-                </span>
-                <span className="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
-                  {approvedCount} מאושרים
-                </span>
-              </div>
-
-              {selectedEvent.status === 'active' && (
-                <button
-                  onClick={() => handleCancelEvent(selectedEvent.id)}
-                  className="text-xs text-destructive hover:underline"
-                >
-                  ביטול האירוע
-                </button>
-              )}
-            </div>
-
-            {/* Guests */}
-            <div>
-              <h3 className="section-title mb-3">אורחים</h3>
-              {registrations.length === 0 ? (
-                <EmptyState icon={<Users className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />} title="אין אורחים עדיין" description="ברגע שמישהו יירשם תקבל התראה" />
+              {loading ? <LoadingSpinner /> : events.length === 0 ? (
+                <EmptyState
+                  icon={<CalendarPlus className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
+                  title="עוד לא פרסמת ארוחה"
+                  description="פתח את ביתך לאורחים חדשים!"
+                  action={
+                    <Link to="/create-event">
+                      <button className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2">
+                        <CalendarPlus className="w-4 h-4" />
+                        פרסם ארוחה ראשונה
+                      </button>
+                    </Link>
+                  }
+                />
               ) : (
-                <div className="space-y-3">
-                  {registrations.map(reg => (
-                    <div key={reg.id}>
-                      <GuestCard
-                        registration={reg}
-                        onApprove={reg.status === 'pending' ? handleApprove : undefined}
-                        onReject={reg.status === 'pending' ? handleReject : undefined}
-                        loading={actionLoading}
-                      />
-                      {canRateGuest(reg) && reg.guest && (
-                        <button
-                          onClick={() => setGuestRatingModal({ eventId: selectedEvent!.id, guestId: reg.guest_id, guestName: reg.guest!.display_name })}
-                          className="mt-1.5 mr-2 flex items-center gap-1.5 text-xs font-bold"
-                          style={{ color: '#C8860A' }}
-                        >
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          דרג את {reg.guest.display_name}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <motion.div
+                  className="space-y-3"
+                  initial="hidden"
+                  animate="show"
+                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
+                >
+                  {events.map(event => {
+                    const dateStr = format(new Date(event.event_date + 'T00:00:00'), 'd בMMM', { locale: he })
+                    const statusColor = {
+                      active: 'text-emerald-600',
+                      full: 'text-amber-600',
+                      cancelled: 'text-red-500',
+                      completed: 'text-muted-foreground',
+                    }[event.status]
+                    const statusLabel = {
+                      active: 'פעיל',
+                      full: 'מלא',
+                      cancelled: 'בוטל',
+                      completed: 'הסתיים',
+                    }[event.status]
+
+                    return (
+                      <motion.button
+                        key={event.id}
+                        onClick={() => handleSelectEvent(event)}
+                        className="shulchan-card p-4 w-full text-right"
+                        variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
+                        whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
+                        whileTap={{ scale: 0.985 }}
+                        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-semibold text-foreground text-sm">{event.title}</p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {dateStr} • {event.event_time.slice(0, 5)}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {event.current_guests}/{event.max_guests}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs badge bg-muted text-muted-foreground">
+                                {KASHRUT_LABELS[event.kashrut_level]}
+                              </span>
+                              <span className="text-xs badge bg-muted text-muted-foreground">
+                                {EVENT_TYPE_LABELS[event.event_type]}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className={`text-xs font-semibold ${statusColor}`}>{statusLabel}</span>
+                            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        </div>
+                      </motion.button>
+                    )
+                  })}
+                </motion.div>
               )}
-            </div>
-          </>
-        )}
+            </>
+          ) : (
+            <>
+              {/* Back button */}
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4 rotate-180" />
+                כל הארוחות
+              </button>
+
+              {/* Event header */}
+              <div className="shulchan-card p-4 space-y-2">
+                <h2 className="font-display font-bold text-lg text-foreground">{selectedEvent.title}</h2>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>{format(new Date(selectedEvent.event_date + 'T00:00:00'), 'd בMMM yyyy', { locale: he })}</span>
+                  <span>{selectedEvent.event_time.slice(0, 5)}</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full"
+                      style={{ width: `${(selectedEvent.current_guests / selectedEvent.max_guests) * 100}%` }} />
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedEvent.current_guests}/{selectedEvent.max_guests}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="badge bg-amber-100 text-amber-800">
+                    {pendingCount} ממתינים
+                  </span>
+                  <span className="badge bg-emerald-100 text-emerald-800">
+                    {approvedCount} מאושרים
+                  </span>
+                </div>
+
+                {selectedEvent.status === 'active' && (
+                  <button
+                    onClick={() => handleCancelEvent(selectedEvent.id)}
+                    className="text-xs text-destructive hover:underline"
+                  >
+                    ביטול האירוע
+                  </button>
+                )}
+              </div>
+
+              {/* Guests */}
+              <div>
+                <h3 className="section-title mb-3">אורחים</h3>
+                {registrations.length === 0 ? (
+                  <EmptyState icon={<Users className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />} title="אין אורחים עדיין" description="ברגע שמישהו יירשם תקבל התראה" />
+                ) : (
+                  <div className="space-y-3">
+                    {registrations.map(reg => (
+                      <div key={reg.id}>
+                        <GuestCard
+                          registration={reg}
+                          onApprove={reg.status === 'pending' ? handleApprove : undefined}
+                          onReject={reg.status === 'pending' ? handleReject : undefined}
+                          loading={actionLoading}
+                        />
+                        {canRateGuest(reg) && reg.guest && (
+                          <button
+                            onClick={() => setGuestRatingModal({ eventId: selectedEvent!.id, guestId: reg.guest_id, guestName: reg.guest!.display_name })}
+                            className="mt-1.5 mr-2 flex items-center gap-1.5 text-xs font-bold"
+                            style={{ color: '#C8860A' }}
+                          >
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            דרג את {reg.guest.display_name}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
     {/* Rate guest modal */}

@@ -156,18 +156,18 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
 }
 
 export const KASHRUT_COLORS: Record<KashrutLevel, string> = {
-  mehadrin: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  kosher: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
-  traditional: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  none: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  mehadrin: 'bg-emerald-100 text-emerald-800',
+  kosher: 'bg-green-100 text-green-800',
+  traditional: 'bg-amber-100 text-amber-800',
+  none: 'bg-gray-100 text-gray-700',
 }
 
 export const RELIGIOUS_COLORS: Record<ReligiousLevel, string> = {
-  haredi:     'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
-  hardali:    'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
-  dati:       'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  dati_leumi: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
-  dati_light: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
-  masorti:    'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
-  hiloni:     'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  haredi:     'bg-purple-100 text-purple-800',
+  hardali:    'bg-indigo-100 text-indigo-800',
+  dati:       'bg-blue-100 text-blue-800',
+  dati_leumi: 'bg-sky-100 text-sky-800',
+  dati_light: 'bg-cyan-100 text-cyan-800',
+  masorti:    'bg-orange-100 text-orange-800',
+  hiloni:     'bg-gray-100 text-gray-700',
 }
