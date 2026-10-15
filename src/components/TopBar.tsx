@@ -1,6 +1,5 @@
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowRight, Sun, Moon } from 'lucide-react'
-import { useTheme } from '../hooks/useTheme'
+import { ArrowRight } from 'lucide-react'
 import BrandLogo from './BrandLogo'
 
 interface TopBarProps {
@@ -13,7 +12,6 @@ interface TopBarProps {
 
 export default function TopBar({ title, showBack = false, right, transparent = false, logo = false }: TopBarProps) {
   const navigate = useNavigate()
-  const { theme, toggle } = useTheme()
 
   return (
     <header
@@ -51,16 +49,7 @@ export default function TopBar({ title, showBack = false, right, transparent = f
           </Link>
         ) : null}
 
-        {/* Left side — theme toggle */}
-        <button
-          onClick={toggle}
-          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted active:scale-90 transition-all"
-          aria-label={theme === 'dark' ? 'מצב יום' : 'מצב לילה'}
-        >
-          {theme === 'dark'
-            ? <Sun className="w-4 h-4 text-primary" />
-            : <Moon className="w-4 h-4 text-muted-foreground" />}
-        </button>
+        <div className="min-w-9" />
       </div>
     </header>
   )
