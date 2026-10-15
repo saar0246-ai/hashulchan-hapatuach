@@ -2,17 +2,21 @@ import { useAuth } from '../hooks/useAuth'
 import { useNotifications } from '../hooks/useNotifications'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
-import { Check } from 'lucide-react'
+import { Check, Users, CheckCircle, XCircle, Star, Bell } from 'lucide-react'
 import TopBar from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
 
-const TYPE_ICONS: Record<string, string> = {
-  new_guest_request: '🙋',
-  request_approved: '✅',
-  request_rejected: '❌',
-  new_rating: '⭐',
-  event_reminder: '🔔',
-  system: '📢',
+function NotificationIcon({ type }: { type: string }) {
+  const iconClass = 'w-5 h-5'
+  switch (type) {
+    case 'new_guest_request': return <Users className={iconClass} />
+    case 'request_approved':  return <CheckCircle className={iconClass} style={{ color: '#059669' }} />
+    case 'request_rejected':  return <XCircle className={iconClass} style={{ color: '#DC2626' }} />
+    case 'new_rating':        return <Star className={iconClass} style={{ color: '#C8860A' }} />
+    case 'event_reminder':
+    case 'system':
+    default:                  return <Bell className={iconClass} />
+  }
 }
 
 export default function Notifications() {
@@ -33,7 +37,7 @@ export default function Notifications() {
       <div className="page-container space-y-3">
         {notifications.length === 0 ? (
           <EmptyState
-            icon="🔔"
+            icon={<Bell className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
             title="אין התראות"
             description="כאן יופיעו עדכונים על ארוחות, אורחים ועוד"
           />
@@ -47,7 +51,12 @@ export default function Notifications() {
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className="text-2xl flex-shrink-0">{TYPE_ICONS[n.type] ?? '🔔'}</div>
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-muted-foreground"
+                  style={{ background: 'hsl(var(--muted))' }}
+                >
+                  <NotificationIcon type={n.type} />
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <p className={`text-sm ${!n.read ? 'font-bold text-foreground' : 'font-medium text-foreground'}`}>

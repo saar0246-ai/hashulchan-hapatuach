@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, MapPin, Star, Phone, ChevronLeft } from 'lucide-react'
+import { Calendar, MapPin, Star, Phone, ChevronLeft, UtensilsCrossed } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { he } from 'date-fns/locale'
 import toast from 'react-hot-toast'
@@ -13,10 +13,10 @@ import EmptyState from '../components/EmptyState'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const STATUS_CONFIG = {
-  pending:   { label: 'ממתין',  emoji: '⏳', border: '#F59E0B', bg: 'rgba(245,158,11,0.08)',  text: '#D97706' },
-  approved:  { label: 'מאושר', emoji: '✅', border: '#10B981', bg: 'rgba(16,185,129,0.08)',  text: '#059669' },
-  rejected:  { label: 'נדחה',  emoji: '❌', border: '#EF4444', bg: 'rgba(239,68,68,0.08)',   text: '#DC2626' },
-  cancelled: { label: 'בוטל',  emoji: '🚫', border: '#9CA3AF', bg: 'rgba(156,163,175,0.08)', text: '#6B7280' },
+  pending:   { label: 'ממתין',  border: '#F59E0B', bg: 'rgba(245,158,11,0.08)',  text: '#D97706' },
+  approved:  { label: 'מאושר', border: '#10B981', bg: 'rgba(16,185,129,0.08)',  text: '#059669' },
+  rejected:  { label: 'נדחה',  border: '#EF4444', bg: 'rgba(239,68,68,0.08)',   text: '#DC2626' },
+  cancelled: { label: 'בוטל',  border: '#9CA3AF', bg: 'rgba(156,163,175,0.08)', text: '#6B7280' },
 } as const
 
 export default function MyBookings() {
@@ -62,7 +62,7 @@ export default function MyBookings() {
     if (error) {
       toast.error(error.message.includes('duplicate') ? 'כבר דירגת ארוחה זו' : 'שגיאה בשמירת הדירוג')
     } else {
-      toast.success('תודה על הדירוג! ⭐')
+      toast.success('תודה על הדירוג!')
       setRatingModal(null)
       setRatingComment('')
       setRatingScore(5)
@@ -74,18 +74,10 @@ export default function MyBookings() {
     <div className="min-h-dvh bg-background">
       <TopBar title="ההזמנות שלי" />
 
-      {/* Hero strip */}
-      <div className="page-hero px-5 pt-4 pb-10">
-        <div className="max-w-lg mx-auto relative z-10">
-          <p className="text-white/40 text-xs mb-1">כל הבקשות שהגשת</p>
-          <h2 className="font-display font-black text-2xl text-white">ההזמנות שלי</h2>
-        </div>
-      </div>
-
-      <div className="max-w-lg mx-auto px-4 -mt-4 relative z-20 pb-28">
+      <div className="max-w-lg mx-auto px-4 pb-28">
         {loading ? <LoadingSpinner /> : registrations.length === 0 ? (
           <EmptyState
-            icon="🍽️"
+            icon={<UtensilsCrossed className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
             title="עוד לא נרשמת לארוחה"
             description="מצא ארוחה קרובה אליך"
             action={
@@ -111,7 +103,7 @@ export default function MyBookings() {
                   {/* Status header */}
                   <div className="px-4 py-2.5 flex items-center justify-between" style={{ background: cfg.bg }}>
                     <span className="text-xs font-bold" style={{ color: cfg.text }}>
-                      {cfg.emoji} {cfg.label}
+                      {cfg.label}
                     </span>
                     <span className="text-[10px] text-muted-foreground">
                       {format(new Date(reg.created_at), "d בMMM, HH:mm", { locale: he })}
@@ -140,7 +132,10 @@ export default function MyBookings() {
                         className="rounded-xl p-3 space-y-1.5"
                         style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)' }}
                       >
-                        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2">📍 פרטי המארח</p>
+                        <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          פרטי המארח
+                        </p>
                         <p className="text-sm text-foreground font-medium">{event.address}</p>
                         {event.address_notes && (
                           <p className="text-xs text-muted-foreground">{event.address_notes}</p>
@@ -192,7 +187,7 @@ export default function MyBookings() {
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-border rounded-full mx-auto" />
-            <h3 className="font-display font-black text-xl text-foreground text-center">דרג את הארוחה ⭐</h3>
+            <h3 className="font-display font-black text-xl text-foreground text-center">דרג את הארוחה</h3>
             <div className="flex justify-center">
               <StarRating score={ratingScore} interactive onChange={setRatingScore} size="md" />
             </div>

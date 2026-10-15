@@ -1,25 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 
-type Theme = 'light' | 'dark'
-
+// Light mode only — dark mode disabled site-wide
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('shulchan-theme') as Theme | null
-    if (saved) return saved
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  })
-
   useEffect(() => {
-    const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-    }
-    localStorage.setItem('shulchan-theme', theme)
-  }, [theme])
+    document.documentElement.classList.remove('dark')
+    localStorage.removeItem('shulchan-theme')
+  }, [])
 
-  const toggle = () => setTheme(t => (t === 'light' ? 'dark' : 'light'))
-
-  return { theme, toggle }
+  return { theme: 'light' as const, toggle: () => {} }
 }

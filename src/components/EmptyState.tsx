@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
+
 interface EmptyStateProps {
-  icon: string
+  icon?: ReactNode
   title: string
   description?: string
-  action?: React.ReactNode
+  action?: ReactNode
 }
 
 export default function EmptyState({ icon, title, description, action }: EmptyStateProps) {
@@ -10,7 +12,7 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
     <div className="flex flex-col items-center justify-center text-center py-14 px-6">
       {icon && (
         <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-5"
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
           style={{ background: 'hsl(var(--muted))', boxShadow: 'inset 0 1px 0 hsl(var(--card))' }}
         >
           {icon}

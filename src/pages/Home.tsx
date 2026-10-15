@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, CalendarPlus, X } from 'lucide-react'
+import { Search, CalendarPlus, X, UtensilsCrossed, Home as HomeIcon, Cake } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -99,25 +99,25 @@ export default function Home() {
       <TopBar logo />
 
       {/* Greeting hero */}
-      <div className="page-hero px-5 pt-5 pb-10">
-        <div className="max-w-lg mx-auto md:max-w-3xl relative z-10">
-          <p className="text-white/50 text-sm mb-1">{greeting()},</p>
-          <h1 className="font-display font-black text-2xl text-white leading-tight">
-            {profile?.display_name
-              ? <><span className="text-gold-gradient">{profile.display_name}</span> 👋</>
-              : 'ברוך הבא 👋'}
+      <div className="px-5 pt-5 pb-5" style={{ borderBottom: '1px solid hsl(var(--border))' }}>
+        <div className="max-w-lg mx-auto md:max-w-3xl">
+          <p className="text-muted-foreground text-sm mb-1">{greeting()},</p>
+          <h1 className="font-display font-black text-2xl text-foreground leading-tight">
+            {profile?.display_name ? profile.display_name : 'ברוך הבא'}
           </h1>
-          <p className="text-white/45 text-xs mt-1.5">מצא שולחן לשישי, לחג, או לסתם ערב טוב</p>
+          <p className="text-muted-foreground text-xs mt-1.5">מצא שולחן לשישי, לחג, או לסתם ערב טוב</p>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto md:max-w-3xl px-4 -mt-4 relative z-20">
+      <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-4">
 
         {/* Quick actions */}
         <div className="stagger-1 grid grid-cols-2 gap-3 mb-5">
           <div className="shulchan-card p-4">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xl">🍽️</span>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
+                <UtensilsCrossed className="w-4 h-4 text-primary" />
+              </div>
               <p className="text-2xl font-black text-foreground">{events.length}</p>
             </div>
             <p className="text-xs font-medium text-foreground">ארוחות זמינות</p>
@@ -128,7 +128,9 @@ export default function Home() {
               className="shulchan-card p-4 h-full flex flex-col justify-between shulchan-card-hover cursor-pointer"
               style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))' }}
             >
-              <span className="text-xl">🏠</span>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.15)' }}>
+                <HomeIcon className="w-4 h-4 text-primary" />
+              </div>
               <div>
                 <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
                 <p className="text-xs text-muted-foreground">הפוך למארח</p>
@@ -168,7 +170,10 @@ export default function Home() {
               className="shulchan-card p-4 overflow-hidden"
               style={{ background: 'linear-gradient(135deg, rgba(200,134,10,0.08), rgba(240,180,40,0.04))', borderRight: '3px solid rgba(200,134,10,0.5)' }}
             >
-              <p className="text-sm font-bold text-foreground mb-3">🎂 ימי הולדת השבוע</p>
+              <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-1.5">
+                <Cake className="w-4 h-4" style={{ color: '#C8860A' }} />
+                ימי הולדת השבוע
+              </p>
               <div className="flex flex-col gap-2">
                 {birthdays.map(p => {
                   const bday = new Date(p.birthday + 'T00:00:00')
@@ -187,7 +192,7 @@ export default function Home() {
                         <span className="text-sm font-medium text-foreground truncate block">{p.display_name}</span>
                       </div>
                       <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#C8860A' }}>
-                        {isToday ? '🎉 היום!' : dayLabel}
+                        {isToday ? 'היום!' : dayLabel}
                       </span>
                     </div>
                   )
@@ -212,7 +217,7 @@ export default function Home() {
 
           {loading ? <LoadingSpinner /> : events.length === 0 ? (
             <EmptyState
-              icon="🍽️"
+              icon={<UtensilsCrossed className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
               title="לא נמצאו ארוחות"
               description="נסה לשנות את הסינון, או פרסם ארוחה בעצמך"
               action={

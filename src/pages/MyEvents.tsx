@@ -143,7 +143,7 @@ export default function MyEvents() {
     if (error) {
       toast.error(error.message.includes('duplicate') ? 'כבר דירגת אורח זה' : 'שגיאה בשמירת הדירוג')
     } else {
-      toast.success('תודה על הדירוג! ⭐')
+      toast.success('תודה על הדירוג!')
       setGuestRatingModal(null)
       setGuestRatingComment('')
       setGuestRatingScore(5)
@@ -175,7 +175,7 @@ export default function MyEvents() {
 
             {loading ? <LoadingSpinner /> : events.length === 0 ? (
               <EmptyState
-                icon="🏠"
+                icon={<CalendarPlus className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
                 title="עוד לא פרסמת ארוחה"
                 description="פתח את ביתך לאורחים חדשים!"
                 action={
@@ -295,7 +295,7 @@ export default function MyEvents() {
             <div>
               <h3 className="section-title mb-3">אורחים</h3>
               {registrations.length === 0 ? (
-                <EmptyState icon="👥" title="אין אורחים עדיין" description="ברגע שמישהו יירשם תקבל התראה" />
+                <EmptyState icon={<Users className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />} title="אין אורחים עדיין" description="ברגע שמישהו יירשם תקבל התראה" />
               ) : (
                 <div className="space-y-3">
                   {registrations.map(reg => (
@@ -335,7 +335,7 @@ export default function MyEvents() {
         >
           <div className="w-10 h-1 bg-border rounded-full mx-auto" />
           <h3 className="font-display font-black text-xl text-foreground text-center">
-            דרג את {guestRatingModal.guestName} ⭐
+            דרג את {guestRatingModal.guestName}
           </h3>
           <div className="flex justify-center">
             <StarRating score={guestRatingScore} interactive onChange={setGuestRatingScore} size="md" />
