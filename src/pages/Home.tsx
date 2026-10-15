@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, CalendarPlus, X, UtensilsCrossed, Home as HomeIcon, Cake } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
+
+type BezierEase = [number, number, number, number]
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -29,6 +31,27 @@ function isBirthdayThisWeek(birthday: string): boolean {
   }
   return false
 }
+
+const CITIES_QUICK = ['ירושלים', 'תל אביב', 'חיפה', 'ראשון לציון', 'באר שבע', 'נתניה', 'בני ברק']
+
+const EASE: BezierEase = [0.22, 1, 0.36, 1]
+
+const fadeUp = (delay = 0) => ({
+  initial:    { opacity: 0, y: 20 } as const,
+  animate:    { opacity: 1, y: 0 } as const,
+  transition: { duration: 0.45, ease: EASE, delay },
+})
+
+const staggerContainer: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+}
+const staggerItem: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.42, ease: EASE } },
+}
+
+const spring = { type: 'spring' as const, stiffness: 380, damping: 26 }
 
 export default function Home() {
   const { user } = useAuth()
@@ -97,161 +120,250 @@ export default function Home() {
   const hasFilters = filters.kashrut.length > 0 || filters.city || filters.religious || filters.eventType || search
 
   return (
-    <div className="min-h-dvh bg-background">
-      <TopBar logo />
+    <div className="relative min-h-dvh" style={{ background: '#FDFBF7' }}>
 
-      {/* Greeting hero */}
-      <div className="px-5 pt-5 pb-5" style={{ borderBottom: '1px solid hsl(var(--border))' }}>
-        <div className="max-w-lg mx-auto md:max-w-3xl">
-          <p className="text-muted-foreground text-sm mb-1">{greeting()},</p>
-          <h1 className="font-display font-black text-2xl text-foreground leading-tight">
-            {profile?.display_name ? profile.display_name : 'ברוך הבא'}
-          </h1>
-          <p className="text-muted-foreground text-xs mt-1.5">מצא שולחן לשישי, לחג, או לסתם ערב טוב</p>
-        </div>
+      {/* ── Ambient background orbs ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <div
+          className="ambient-blob absolute rounded-full"
+          style={{
+            width: 700, height: 700,
+            top: -200, right: -250,
+            background: 'radial-gradient(circle at center, rgba(245,158,11,0.20) 0%, rgba(245,158,11,0.06) 45%, transparent 70%)',
+            filter: 'blur(50px)',
+            animation: 'blob-drift-1 22s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="ambient-blob absolute rounded-full"
+          style={{
+            width: 550, height: 550,
+            bottom: 100, left: -180,
+            background: 'radial-gradient(circle at center, rgba(200,90,50,0.16) 0%, rgba(200,90,50,0.05) 50%, transparent 70%)',
+            filter: 'blur(45px)',
+            animation: 'blob-drift-2 28s ease-in-out infinite',
+          }}
+        />
       </div>
 
-      <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-4">
+      <div className="relative" style={{ zIndex: 1 }}>
+        <TopBar logo />
 
-        {/* Quick actions */}
+        {/* ── Greeting hero ── */}
         <motion.div
-          className="stagger-1 grid grid-cols-2 gap-3 mb-5"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
+          {...fadeUp(0.05)}
+          className="px-5 pt-6 pb-5"
+          style={{ borderBottom: '1px solid hsl(var(--border))' }}
         >
-          <div className="shulchan-card p-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
-                <UtensilsCrossed className="w-4 h-4 text-primary" />
-              </div>
-              <p className="text-2xl font-black text-foreground">{events.length}</p>
-            </div>
-            <p className="text-xs font-medium text-foreground">ארוחות זמינות</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">שישי, שבת וחגים</p>
+          <div className="max-w-lg mx-auto md:max-w-3xl">
+            <p className="text-muted-foreground text-sm mb-1">{greeting()},</p>
+            <h1 className="font-display font-black text-2xl text-foreground leading-tight">
+              {profile?.display_name ? profile.display_name : 'ברוך הבא'}
+            </h1>
+            <p className="text-muted-foreground text-xs mt-1.5">מצא שולחן לשישי, לחג, או לסתם ערב טוב</p>
           </div>
-          <Link to="/create-event" className="block">
-            <div
-              className="shulchan-card p-4 h-full flex flex-col justify-between shulchan-card-hover cursor-pointer"
-              style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))' }}
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.15)' }}>
-                <HomeIcon className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
-                <p className="text-xs text-muted-foreground">הפוך למארח</p>
-              </div>
-            </div>
-          </Link>
         </motion.div>
 
-        {/* Search */}
-        <motion.div
-          className="stagger-2 relative mb-3 rounded-lg"
-          animate={{
-            scale: searchFocused ? 1.01 : 1,
-            boxShadow: searchFocused ? '0 4px 20px rgba(192,82,42,0.12)' : '0 0 0 rgba(0,0,0,0)',
-          }}
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        >
-          <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            placeholder="חפש ארוחה, עיר, מארח..."
-            className="shulchan-input pr-10 pl-9"
-          />
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </motion.div>
+        <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-4">
 
-        {/* Filters */}
-        <div className="stagger-3 mb-5">
-          <FilterBar value={filters} onChange={setFilters} />
-        </div>
-
-        {/* Birthday wall */}
-        {birthdays.length > 0 && (
-          <div className="stagger-3b mb-4">
-            <div
-              className="shulchan-card p-4 overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, rgba(200,134,10,0.08), rgba(240,180,40,0.04))', borderRight: '3px solid rgba(200,134,10,0.5)' }}
+          {/* ── Quick actions ── */}
+          <motion.div {...fadeUp(0.08)} className="grid grid-cols-2 gap-3 mb-5">
+            <motion.div
+              className="shulchan-card p-4"
+              whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
+              transition={spring}
             >
-              <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-1.5">
-                <Cake className="w-4 h-4" style={{ color: '#C8860A' }} />
-                ימי הולדת השבוע
-              </p>
-              <div className="flex flex-col gap-2">
-                {birthdays.map(p => {
-                  const bday = new Date(p.birthday + 'T00:00:00')
-                  const today = new Date()
-                  const isToday = bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate()
-                  const dayLabel = isToday ? 'היום!' : `${bday.getDate()}/${bday.getMonth() + 1}`
-                  return (
-                    <div key={p.id} className="flex items-center gap-2.5">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg, #C8860A, #F0B428)', color: '#1A0800' }}
-                      >
-                        {p.display_name.charAt(0)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-foreground truncate block">{p.display_name}</span>
-                      </div>
-                      <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#C8860A' }}>
-                        {isToday ? 'היום!' : dayLabel}
-                      </span>
-                    </div>
-                  )
-                })}
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
+                  <UtensilsCrossed className="w-4 h-4 text-primary" />
+                </div>
+                <p className="text-2xl font-black text-foreground">{events.length}</p>
               </div>
-            </div>
-          </div>
-        )}
+              <p className="text-xs font-medium text-foreground">ארוחות זמינות</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">שישי, שבת וחגים</p>
+            </motion.div>
 
-        {/* Events list */}
-        <div className="stagger-4 space-y-3 pb-4">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="section-title">
-              {hasFilters ? 'תוצאות חיפוש' : 'ארוחות קרובות'}
-            </h2>
-            {events.length > 0 && (
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                {events.length}
-              </span>
-            )}
-          </div>
+            <Link to="/create-event" className="block">
+              <motion.div
+                className="shulchan-card p-4 h-full flex flex-col justify-between cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))' }}
+                whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
+                transition={spring}
+              >
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.15)' }}>
+                  <HomeIcon className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-primary">פרסם ארוחה</p>
+                  <p className="text-xs text-muted-foreground">הפוך למארח</p>
+                </div>
+              </motion.div>
+            </Link>
+          </motion.div>
 
-          {loading ? <LoadingSpinner /> : events.length === 0 ? (
-            <EmptyState
-              icon={<UtensilsCrossed className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
-              title="לא נמצאו ארוחות"
-              description="נסה לשנות את הסינון, או פרסם ארוחה בעצמך"
-              action={
-                <Link to="/create-event">
-                  <button className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm">
-                    <CalendarPlus className="w-4 h-4" />
-                    פרסם ארוחה
-                  </button>
-                </Link>
-              }
+          {/* ── City quick-filter strip ── */}
+          <motion.div {...fadeUp(0.12)} className="mb-3 overflow-x-auto no-scrollbar flex gap-2 pb-0.5">
+            {CITIES_QUICK.map((city) => {
+              const isActive = filters.city === city
+              return (
+                <motion.button
+                  key={city}
+                  onClick={() => setFilters(f => ({ ...f, city: f.city === city ? '' : city }))}
+                  className="flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold relative"
+                  style={{ color: isActive ? '#fff' : 'hsl(var(--muted-foreground))' }}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={spring}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="homeCityPill"
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: 'hsl(var(--primary))', zIndex: 0 }}
+                      transition={spring}
+                    />
+                  )}
+                  {!isActive && (
+                    <span className="absolute inset-0 rounded-full" style={{ background: 'hsl(var(--muted))', zIndex: 0 }} />
+                  )}
+                  <span style={{ position: 'relative', zIndex: 1 }}>{city}</span>
+                </motion.button>
+              )
+            })}
+          </motion.div>
+
+          {/* ── Search ── */}
+          <motion.div
+            {...fadeUp(0.14)}
+            animate={{
+              scale: searchFocused ? 1.01 : 1,
+              boxShadow: searchFocused
+                ? '0 4px 20px rgba(192,82,42,0.14), 0 0 0 2px rgba(192,82,42,0.18)'
+                : '0 0 0 rgba(0,0,0,0)',
+            }}
+            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+            className="relative mb-3 rounded-lg"
+          >
+            <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              placeholder="חפש ארוחה, עיר, מארח..."
+              className="shulchan-input pr-10 pl-9"
             />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {events.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
-          )}
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </motion.div>
+
+          {/* ── Filters ── */}
+          <motion.div {...fadeUp(0.16)} className="mb-5">
+            <FilterBar value={filters} onChange={setFilters} />
+          </motion.div>
+
+          {/* ── Birthday wall ── */}
+          <AnimatePresence>
+            {birthdays.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.4 }}
+                className="mb-4"
+              >
+                <div
+                  className="shulchan-card p-4 overflow-hidden"
+                  style={{ background: 'linear-gradient(135deg, rgba(200,134,10,0.08), rgba(240,180,40,0.04))', borderRight: '3px solid rgba(200,134,10,0.5)' }}
+                >
+                  <p className="text-sm font-bold text-foreground mb-3 flex items-center gap-1.5">
+                    <Cake className="w-4 h-4" style={{ color: '#C8860A' }} />
+                    ימי הולדת השבוע
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {birthdays.map(p => {
+                      const bday = new Date(p.birthday + 'T00:00:00')
+                      const today = new Date()
+                      const isToday = bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate()
+                      const dayLabel = isToday ? 'היום!' : `${bday.getDate()}/${bday.getMonth() + 1}`
+                      return (
+                        <div key={p.id} className="flex items-center gap-2.5">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                            style={{ background: 'linear-gradient(135deg, #C8860A, #F0B428)', color: '#1A0800' }}
+                          >
+                            {p.display_name.charAt(0)}
+                          </div>
+                          <span className="text-sm font-medium text-foreground truncate flex-1">{p.display_name}</span>
+                          <span className="text-xs font-semibold flex-shrink-0" style={{ color: '#C8860A' }}>
+                            {isToday ? 'היום!' : dayLabel}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Events list ── */}
+          <div className="pb-4">
+            <motion.div {...fadeUp(0.18)} className="flex items-center justify-between mb-3">
+              <h2 className="section-title">
+                {hasFilters ? 'תוצאות חיפוש' : 'ארוחות קרובות'}
+              </h2>
+              {events.length > 0 && (
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  {events.length}
+                </span>
+              )}
+            </motion.div>
+
+            <AnimatePresence mode="wait">
+              {loading ? (
+                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <LoadingSpinner />
+                </motion.div>
+              ) : events.length === 0 ? (
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <EmptyState
+                    icon={<UtensilsCrossed className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
+                    title="לא נמצאו ארוחות"
+                    description="נסה לשנות את הסינון, או פרסם ארוחה בעצמך"
+                    action={
+                      <Link to="/create-event">
+                        <button className="btn-primary flex items-center gap-2 px-5 py-2.5 text-sm">
+                          <CalendarPlus className="w-4 h-4" />
+                          פרסם ארוחה
+                        </button>
+                      </Link>
+                    }
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="events"
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="show"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                >
+                  {events.map(event => (
+                    <motion.div key={event.id} variants={staggerItem}>
+                      <EventCard event={event} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
