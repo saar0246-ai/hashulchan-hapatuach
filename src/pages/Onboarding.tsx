@@ -12,10 +12,10 @@ const TOTAL_STEPS = 7
 const toggleArr = <T,>(arr: T[], val: T): T[] =>
   arr.includes(val) ? arr.filter(v => v !== val) : [...arr, val]
 
-const GENDER_OPTIONS: { value: Gender; label: string; emoji: string }[] = [
-  { value: 'male',   label: 'זכר',   emoji: '👨' },
-  { value: 'female', label: 'נקבה',  emoji: '👩' },
-  { value: 'other',  label: 'אחר',   emoji: '🧑' },
+const GENDER_OPTIONS: { value: Gender; label: string }[] = [
+  { value: 'male',   label: 'זכר' },
+  { value: 'female', label: 'נקבה' },
+  { value: 'other',  label: 'אחר' },
 ]
 
 export default function Onboarding() {
@@ -138,7 +138,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-dvh bg-background flex flex-col max-w-md mx-auto">
+    <div className="min-h-dvh flex flex-col max-w-md mx-auto" style={{ background: '#FDFBF7' }}>
       {/* Progress */}
       <div className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between mb-2">
@@ -193,13 +193,12 @@ export default function Onboarding() {
                     key={g.value}
                     type="button"
                     onClick={() => update('gender', g.value)}
-                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all flex flex-col items-center gap-1 ${
+                    className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
                       form.gender === g.value
                         ? 'border-primary bg-primary/10 text-primary'
                         : 'border-border bg-card text-foreground hover:border-primary/50'
                     }`}
                   >
-                    <span className="text-xl">{g.emoji}</span>
                     {g.label}
                   </button>
                 ))}
@@ -329,7 +328,7 @@ export default function Onboarding() {
               <p className="text-xs text-muted-foreground mt-2">לא חובה — ניתן לשנות בהגדרות הפרופיל</p>
             </div>
             <div className="shulchan-card p-4 bg-primary/5 border-primary/20">
-              <p className="text-sm text-foreground font-medium mb-1">💡 מה זה עושה?</p>
+              <p className="text-sm text-foreground font-medium mb-1">מה זה עושה?</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 דף הבית יציג אוטומטית רק ארוחות ברמות הכשרות שבחרת. אפשר תמיד לסנן ידנית.
               </p>
@@ -356,7 +355,7 @@ export default function Onboarding() {
               <p className="text-xs text-muted-foreground mt-1">{form.bio.length}/300</p>
             </div>
             <div className="shulchan-card p-4 bg-primary/5 border-primary/20">
-              <p className="text-sm text-foreground font-medium mb-1">💡 טיפ</p>
+              <p className="text-sm text-foreground font-medium mb-1">טיפ</p>
               <p className="text-xs text-muted-foreground">
                 מארחים שמוסיפים ביוגרפיה מקבלים 3 פעמים יותר אורחים
               </p>
@@ -416,7 +415,7 @@ export default function Onboarding() {
             </div>
 
             <div className="shulchan-card p-4 bg-primary/5 border-primary/20">
-              <p className="text-sm text-foreground font-medium mb-1">📸 טיפ</p>
+              <p className="text-sm text-foreground font-medium mb-1">טיפ</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 פרופילים עם תמונה מקבלים 5 פעמים יותר אישורים ממארחים. אפשר לדלג ולהוסיף תמונה מאוחר יותר מהפרופיל.
               </p>

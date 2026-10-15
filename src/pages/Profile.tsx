@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, ChevronLeft, Edit2, Check, X, Camera } from 'lucide-react'
+import { LogOut, ChevronLeft, Edit2, Check, X, Camera, Home as HomeIcon, FileText, Lock, Shield, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -125,11 +125,11 @@ export default function Profile() {
     setAvatarUploading(false)
   }
 
-  if (loading) return <div className="min-h-dvh bg-background"><TopBar /><LoadingSpinner /></div>
+  if (loading) return <div className="min-h-dvh" style={{ background: '#FDFBF7' }}><TopBar /><LoadingSpinner /></div>
   if (!profile) return null
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh" style={{ background: '#FDFBF7' }}>
       <TopBar title="הפרופיל שלי" right={
         !editing ? (
           <button onClick={startEdit} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-muted transition-all">
@@ -138,9 +138,9 @@ export default function Profile() {
         ) : null
       } />
 
-      <div className="page-container space-y-5">
+      <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-5">
         {/* Avatar + stats */}
-        <div className="stagger-1 flex flex-col items-center pt-2 gap-3">
+        <div className="flex flex-col items-center pt-2 gap-3">
           <div className="relative">
             <ProfileAvatar name={profile.display_name} avatarUrl={profile.avatar_url} size="xl" />
             <button
@@ -182,7 +182,7 @@ export default function Profile() {
 
         {/* View mode */}
         {!editing ? (
-          <div className="stagger-2 space-y-4">
+          <div className="space-y-4">
             <div className="shulchan-card p-4 space-y-3">
               <h3 className="text-sm font-semibold text-muted-foreground">פרטים אישיים</h3>
               {[
@@ -203,7 +203,7 @@ export default function Profile() {
               <div className="flex flex-wrap gap-2">
                 {profile.kashrut_level && (
                   <span className={`badge ${KASHRUT_COLORS[profile.kashrut_level]}`}>
-                    🍽️ {KASHRUT_LABELS[profile.kashrut_level]}
+                    {KASHRUT_LABELS[profile.kashrut_level]}
                   </span>
                 )}
                 {profile.religious_level && (
@@ -236,25 +236,25 @@ export default function Profile() {
             <div className="space-y-2">
               <Link to="/my-events">
                 <button className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all">
-                  <span className="text-sm font-medium text-foreground">🏠 הארוחות שפרסמתי</span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground"><HomeIcon className="w-4 h-4" />הארוחות שפרסמתי</span>
                   <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                 </button>
               </Link>
               <Link to="/terms">
                 <button className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all">
-                  <span className="text-sm font-medium text-foreground">📜 תנאי שימוש</span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground"><FileText className="w-4 h-4" />תנאי שימוש</span>
                   <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                 </button>
               </Link>
               <Link to="/privacy">
                 <button className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all">
-                  <span className="text-sm font-medium text-foreground">🔒 מדיניות פרטיות</span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Lock className="w-4 h-4" />מדיניות פרטיות</span>
                   <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                 </button>
               </Link>
               <Link to="/accessibility">
                 <button className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all">
-                  <span className="text-sm font-medium text-foreground">♿ הצהרת נגישות</span>
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Eye className="w-4 h-4" />הצהרת נגישות</span>
                   <ChevronLeft className="w-4 h-4 text-muted-foreground" />
                 </button>
               </Link>
@@ -266,7 +266,7 @@ export default function Profile() {
                   className="w-full shulchan-card p-4 flex items-center justify-between hover:shadow-md active:scale-[0.99] transition-all"
                   style={{ borderRight: '3px solid hsl(var(--primary))' }}
                 >
-                  <span className="text-sm font-bold text-primary">🛡️ לוח ניהול אדמין</span>
+                  <span className="flex items-center gap-2 text-sm font-bold text-primary"><Shield className="w-4 h-4" />לוח ניהול אדמין</span>
                   <ChevronLeft className="w-4 h-4 text-primary" />
                 </button>
               </Link>
@@ -282,7 +282,7 @@ export default function Profile() {
           </div>
         ) : (
           /* Edit mode */
-          <div className="stagger-2 space-y-4">
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-foreground mb-1.5 block">שם להצגה</label>
               <input value={form.display_name}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarPlus, Info } from 'lucide-react'
+import { CalendarPlus, Info, Moon, Sun, Star, Utensils } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -9,6 +9,13 @@ import { KASHRUT_LABELS, RELIGIOUS_LABELS, EVENT_TYPE_LABELS } from '../types'
 import TopBar from '../components/TopBar'
 
 const CITIES = ['ירושלים', 'תל אביב', 'חיפה', 'ראשון לציון', 'פתח תקוה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק', 'בת ים', 'רחובות', 'רמת גן', 'אחרת']
+
+const EVENT_TYPE_ICON: Record<string, React.ReactNode> = {
+  shabbat_dinner: <Moon className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
+  shabbat_lunch:  <Sun className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
+  holiday:        <Star className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
+  weekday:        <Utensils className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
+}
 
 export default function CreateEvent() {
   const { user } = useAuth()
@@ -85,12 +92,11 @@ export default function CreateEvent() {
   }
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="min-h-dvh" style={{ background: '#FDFBF7' }}>
       <TopBar title="פרסם ארוחה" showBack />
 
-      <div className="page-container space-y-6">
-        {/* Event type */}
-        <div className="stagger-1">
+      <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-6">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-2 block">סוג הארוחה *</label>
           <div className="grid grid-cols-2 gap-2">
             {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(t => (
@@ -98,14 +104,16 @@ export default function CreateEvent() {
                 key={t}
                 type="button"
                 onClick={() => update('event_type', t)}
-                className={`p-3 rounded-xl text-sm font-medium border-2 transition-all text-right ${
+                className={`p-3 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-start gap-1.5 ${
                   form.event_type === t
                     ? 'border-primary bg-primary/10 text-primary'
                     : 'border-border bg-card text-foreground hover:border-primary/50'
                 }`}
               >
-                {t === 'shabbat_dinner' ? '🕯️' : t === 'shabbat_lunch' ? '☀️' : t === 'holiday' ? '🎉' : '🍽️'}{' '}
-                {EVENT_TYPE_LABELS[t]}
+                <div className="flex items-center gap-1">
+                  {EVENT_TYPE_ICON[t]}
+                  {EVENT_TYPE_LABELS[t]}
+                </div>
               </button>
             ))}
           </div>
@@ -119,15 +127,13 @@ export default function CreateEvent() {
           </div>
         )}
 
-        {/* Title */}
-        <div className="stagger-2">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-1.5 block">כותרת הארוחה *</label>
           <input value={form.title} onChange={e => update('title', e.target.value)}
             placeholder="ארוחת שישי חמה בסלון, כולם מוזמנים!" className="shulchan-input" maxLength={80} />
         </div>
 
-        {/* Date + time */}
-        <div className="stagger-2 grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-semibold text-foreground mb-1.5 block">תאריך *</label>
             <input type="date" value={form.event_date} onChange={e => update('event_date', e.target.value)}
@@ -140,8 +146,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Location */}
-        <div className="stagger-3 space-y-3">
+        <div className="space-y-3">
           <div>
             <label className="text-sm font-semibold text-foreground mb-1.5 block">עיר *</label>
             <select value={form.city} onChange={e => update('city', e.target.value)} className="shulchan-input">
@@ -170,8 +175,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Max guests */}
-        <div className="stagger-3">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-1.5 block">מספר אורחים מקסימלי *</label>
           <div className="flex items-center gap-3">
             <button type="button"
@@ -188,8 +192,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Kashrut */}
-        <div className="stagger-4">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-2 block">רמת כשרות האוכל *</label>
           <div className="grid grid-cols-2 gap-2">
             {(['mehadrin', 'kosher', 'traditional', 'none'] as KashrutLevel[]).map(k => (
@@ -206,8 +209,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Religious preferences */}
-        <div className="stagger-4">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-1 block">העדפת אורחים (ריק = כולם)</label>
           <p className="text-xs text-muted-foreground mb-2">בחר את הרקע הדתי של האורחים המועדפים</p>
           <div className="grid grid-cols-2 gap-2">
@@ -225,8 +227,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Age range */}
-        <div className="stagger-5 grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-sm font-semibold text-foreground mb-1.5 block">גיל מינימלי</label>
             <input type="number" value={form.min_age} onChange={e => update('min_age', e.target.value)}
@@ -239,8 +240,7 @@ export default function CreateEvent() {
           </div>
         </div>
 
-        {/* Description */}
-        <div className="stagger-5">
+        <div>
           <label className="text-sm font-semibold text-foreground mb-1.5 block">תיאור הארוחה</label>
           <textarea value={form.description} onChange={e => update('description', e.target.value)}
             placeholder="ספר על הארוחה — מה מגישים, האווירה, מה מצפה לאורחים..."
