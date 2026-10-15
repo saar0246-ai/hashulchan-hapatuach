@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Users, Calendar } from 'lucide-react'
+import { MapPin, Users, Calendar, Moon, Sun, Star, Utensils } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import type { Event } from '../types'
@@ -10,24 +11,25 @@ import {
 } from '../types'
 import ProfileAvatar from './ProfileAvatar'
 import StarRating from './StarRating'
+import type { LucideIcon } from 'lucide-react'
 
 interface EventCardProps {
   event: Event
   className?: string
 }
 
-const EVENT_TYPE_EMOJI: Record<string, string> = {
-  shabbat_dinner: '🕯️',
-  shabbat_lunch: '☀️',
-  holiday: '🎉',
-  weekday: '🍽️',
+const EVENT_TYPE_ICON: Record<string, LucideIcon> = {
+  shabbat_dinner: Moon,
+  shabbat_lunch:  Sun,
+  holiday:        Star,
+  weekday:        Utensils,
 }
 
 const EVENT_TYPE_GRADIENT: Record<string, string> = {
-  shabbat_dinner: 'linear-gradient(135deg, #7C2E18 0%, #4A1808 100%)',
-  shabbat_lunch:  'linear-gradient(135deg, #8A6000 0%, #553A00 100%)',
-  holiday:        'linear-gradient(135deg, #2A5C28 0%, #163018 100%)',
-  weekday:        'linear-gradient(135deg, #3A2E24 0%, #221A12 100%)',
+  shabbat_dinner: 'linear-gradient(135deg, #C0522A 0%, #8C3318 100%)',
+  shabbat_lunch:  'linear-gradient(135deg, #B87A10 0%, #7A5200 100%)',
+  holiday:        'linear-gradient(135deg, #4A8C3A 0%, #2C5422 100%)',
+  weekday:        'linear-gradient(135deg, #8C6240 0%, #5C3A20 100%)',
 }
 
 export default function EventCard({ event, className = '' }: EventCardProps) {
@@ -37,101 +39,112 @@ export default function EventCard({ event, className = '' }: EventCardProps) {
   const dateStr = format(dateObj, "EEEE, d בMMM", { locale: he })
   const fillPct = Math.min(100, (event.current_guests / event.max_guests) * 100)
 
+  const TypeIcon = EVENT_TYPE_ICON[event.event_type] ?? Utensils
+
   return (
     <Link to={`/events/${event.id}`} className={`block group ${className}`}>
-      <div className="shulchan-card">
-
-        {/* Colored header strip */}
+      <motion.div
+        whileHover={{ y: -3, boxShadow: '0 16px 40px rgba(44,24,8,0.10)' }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+      >
         <div
-          className="relative px-4 pt-4 pb-3 flex items-start justify-between gap-2"
-          style={{ background: EVENT_TYPE_GRADIENT[event.event_type] }}
+          className="shulchan-card"
+          style={{ border: '1px solid #E8E2D8' }}
         >
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl">{EVENT_TYPE_EMOJI[event.event_type]}</span>
-            <div>
-              <p className="text-xs text-white/65 font-medium">
-                {EVENT_TYPE_LABELS[event.event_type]}
-                {event.holiday_name ? ` • ${event.holiday_name}` : ''}
-              </p>
-              <h3 className="font-display font-bold text-white text-base leading-tight line-clamp-2">
-                {event.title}
-              </h3>
-            </div>
-          </div>
-          {isFull ? (
-            <span className="flex-shrink-0 badge bg-white/15 text-white/80 border border-white/20 text-[10px]">
-              מלא
-            </span>
-          ) : (
-            <span className="flex-shrink-0 badge bg-white/15 text-white text-[10px] border border-white/20">
-              {spotsLeft} מקומות
-            </span>
-          )}
-        </div>
 
-        {/* Card body */}
-        <div className="p-4 space-y-3">
-
-          {/* Date + location */}
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{dateStr}</span>
-              <span className="text-border">·</span>
-              <span>{event.event_time.slice(0, 5)}</span>
+          {/* Colored header strip */}
+          <div
+            className="relative px-4 pt-4 pb-3 flex items-start justify-between gap-2"
+            style={{ background: EVENT_TYPE_GRADIENT[event.event_type] }}
+          >
+            <div className="flex items-center gap-2.5">
+              <TypeIcon className="w-5 h-5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.80)' }} strokeWidth={1.75} />
+              <div>
+                <p className="text-xs text-white/65 font-medium">
+                  {EVENT_TYPE_LABELS[event.event_type]}
+                  {event.holiday_name ? ` • ${event.holiday_name}` : ''}
+                </p>
+                <h3 className="font-display font-bold text-white text-base leading-tight line-clamp-2">
+                  {event.title}
+                </h3>
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-              <span>{event.city}{event.neighborhood ? `, ${event.neighborhood}` : ''}</span>
-            </div>
-          </div>
-
-          {/* Badges */}
-          <div className="flex flex-wrap gap-1.5">
-            <span className={`badge text-[11px] ${KASHRUT_COLORS[event.kashrut_level]}`}>
-              {KASHRUT_LABELS[event.kashrut_level]}
-            </span>
-            {event.preferred_religious_levels.length > 0 && (
-              <span className={`badge text-[11px] ${RELIGIOUS_COLORS[event.preferred_religious_levels[0]]}`}>
-                {RELIGIOUS_LABELS[event.preferred_religious_levels[0]]}
-                {event.preferred_religious_levels.length > 1 ? ` +${event.preferred_religious_levels.length - 1}` : ''}
+            {isFull ? (
+              <span className="flex-shrink-0 badge bg-white/15 text-white/80 border border-white/20 text-[10px]">
+                מלא
+              </span>
+            ) : (
+              <span className="flex-shrink-0 badge bg-white/15 text-white text-[10px] border border-white/20">
+                {spotsLeft} מקומות
               </span>
             )}
           </div>
 
-          {/* Host row + capacity */}
-          {event.host && (
-            <div className="flex items-center justify-between pt-1 border-t border-border/50">
-              <div className="flex items-center gap-2">
-                <ProfileAvatar
-                  name={event.host.display_name}
-                  avatarUrl={event.host.avatar_url}
-                  size="sm"
-                />
-                <div>
-                  <p className="text-xs font-semibold text-foreground">{event.host.display_name}</p>
-                  {event.host.rating_count_host > 0 && (
-                    <StarRating score={Math.round(event.host.rating_as_host)} count={event.host.rating_count_host} />
-                  )}
-                </div>
+          {/* Card body */}
+          <div className="p-4 space-y-3">
+
+            {/* Date + location */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{dateStr}</span>
+                <span className="text-border">·</span>
+                <span>{event.event_time.slice(0, 5)}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Users className="w-3 h-3" />
-                <span>{event.current_guests}/{event.max_guests}</span>
-                <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${fillPct}%`,
-                      background: fillPct >= 80 ? '#e53e3e' : 'hsl(var(--primary))',
-                    }}
-                  />
-                </div>
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{event.city}{event.neighborhood ? `, ${event.neighborhood}` : ''}</span>
               </div>
             </div>
-          )}
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-1.5">
+              <span className={`badge text-[11px] ${KASHRUT_COLORS[event.kashrut_level]}`}>
+                {KASHRUT_LABELS[event.kashrut_level]}
+              </span>
+              {event.preferred_religious_levels.length > 0 && (
+                <span className={`badge text-[11px] ${RELIGIOUS_COLORS[event.preferred_religious_levels[0]]}`}>
+                  {RELIGIOUS_LABELS[event.preferred_religious_levels[0]]}
+                  {event.preferred_religious_levels.length > 1 ? ` +${event.preferred_religious_levels.length - 1}` : ''}
+                </span>
+              )}
+            </div>
+
+            {/* Host row + capacity */}
+            {event.host && (
+              <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                <div className="flex items-center gap-2">
+                  <ProfileAvatar
+                    name={event.host.display_name}
+                    avatarUrl={event.host.avatar_url}
+                    size="sm"
+                  />
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">{event.host.display_name}</p>
+                    {event.host.rating_count_host > 0 && (
+                      <StarRating score={Math.round(event.host.rating_as_host)} count={event.host.rating_count_host} />
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Users className="w-3 h-3" />
+                  <span>{event.current_guests}/{event.max_guests}</span>
+                  <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${fillPct}%`,
+                        background: fillPct >= 80 ? '#e53e3e' : 'hsl(var(--primary))',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   )
 }

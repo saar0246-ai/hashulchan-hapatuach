@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Calendar, Users, Shield, Heart, MapPin } from 'lucide-react'
+import { motion } from 'framer-motion'
 import BrandLogo from '../components/BrandLogo'
 
 /* ─── Tokens ─── */
@@ -33,6 +34,28 @@ const STATS = [
   { value: '400+', label: 'ארוחות בחודש' },
   { value: '4.8',  label: 'דירוג ממוצע'  },
 ]
+
+const REGIONS = [
+  { id: 'jerusalem', name: 'ירושלים', icon: '🕍', hosts: 48, upcoming: 12, color: '#C0522A', bg: 'rgba(192,82,42,0.07)' },
+  { id: 'tel-aviv',  name: 'תל אביב',  icon: '🌊', hosts: 72, upcoming: 23, color: '#1a7a4a', bg: 'rgba(26,122,74,0.07)'  },
+  { id: 'haifa',     name: 'חיפה',     icon: '⛵', hosts: 31, upcoming: 8,  color: '#1e5fa5', bg: 'rgba(30,95,165,0.07)' },
+  { id: 'negev',     name: 'הנגב',     icon: '🌵', hosts: 24, upcoming: 6,  color: '#B8780A', bg: 'rgba(184,120,10,0.07)'},
+  { id: 'galilee',   name: 'הגליל',    icon: '🌾', hosts: 18, upcoming: 5,  color: '#4A8C3A', bg: 'rgba(74,140,58,0.07)' },
+  { id: 'center',    name: 'המרכז',    icon: '🏙️', hosts: 55, upcoming: 18, color: '#7B4A9E', bg: 'rgba(123,74,158,0.07)'},
+]
+
+/* ─── Animation variants ─── */
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.2, 0, 0, 1] as [number, number, number, number] } },
+}
+
+const springButton = { type: 'spring' as const, stiffness: 400, damping: 20 }
 
 /* ─── Decorative event card ─── */
 function EventPreviewCard() {
@@ -147,14 +170,15 @@ export default function Landing() {
               כניסה
             </Link>
             <Link to="/auth?mode=register">
-              <button
-                className="text-sm font-semibold rounded-lg px-4 py-2 text-white
-                           transition-all active:scale-[0.97] hover:opacity-90
-                           shadow-sm"
+              <motion.button
+                className="text-sm font-semibold rounded-lg px-4 py-2 text-white shadow-sm"
                 style={{ background: C.accent }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                transition={springButton}
               >
                 הצטרף
-              </button>
+              </motion.button>
             </Link>
           </div>
         </div>
@@ -169,78 +193,105 @@ export default function Landing() {
           {/* Text column */}
           <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-start">
 
-            {/* Badge */}
-            <div
-              className="stagger-1 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full
-                         text-xs font-semibold mb-7 border"
-              style={{ background: C.accentBg, borderColor: 'rgba(192,82,42,0.22)', color: C.accent }}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col items-center md:items-start text-center md:text-start w-full"
             >
-              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: C.accent }} />
-              חינמי לחלוטין · ללא עמלות
-            </div>
+              {/* Badge */}
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full
+                           text-xs font-semibold mb-7 border"
+                style={{ background: C.accentBg, borderColor: 'rgba(192,82,42,0.22)', color: C.accent }}
+              >
+                {/* Pulsing live dot */}
+                <span className="relative flex h-2 w-2 flex-shrink-0">
+                  <span
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40"
+                    style={{ background: C.accent }}
+                  />
+                  <span
+                    className="relative inline-flex rounded-full h-2 w-2"
+                    style={{ background: C.accent }}
+                  />
+                </span>
+                חינמי לחלוטין · ללא עמלות
+              </motion.div>
 
-            {/* Headline */}
-            <h1
-              className="stagger-2 font-black leading-[1.04] tracking-tight mb-5"
-              style={{
-                fontFamily: "'Frank Ruhl Libre', serif",
-                fontSize: 'clamp(2.4rem, 7vw, 5.2rem)',
-                color: C.text,
-              }}
-            >
-              שולחן חם
-              <br />
-              <span style={{ color: C.accent }}>לכל שבת וחג</span>
-            </h1>
+              {/* Headline */}
+              <motion.h1
+                variants={itemVariants}
+                className="font-black leading-[1.04] tracking-tight mb-5"
+                style={{
+                  fontFamily: "'Frank Ruhl Libre', serif",
+                  fontSize: 'clamp(2.4rem, 7vw, 5.2rem)',
+                  color: C.text,
+                }}
+              >
+                שולחן חם
+                <br />
+                <span style={{ color: C.accent }}>לכל שבת וחג</span>
+              </motion.h1>
 
-            {/* Subtitle */}
-            <p className="stagger-3 text-base md:text-lg leading-relaxed max-w-sm mb-9"
-               style={{ color: C.muted }}>
-              מארחים פותחים את ביתם · אורחים מוצאים שולחן ביתי אמיתי
-            </p>
+              {/* Subtitle */}
+              <motion.p
+                variants={itemVariants}
+                className="text-base md:text-lg leading-relaxed max-w-sm mb-9"
+                style={{ color: C.muted }}
+              >
+                מארחים פותחים את ביתם · אורחים מוצאים שולחן ביתי אמיתי
+              </motion.p>
 
-            {/* CTA */}
-            <div className="stagger-4 flex gap-3 w-full max-w-[290px]">
-              <Link to="/auth?mode=register" className="flex-1">
-                <button
-                  className="w-full py-3.5 text-sm font-semibold rounded-xl text-white
-                             transition-all active:scale-[0.97] hover:opacity-90 shadow-sm"
-                  style={{ background: C.accent }}
-                >
-                  הצטרף עכשיו
-                </button>
-              </Link>
-              <Link to="/auth?mode=login" className="flex-1">
-                <button
-                  className="w-full py-3.5 text-sm font-medium rounded-xl
-                             transition-all active:scale-[0.97] hover:bg-stone-100"
-                  style={{ border: `1px solid ${C.border}`, color: C.text, background: C.card }}
-                >
-                  כניסה
-                </button>
-              </Link>
-            </div>
+              {/* CTA */}
+              <motion.div variants={itemVariants} className="flex gap-3 w-full max-w-[290px]">
+                <Link to="/auth?mode=register" className="flex-1">
+                  <motion.button
+                    className="w-full py-3.5 text-sm font-semibold rounded-xl text-white shadow-sm"
+                    style={{ background: C.accent }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={springButton}
+                  >
+                    הצטרף עכשיו
+                  </motion.button>
+                </Link>
+                <Link to="/auth?mode=login" className="flex-1">
+                  <motion.button
+                    className="w-full py-3.5 text-sm font-medium rounded-xl"
+                    style={{ border: `1px solid ${C.border}`, color: C.text, background: C.card }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={springButton}
+                  >
+                    כניסה
+                  </motion.button>
+                </Link>
+              </motion.div>
 
-            {/* Stats */}
-            <div
-              className="stagger-5 grid grid-cols-3 mt-9 w-full max-w-[290px] rounded-xl overflow-hidden"
-              style={{ border: `1px solid ${C.border}` }}
-            >
-              {STATS.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center py-3.5 px-2"
-                  style={{ background: C.bg, borderInlineStart: i > 0 ? `1px solid ${C.border}` : 'none' }}
-                >
-                  <span className="font-black text-xl leading-none" style={{ color: C.text }}>{s.value}</span>
-                  <span className="text-[10px] mt-1 text-center leading-tight" style={{ color: C.muted }}>{s.label}</span>
-                </div>
-              ))}
-            </div>
+              {/* Stats */}
+              <motion.div
+                variants={itemVariants}
+                className="grid grid-cols-3 mt-9 w-full max-w-[290px] rounded-xl overflow-hidden"
+                style={{ border: `1px solid ${C.border}` }}
+              >
+                {STATS.map((s, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center py-3.5 px-2"
+                    style={{ background: C.bg, borderInlineStart: i > 0 ? `1px solid ${C.border}` : 'none' }}
+                  >
+                    <span className="font-black text-xl leading-none" style={{ color: C.text }}>{s.value}</span>
+                    <span className="text-[10px] mt-1 text-center leading-tight" style={{ color: C.muted }}>{s.label}</span>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* Card column — desktop only */}
-          <div className="hidden md:flex flex-col items-center gap-2 flex-shrink-0 stagger-3">
+          <div className="hidden md:flex flex-col items-center gap-2 flex-shrink-0">
             <p className="text-[11px] font-semibold uppercase tracking-widest mb-3"
                style={{ color: 'rgba(192,82,42,0.55)' }}>
               ארוחה קרובה
@@ -301,6 +352,55 @@ export default function Landing() {
                 <p className="text-xs leading-relaxed" style={{ color: C.muted }}>{s.desc}</p>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Divider ── */}
+      <div className="relative z-10" style={{ borderTop: `1px solid ${C.border}` }} />
+
+      {/* ── Active Cities / Regions ── */}
+      <section className="relative z-10 px-5 sm:px-8 py-14 max-w-7xl mx-auto w-full">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: C.muted }}>
+          קהילות שולחן פתוח
+        </p>
+        <h2
+          className="font-black text-2xl md:text-3xl mb-8 leading-tight"
+          style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.text }}
+        >
+          מארחים בכל הארץ
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          {REGIONS.map((region) => (
+            <motion.div
+              key={region.id}
+              className="flex flex-col gap-3 p-5 rounded-xl cursor-default"
+              style={{ background: C.card, border: `1px solid ${C.border}`, boxShadow: C.shadow }}
+              whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(44,24,8,0.08)' }}
+              transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            >
+              {/* Icon */}
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                style={{ background: region.bg }}
+              >
+                {region.icon}
+              </div>
+              {/* Name */}
+              <p className="font-bold text-sm leading-snug" style={{ color: C.text }}>{region.name}</p>
+              {/* Stats */}
+              <div className="flex flex-col gap-1">
+                <span
+                  className="text-xs font-semibold px-2.5 py-0.5 rounded-full self-start"
+                  style={{ background: region.bg, color: region.color }}
+                >
+                  {region.hosts} מארחים
+                </span>
+                <span className="text-[11px]" style={{ color: C.muted }}>
+                  {region.upcoming} ארוחות קרובות
+                </span>
+              </div>
+            </motion.div>
           ))}
         </div>
       </section>

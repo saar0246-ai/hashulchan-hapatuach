@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, CalendarPlus, X, UtensilsCrossed, Home as HomeIcon, Cake } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -35,6 +36,7 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
   const [filters, setFilters] = useState<FilterState>({ kashrut: [], religious: '', city: '', eventType: '' })
   const [filtersInitialized, setFiltersInitialized] = useState(false)
   const [birthdays, setBirthdays] = useState<BirthdayProfile[]>([])
@@ -112,7 +114,12 @@ export default function Home() {
       <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-4">
 
         {/* Quick actions */}
-        <div className="stagger-1 grid grid-cols-2 gap-3 mb-5">
+        <motion.div
+          className="stagger-1 grid grid-cols-2 gap-3 mb-5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
+        >
           <div className="shulchan-card p-4">
             <div className="flex items-center gap-2 mb-1.5">
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'hsl(var(--primary) / 0.1)' }}>
@@ -137,14 +144,23 @@ export default function Home() {
               </div>
             </div>
           </Link>
-        </div>
+        </motion.div>
 
         {/* Search */}
-        <div className="stagger-2 relative mb-3">
+        <motion.div
+          className="stagger-2 relative mb-3 rounded-lg"
+          animate={{
+            scale: searchFocused ? 1.01 : 1,
+            boxShadow: searchFocused ? '0 4px 20px rgba(192,82,42,0.12)' : '0 0 0 rgba(0,0,0,0)',
+          }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
           <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             placeholder="חפש ארוחה, עיר, מארח..."
             className="shulchan-input pr-10 pl-9"
           />
@@ -156,7 +172,7 @@ export default function Home() {
               <X className="w-4 h-4" />
             </button>
           )}
-        </div>
+        </motion.div>
 
         {/* Filters */}
         <div className="stagger-3 mb-5">
