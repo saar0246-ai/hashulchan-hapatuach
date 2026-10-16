@@ -6,6 +6,31 @@
 
 ## 📦 גירסאות
 
+### טיוטא 4 — commit `master` (אוקטובר 2026) — נוכחי
+
+**מנוע גרפי מלא (WebGL + 3D + Spotlight):**
+- `FluidCanvas.tsx` — canvas WebGL (GLSL fragment shader): 4 blobs בפלטה (#C0390A/#2D4A1E/#F59E0B) + mouse force vectors + vignette
+- `SpotlightCard` — 3D perspective tilt (`useSpring stiffness:300 damping:28`) + spotlight DOM-direct (`radial-gradient 600px circle at cursor`) + `BorderBeam` (top/bottom sweeping highlights)
+- הרקע מכוסה על-ידי canvas (div ראשי שקוף) — זכוכית מטשטשת את ה-canvas
+- `ShimmerSweep` — sweep אחד מעל הכותרת בטעינה
+- Feature card: `gradient(148deg, #C0390A → #A9603D → #6E2E17)` + נצנוץ פנימי + grain overlay
+- Region explorer: פסים אופקיים (bands) עם SpotlightCard
+- `layoutId="activeTabPill"` — Emil Kowalski sliding pill על tabs
+
+---
+
+### טיוטא 3 — commit `87883e7` (אוקטובר 2026)
+
+**שינויים ביחס לטיוטא 2:**
+- `FluidCanvas.tsx` (חדש): WebGL GLSL shader — 4 blobs צפים, mouse tracking
+- `TiltCard`: `useMotionValue` + `useSpring` + `useMotionTemplate` specular glare
+- `ShimmerSweep`: sweep חד-פעמי על כותרת הגיבור
+- Feature card בגובה מלא 300px (במקום col-span-3 ב-164px)
+- Region explorer: פסים אופקיים עם שמות ערים
+- `layoutId="activeFilterPill"` Emil Kowalski tabs
+
+---
+
 ### טיוטא 2 — branch `draft-2` (אוקטובר 2026)
 
 עמוד הבית נבנה מחדש לגמרי עם שפה עיצובית אחרת לחלוטין:

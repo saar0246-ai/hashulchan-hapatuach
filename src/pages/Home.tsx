@@ -7,7 +7,7 @@ import {
 import type { LucideIcon } from 'lucide-react'
 import {
   motion, AnimatePresence, LayoutGroup,
-  useMotionValue, useSpring, useMotionTemplate,
+  useMotionValue, useSpring,
   type Variants,
 } from 'framer-motion'
 import { supabase } from '../lib/supabase'
@@ -25,7 +25,6 @@ const SPRING             = { type: 'spring' as const, stiffness: 350, damping: 2
 const SPRING_TILT        = { stiffness: 300, damping: 28 }
 
 /* ─── Brand palette ──────────────────────────────────────── */
-const BG     = '#FDFBF7'
 const TERRA  = '#C0390A'
 const OLIVE  = '#2D4A1E'
 const TEXT   = '#1C1A17'
@@ -84,41 +83,68 @@ const fadeUp:  Variants = {
   show:   { opacity: 1, y: 0, transition: { duration: 0.44, ease: EASE } },
 }
 
-/* ─── 3D Tilt + Specular Glare ───────────────────────────── */
-interface TiltCardProps {
+/* ─── Border Beam ────────────────────────────────────────── */
+function BorderBeam() {
+  return (
+    <>
+      <motion.div
+        className="absolute top-0 inset-x-0 pointer-events-none"
+        style={{
+          height: '1.5px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.90), transparent)',
+        }}
+        initial={{ x: '-100%' }}
+        animate={{ x: '350%' }}
+        transition={{ duration: 2.6, ease: EASE, repeat: Infinity, repeatDelay: 4 }}
+      />
+      <motion.div
+        className="absolute bottom-0 inset-x-0 pointer-events-none"
+        style={{
+          height: '1.5px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.90), transparent)',
+        }}
+        initial={{ x: '100%' }}
+        animate={{ x: '-350%' }}
+        transition={{ duration: 2.6, ease: EASE, repeat: Infinity, repeatDelay: 4, delay: 1.3 }}
+      />
+    </>
+  )
+}
+
+/* ─── SpotlightCard — 3D tilt + 600px DOM spotlight + beam ─ */
+interface SpotlightCardProps {
   children:  React.ReactNode
   className?: string
   style?:     React.CSSProperties
   onClick?:   () => void
 }
 
-function TiltCard({ children, className = '', style, onClick }: TiltCardProps) {
-  const ref    = useRef<HTMLDivElement>(null)
-  const rawX   = useMotionValue(0)
-  const rawY   = useMotionValue(0)
-  const rotY   = useSpring(rawX, SPRING_TILT)
-  const rotX   = useSpring(rawY, SPRING_TILT)
-  const gX     = useMotionValue(50)
-  const gY     = useMotionValue(50)
-  const gOp    = useMotionValue(0)
-  const glare  = useMotionTemplate`radial-gradient(circle at ${gX}% ${gY}%, rgba(255,255,255,0.38) 0%, transparent 72%)`
+function SpotlightCard({ children, className = '', style, onClick }: SpotlightCardProps) {
+  const ref        = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const rawX       = useMotionValue(0)
+  const rawY       = useMotionValue(0)
+  const rotY       = useSpring(rawX, SPRING_TILT)
+  const rotX       = useSpring(rawY, SPRING_TILT)
 
   function onMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (!ref.current) return
+    if (!ref.current || !overlayRef.current) return
     const r  = ref.current.getBoundingClientRect()
     const px = (e.clientX - r.left) / r.width
     const py = (e.clientY - r.top)  / r.height
-    rawX.set((px - 0.5) * 16)
-    rawY.set((0.5 - py) * 16)
-    gX.set(px * 100)
-    gY.set(py * 100)
-    gOp.set(1)
+    rawX.set((px - 0.5) * 14)
+    rawY.set((0.5 - py) * 14)
+    const x = e.clientX - r.left
+    const y = e.clientY - r.top
+    overlayRef.current.style.background =
+      `radial-gradient(600px circle at ${x}px ${y}px, rgba(255,255,255,0.20), transparent 40%)`
+    overlayRef.current.style.opacity = '1'
   }
 
   function onLeave() {
     rawX.set(0)
     rawY.set(0)
-    gOp.set(0)
+    if (overlayRef.current) overlayRef.current.style.opacity = '0'
   }
 
   return (
@@ -130,10 +156,14 @@ function TiltCard({ children, className = '', style, onClick }: TiltCardProps) {
       onPointerLeave={onLeave}
       onClick={onClick}>
       {children}
-      {/* Specular glare overlay */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: glare, opacity: gOp, borderRadius: 'inherit' }} />
+      {/* 600px spotlight — direct DOM, zero React re-renders */}
+      <div ref={overlayRef}
+        style={{
+          position: 'absolute', inset: 0, opacity: 0,
+          pointerEvents: 'none', borderRadius: 'inherit',
+          transition: 'opacity 0.35s ease',
+        }} />
+      <BorderBeam />
     </motion.div>
   )
 }
@@ -204,7 +234,7 @@ export default function Home() {
     : events
 
   return (
-    <div dir="rtl" className="relative min-h-dvh" style={{ background: BG }}>
+    <div dir="rtl" className="relative min-h-dvh">
 
       {/* WebGL fluid mesh — replaces CSS gradient orbs */}
       <FluidCanvas />
@@ -328,7 +358,7 @@ export default function Home() {
 
             {/* Feature card — col-span-2, dominant height */}
             <Link to="/create-event" className="col-span-2 block">
-              <TiltCard
+              <SpotlightCard
                 className="rounded-3xl"
                 style={{
                   minHeight: '300px',
@@ -400,11 +430,11 @@ export default function Home() {
                     </div>
                   </div>
                 </motion.div>
-              </TiltCard>
+              </SpotlightCard>
             </Link>
 
             {/* Live count card */}
-            <TiltCard
+            <SpotlightCard
               className="col-span-1 rounded-3xl"
               style={{ ...GLASS, minHeight: '170px', padding: '1.25rem' }}>
               <motion.div
@@ -449,10 +479,10 @@ export default function Home() {
                   )}
                 </AnimatePresence>
               </motion.div>
-            </TiltCard>
+            </SpotlightCard>
 
             {/* Geo shortcut card */}
-            <TiltCard
+            <SpotlightCard
               className="col-span-1 rounded-3xl cursor-pointer"
               style={{
                 ...GLASS,
@@ -479,7 +509,7 @@ export default function Home() {
                   </p>
                 </div>
               </motion.div>
-            </TiltCard>
+            </SpotlightCard>
           </motion.div>
 
           {/* ══════════════════════════════════════
@@ -510,7 +540,7 @@ export default function Home() {
                       transition={SPRING}>
                       {isActive && (
                         <motion.span
-                          layoutId="activeFilterPill"
+                          layoutId="activeTabPill"
                           className="absolute inset-0 rounded-full"
                           style={{
                             background: `linear-gradient(135deg, ${TERRA}, #A9603D, #6E2E17)`,
@@ -566,7 +596,7 @@ export default function Home() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.42, ease: EASE, delay: idx * 0.07 }}>
-                    <TiltCard
+                    <SpotlightCard
                       className="rounded-3xl w-full"
                       style={{
                         padding: '1rem 1.25rem',
@@ -627,7 +657,7 @@ export default function Home() {
                             }} />
                         </div>
                       </motion.div>
-                    </TiltCard>
+                    </SpotlightCard>
                   </motion.div>
                 )
               })}

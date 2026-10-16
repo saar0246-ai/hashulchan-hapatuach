@@ -47,10 +47,10 @@ const FRAG = `
 
     /* Compose — additive tinting on cream base */
     vec3 col = cream;
-    col = mix(col, terra, i1 * 0.18);
-    col = mix(col, olive, i2 * 0.14);
-    col = mix(col, amber, i3 * 0.16);
-    col = mix(col, terra, i4 * 0.12);
+    col = mix(col, terra, i1 * 0.26);
+    col = mix(col, olive, i2 * 0.22);
+    col = mix(col, amber, i3 * 0.24);
+    col = mix(col, terra, i4 * 0.18);
 
     /* Vignette */
     vec2 q = uv - 0.5;
