@@ -6,6 +6,17 @@
 
 ## 📦 גירסאות
 
+### טיוטא 2 — commit `e2c78fe` (אוקטובר 2026)
+
+ארכיטקטורת עמוד הבית נבנתה מחדש:
+- Hero חדש: "מוצאים שולחן חם לשבת ולחג" עם `letterSpacing: -0.025em` + search bar צף עם `backdrop-blur`
+- Bento 3-תיבות: (a) כרטיס טרקוטה "פרסם ארוחה", (b) כרטיס live stats זכוכית, (c) geographic shortcut
+- Regional Explorer 2×2: 4 אזורים named עם spring hover `y:-6 scale:1.02`, layoutId accent, event counts
+- `whileInView` scroll animations על כל section
+- `selectedRegion` state מסנן events לפי ערי האזור (client-side)
+
+---
+
 ### טיוטא 1 — commit `118b3ed` (אוקטובר 2026)
 
 ה-UI הראשון הבשל. כל הדפים מאוחדים לעיצוב בהיר (light-only).
