@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CalendarPlus, Info, Moon, Sun, Star, Utensils } from 'lucide-react'
+import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -9,6 +10,15 @@ import { KASHRUT_LABELS, RELIGIOUS_LABELS, EVENT_TYPE_LABELS } from '../types'
 import TopBar from '../components/TopBar'
 
 const CITIES = ['ירושלים', 'תל אביב', 'חיפה', 'ראשון לציון', 'פתח תקוה', 'אשדוד', 'נתניה', 'באר שבע', 'בני ברק', 'בת ים', 'רחובות', 'רמת גן', 'אחרת']
+
+const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
+const GLASS = {
+  background: 'rgba(255,255,255,0.58)',
+  backdropFilter: 'blur(28px)',
+  WebkitBackdropFilter: 'blur(28px)',
+  border: '1px solid rgba(255,255,255,0.80)',
+  boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+}
 
 const EVENT_TYPE_ICON: Record<string, React.ReactNode> = {
   shabbat_dinner: <Moon className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
@@ -92,169 +102,220 @@ export default function CreateEvent() {
   }
 
   return (
-    <div className="min-h-dvh" style={{ background: '#FDFBF7' }}>
-      <TopBar title="פרסם ארוחה" showBack />
+    <div className="relative min-h-dvh"
+      style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
 
-      <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-6">
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-2 block">סוג הארוחה *</label>
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(t => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => update('event_type', t)}
-                className={`p-3 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-start gap-1.5 ${
-                  form.event_type === t
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-card text-foreground hover:border-primary/50'
-                }`}
-              >
-                <div className="flex items-center gap-1">
+      {/* Luminous orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <motion.div className="absolute rounded-full"
+          style={{ width: 700, height: 700, top: -260, right: -260,
+            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+            filter: 'blur(80px)' }}
+          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
+          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
+        />
+        <motion.div className="absolute rounded-full"
+          style={{ width: 560, height: 560, bottom: 40, left: -220,
+            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+            filter: 'blur(72px)' }}
+          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
+          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
+        />
+      </div>
+
+      <div className="relative" style={{ zIndex: 1 }}>
+        <TopBar title="פרסם ארוחה" showBack />
+
+        <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-5">
+
+          {/* Event type */}
+          <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
+            <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>סוג הארוחה *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(t => (
+                <button key={t} type="button" onClick={() => update('event_type', t)}
+                  className="p-3 rounded-xl text-sm font-medium transition-all flex items-center justify-start gap-1.5"
+                  style={form.event_type === t ? {
+                    background: 'rgba(192,82,42,0.10)',
+                    border: '2px solid #C0522A',
+                    color: '#C0522A',
+                  } : {
+                    background: 'rgba(255,255,255,0.50)',
+                    border: '1.5px solid rgba(232,226,216,0.70)',
+                    color: '#1A1714',
+                  }}>
                   {EVENT_TYPE_ICON[t]}
                   {EVENT_TYPE_LABELS[t]}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {form.event_type === 'holiday' && (
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">שם החג</label>
-            <input value={form.holiday_name} onChange={e => update('holiday_name', e.target.value)}
-              placeholder="פסח, ראש השנה, שבועות..." className="shulchan-input" />
-          </div>
-        )}
-
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-1.5 block">כותרת הארוחה *</label>
-          <input value={form.title} onChange={e => update('title', e.target.value)}
-            placeholder="ארוחת שישי חמה בסלון, כולם מוזמנים!" className="shulchan-input" maxLength={80} />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">תאריך *</label>
-            <input type="date" value={form.event_date} onChange={e => update('event_date', e.target.value)}
-              className="shulchan-input" min={new Date().toISOString().split('T')[0]} />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">שעה *</label>
-            <input type="time" value={form.event_time} onChange={e => update('event_time', e.target.value)}
-              className="shulchan-input" />
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">עיר *</label>
-            <select value={form.city} onChange={e => update('city', e.target.value)} className="shulchan-input">
-              <option value="">בחר עיר...</option>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">שכונה</label>
-            <input value={form.neighborhood} onChange={e => update('neighborhood', e.target.value)}
-              placeholder="שכונה (אופציונלי)" className="shulchan-input" />
-          </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">כתובת מלאה *</label>
-            <input value={form.address} onChange={e => update('address', e.target.value)}
-              placeholder="רחוב הרצל 5, דירה 3" className="shulchan-input" />
-            <div className="flex items-center gap-1 mt-1">
-              <Info className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">תוצג רק לאורחים מאושרים</p>
+                </button>
+              ))}
             </div>
           </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">הערות לכתובת</label>
-            <input value={form.address_notes} onChange={e => update('address_notes', e.target.value)}
-              placeholder="כניסה מהחצר, קומה 2..." className="shulchan-input" />
-          </div>
-        </div>
 
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-1.5 block">מספר אורחים מקסימלי *</label>
-          <div className="flex items-center gap-3">
-            <button type="button"
-              onClick={() => update('max_guests', String(Math.max(1, Number(form.max_guests) - 1)))}
-              className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xl font-bold active:scale-90 transition-all">
-              −
-            </button>
-            <span className="text-2xl font-bold text-foreground w-8 text-center">{form.max_guests}</span>
-            <button type="button"
-              onClick={() => update('max_guests', String(Math.min(30, Number(form.max_guests) + 1)))}
-              className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-xl font-bold active:scale-90 transition-all">
-              +
-            </button>
-          </div>
-        </div>
+          {form.event_type === 'holiday' && (
+            <div className="rounded-2xl p-4" style={{ ...GLASS }}>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>שם החג</label>
+              <input value={form.holiday_name} onChange={e => update('holiday_name', e.target.value)}
+                placeholder="פסח, ראש השנה, שבועות..." className="shulchan-input" />
+            </div>
+          )}
 
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-2 block">רמת כשרות האוכל *</label>
-          <div className="grid grid-cols-2 gap-2">
-            {(['mehadrin', 'kosher', 'traditional', 'none'] as KashrutLevel[]).map(k => (
-              <button key={k} type="button"
-                onClick={() => update('kashrut_level', k)}
-                className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
-                  form.kashrut_level === k
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-card text-foreground hover:border-primary/50'
-                }`}>
-                {KASHRUT_LABELS[k]}
+          {/* Basic info */}
+          <div className="rounded-2xl p-4 space-y-4" style={{ ...GLASS }}>
+            <div>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>כותרת הארוחה *</label>
+              <input value={form.title} onChange={e => update('title', e.target.value)}
+                placeholder="ארוחת שישי חמה בסלון, כולם מוזמנים!" className="shulchan-input" maxLength={80} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>תאריך *</label>
+                <input type="date" value={form.event_date} onChange={e => update('event_date', e.target.value)}
+                  className="shulchan-input" min={new Date().toISOString().split('T')[0]} />
+              </div>
+              <div>
+                <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>שעה *</label>
+                <input type="time" value={form.event_time} onChange={e => update('event_time', e.target.value)}
+                  className="shulchan-input" />
+              </div>
+            </div>
+          </div>
+
+          {/* Location */}
+          <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
+            <div>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>עיר *</label>
+              <select value={form.city} onChange={e => update('city', e.target.value)} className="shulchan-input">
+                <option value="">בחר עיר...</option>
+                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>שכונה</label>
+              <input value={form.neighborhood} onChange={e => update('neighborhood', e.target.value)}
+                placeholder="שכונה (אופציונלי)" className="shulchan-input" />
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>כתובת מלאה *</label>
+              <input value={form.address} onChange={e => update('address', e.target.value)}
+                placeholder="רחוב הרצל 5, דירה 3" className="shulchan-input" />
+              <div className="flex items-center gap-1 mt-1">
+                <Info className="w-3 h-3" style={{ color: '#8C7060' }} />
+                <p className="text-xs" style={{ color: '#8C7060' }}>תוצג רק לאורחים מאושרים</p>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>הערות לכתובת</label>
+              <input value={form.address_notes} onChange={e => update('address_notes', e.target.value)}
+                placeholder="כניסה מהחצר, קומה 2..." className="shulchan-input" />
+            </div>
+          </div>
+
+          {/* Guests */}
+          <div className="rounded-2xl p-4" style={{ ...GLASS }}>
+            <label className="text-sm font-semibold mb-3 block" style={{ color: '#1A1714' }}>מספר אורחים מקסימלי *</label>
+            <div className="flex items-center gap-4">
+              <button type="button"
+                onClick={() => update('max_guests', String(Math.max(1, Number(form.max_guests) - 1)))}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold transition-all active:scale-90"
+                style={{ background: 'rgba(192,82,42,0.10)', border: '1px solid rgba(192,82,42,0.20)', color: '#C0522A' }}>
+                −
               </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-1 block">העדפת אורחים (ריק = כולם)</label>
-          <p className="text-xs text-muted-foreground mb-2">בחר את הרקע הדתי של האורחים המועדפים</p>
-          <div className="grid grid-cols-2 gap-2">
-            {(Object.keys(RELIGIOUS_LABELS) as ReligiousLevel[]).map(r => (
-              <button key={r} type="button"
-                onClick={() => toggleReligious(r)}
-                className={`p-3 rounded-xl text-sm font-medium border-2 transition-all ${
-                  form.preferred_religious_levels.includes(r)
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border bg-card text-foreground hover:border-primary/50'
-                }`}>
-                {RELIGIOUS_LABELS[r]}
+              <span className="text-2xl font-bold w-8 text-center" style={{ color: '#1A1714' }}>{form.max_guests}</span>
+              <button type="button"
+                onClick={() => update('max_guests', String(Math.min(30, Number(form.max_guests) + 1)))}
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold transition-all active:scale-90"
+                style={{ background: 'rgba(192,82,42,0.10)', border: '1px solid rgba(192,82,42,0.20)', color: '#C0522A' }}>
+                +
               </button>
-            ))}
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">גיל מינימלי</label>
-            <input type="number" value={form.min_age} onChange={e => update('min_age', e.target.value)}
-              placeholder="18" className="shulchan-input" min="18" max="120" />
+          {/* Kashrut */}
+          <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
+            <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>רמת כשרות האוכל *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {(['mehadrin', 'kosher', 'traditional', 'none'] as KashrutLevel[]).map(k => (
+                <button key={k} type="button" onClick={() => update('kashrut_level', k)}
+                  className="p-3 rounded-xl text-sm font-medium transition-all"
+                  style={form.kashrut_level === k ? {
+                    background: 'rgba(192,82,42,0.10)',
+                    border: '2px solid #C0522A',
+                    color: '#C0522A',
+                  } : {
+                    background: 'rgba(255,255,255,0.50)',
+                    border: '1.5px solid rgba(232,226,216,0.70)',
+                    color: '#1A1714',
+                  }}>
+                  {KASHRUT_LABELS[k]}
+                </button>
+              ))}
+            </div>
           </div>
-          <div>
-            <label className="text-sm font-semibold text-foreground mb-1.5 block">גיל מקסימלי</label>
-            <input type="number" value={form.max_age} onChange={e => update('max_age', e.target.value)}
-              placeholder="ללא הגבלה" className="shulchan-input" min="18" max="120" />
+
+          {/* Religious preference */}
+          <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
+            <div>
+              <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>העדפת אורחים <span className="font-normal text-xs" style={{ color: '#8C7060' }}>(ריק = כולם)</span></label>
+              <p className="text-xs mt-0.5" style={{ color: '#8C7060' }}>בחר את הרקע הדתי של האורחים המועדפים</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.keys(RELIGIOUS_LABELS) as ReligiousLevel[]).map(r => (
+                <button key={r} type="button" onClick={() => toggleReligious(r)}
+                  className="p-3 rounded-xl text-sm font-medium transition-all"
+                  style={form.preferred_religious_levels.includes(r) ? {
+                    background: 'rgba(192,82,42,0.10)',
+                    border: '2px solid #C0522A',
+                    color: '#C0522A',
+                  } : {
+                    background: 'rgba(255,255,255,0.50)',
+                    border: '1.5px solid rgba(232,226,216,0.70)',
+                    color: '#1A1714',
+                  }}>
+                  {RELIGIOUS_LABELS[r]}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="text-sm font-semibold text-foreground mb-1.5 block">תיאור הארוחה</label>
-          <textarea value={form.description} onChange={e => update('description', e.target.value)}
-            placeholder="ספר על הארוחה — מה מגישים, האווירה, מה מצפה לאורחים..."
-            className="shulchan-input resize-none h-28" maxLength={500} />
-          <p className="text-xs text-muted-foreground mt-1">{form.description.length}/500</p>
-        </div>
+          {/* Age range */}
+          <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
+            <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>טווח גיל <span className="font-normal text-xs" style={{ color: '#8C7060' }}>(אופציונלי)</span></label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#8C7060' }}>גיל מינימלי</label>
+                <input type="number" value={form.min_age} onChange={e => update('min_age', e.target.value)}
+                  placeholder="18" className="shulchan-input" min="18" max="120" />
+              </div>
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#8C7060' }}>גיל מקסימלי</label>
+                <input type="number" value={form.max_age} onChange={e => update('max_age', e.target.value)}
+                  placeholder="ללא הגבלה" className="shulchan-input" min="18" max="120" />
+              </div>
+            </div>
+          </div>
 
-        {/* Submit */}
-        <button onClick={handleSubmit} disabled={loading} className="w-full btn-primary py-4 text-base font-bold flex items-center justify-center gap-2">
-          {loading
-            ? <div className="w-5 h-5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-            : <><CalendarPlus className="w-5 h-5" /> פרסם את הארוחה!</>
-          }
-        </button>
+          {/* Description */}
+          <div className="rounded-2xl p-4" style={{ ...GLASS }}>
+            <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>תיאור הארוחה</label>
+            <textarea value={form.description} onChange={e => update('description', e.target.value)}
+              placeholder="ספר על הארוחה — מה מגישים, האווירה, מה מצפה לאורחים..."
+              className="shulchan-input resize-none h-28" maxLength={500} />
+            <p className="text-xs mt-1" style={{ color: '#8C7060' }}>{form.description.length}/500</p>
+          </div>
+
+          {/* Submit */}
+          <motion.button
+            onClick={handleSubmit} disabled={loading}
+            whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+            whileTap={{ scale: 0.98 }} transition={SPRING}
+            className="w-full py-4 text-base font-bold text-white rounded-2xl flex items-center justify-center gap-2 disabled:opacity-60"
+            style={{ background: 'linear-gradient(135deg, #C0522A, #8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>
+            {loading
+              ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              : <><CalendarPlus className="w-5 h-5" /> פרסם את הארוחה!</>
+            }
+          </motion.button>
+        </div>
       </div>
     </div>
   )
