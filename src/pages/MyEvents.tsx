@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarPlus, ChevronLeft, Clock, Users, Star } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, Clock, Users, Star, ArrowRight } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { he } from 'date-fns/locale'
 import toast from 'react-hot-toast'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import type { Event, EventRegistration } from '../types'
@@ -12,16 +12,37 @@ import { EVENT_TYPE_LABELS, KASHRUT_LABELS } from '../types'
 import TopBar from '../components/TopBar'
 import GuestCard from '../components/GuestCard'
 import EmptyState from '../components/EmptyState'
-import LoadingSpinner from '../components/LoadingSpinner'
 import StarRating from '../components/StarRating'
+
+type BezierEase = [number, number, number, number]
+const EASE: BezierEase = [0.22, 1, 0.36, 1]
+const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
+const GLASS = {
+  background: 'rgba(255,255,255,0.58)',
+  backdropFilter: 'blur(28px)',
+  WebkitBackdropFilter: 'blur(28px)',
+  border: '1px solid rgba(255,255,255,0.80)',
+  boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+}
+
+function SkeletonCard() {
+  return (
+    <motion.div className="rounded-2xl overflow-hidden p-4 space-y-2" style={{ ...GLASS }}
+      animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
+      <div className="h-3.5 rounded-full w-2/3" style={{ background: 'rgba(232,226,216,0.7)' }} />
+      <div className="h-2.5 rounded-full w-1/2" style={{ background: 'rgba(240,235,228,0.6)' }} />
+      <div className="h-2 rounded-full w-1/3" style={{ background: 'rgba(245,240,234,0.5)' }} />
+    </motion.div>
+  )
+}
 
 export default function MyEvents() {
   const { user } = useAuth()
-  const [events, setEvents] = useState<Event[]>([])
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
-  const [registrations, setRegistrations] = useState<EventRegistration[]>([])
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(false)
+  const [events, setEvents]                   = useState<Event[]>([])
+  const [selectedEvent, setSelectedEvent]     = useState<Event | null>(null)
+  const [registrations, setRegistrations]     = useState<EventRegistration[]>([])
+  const [loading, setLoading]                 = useState(true)
+  const [actionLoading, setActionLoading]     = useState(false)
   const [guestRatingModal, setGuestRatingModal] = useState<{ eventId: string; guestId: string; guestName: string } | null>(null)
   const [guestRatingScore, setGuestRatingScore] = useState(5)
   const [guestRatingComment, setGuestRatingComment] = useState('')
@@ -29,11 +50,8 @@ export default function MyEvents() {
 
   const fetchEvents = useCallback(async () => {
     if (!user) return
-    const { data } = await supabase
-      .from('events')
-      .select('*')
-      .eq('host_id', user.id)
-      .order('event_date', { ascending: false })
+    const { data } = await supabase.from('events').select('*')
+      .eq('host_id', user.id).order('event_date', { ascending: false })
     setEvents(data ?? [])
     setLoading(false)
   }, [user])
@@ -41,11 +59,9 @@ export default function MyEvents() {
   useEffect(() => { fetchEvents() }, [fetchEvents])
 
   const fetchRegistrations = useCallback(async (eventId: string) => {
-    const { data } = await supabase
-      .from('event_registrations')
+    const { data } = await supabase.from('event_registrations')
       .select('*, guest:profiles!guest_id(*)')
-      .eq('event_id', eventId)
-      .order('created_at', { ascending: false })
+      .eq('event_id', eventId).order('created_at', { ascending: false })
     setRegistrations(data ?? [])
   }, [])
 
@@ -56,34 +72,18 @@ export default function MyEvents() {
 
   const handleApprove = async (registrationId: string) => {
     setActionLoading(true)
-    const reg = registrations.find(r => r.id === registrationId)
-    if (!reg || !selectedEvent) return
-
-    const { error } = await supabase
-      .from('event_registrations')
+    const { error } = await supabase.from('event_registrations')
       .update({ status: 'approved', responded_at: new Date().toISOString() })
       .eq('id', registrationId)
-
     if (error) {
       toast.error('שגיאה באישור האורח')
     } else {
       setRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status: 'approved' } : r))
-
-      // Trigger email notification
-      await supabase.functions.invoke('send-notification-email', {
-        body: {
-          type: 'guest_approved',
-          registration_id: registrationId,
-        },
-      })
-
-      // Update current_guests count
-      await supabase
-        .from('events')
-        .update({ current_guests: selectedEvent.current_guests + 1 })
-        .eq('id', selectedEvent.id)
-
-      setSelectedEvent(e => e ? { ...e, current_guests: e.current_guests + 1 } : e)
+      await supabase.functions.invoke('send-notification-email', { body: { type: 'guest_approved', registration_id: registrationId } })
+      if (selectedEvent) {
+        await supabase.from('events').update({ current_guests: selectedEvent.current_guests + 1 }).eq('id', selectedEvent.id)
+        setSelectedEvent(e => e ? { ...e, current_guests: e.current_guests + 1 } : e)
+      }
       toast.success('האורח אושר! נשלח לו מייל עם הכתובת.')
     }
     setActionLoading(false)
@@ -91,20 +91,14 @@ export default function MyEvents() {
 
   const handleReject = async (registrationId: string) => {
     setActionLoading(true)
-    const { error } = await supabase
-      .from('event_registrations')
+    const { error } = await supabase.from('event_registrations')
       .update({ status: 'rejected', responded_at: new Date().toISOString() })
       .eq('id', registrationId)
-
     if (error) {
       toast.error('שגיאה בדחיית האורח')
     } else {
       setRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status: 'rejected' } : r))
-
-      await supabase.functions.invoke('send-notification-email', {
-        body: { type: 'guest_rejected', registration_id: registrationId },
-      })
-
+      await supabase.functions.invoke('send-notification-email', { body: { type: 'guest_rejected', registration_id: registrationId } })
       toast.success('הבקשה נדחתה.')
     }
     setActionLoading(false)
@@ -112,10 +106,7 @@ export default function MyEvents() {
 
   const handleCancelEvent = async (eventId: string) => {
     if (!confirm('האם לבטל את האירוע? פעולה זו לא ניתנת לביטול.')) return
-    const { error } = await supabase
-      .from('events')
-      .update({ status: 'cancelled' })
-      .eq('id', eventId)
+    const { error } = await supabase.from('events').update({ status: 'cancelled' }).eq('id', eventId)
     if (!error) {
       setEvents(prev => prev.map(e => e.id === eventId ? { ...e, status: 'cancelled' } : e))
       if (selectedEvent?.id === eventId) setSelectedEvent(e => e ? { ...e, status: 'cancelled' } : e)
@@ -134,12 +125,8 @@ export default function MyEvents() {
     if (!guestRatingModal || !user) return
     setGuestRatingLoading(true)
     const { error } = await supabase.from('ratings').insert({
-      event_id: guestRatingModal.eventId,
-      rater_id: user.id,
-      rated_id: guestRatingModal.guestId,
-      role: 'as_guest',
-      score: guestRatingScore,
-      comment: guestRatingComment.trim() || null,
+      event_id: guestRatingModal.eventId, rater_id: user.id, rated_id: guestRatingModal.guestId,
+      role: 'as_guest', score: guestRatingScore, comment: guestRatingComment.trim() || null,
     })
     if (error) {
       toast.error(error.message.includes('duplicate') ? 'כבר דירגת אורח זה' : 'שגיאה בשמירת הדירוג')
@@ -152,235 +139,279 @@ export default function MyEvents() {
     setGuestRatingLoading(false)
   }
 
-  const pendingCount = registrations.filter(r => r.status === 'pending').length
+  const pendingCount  = registrations.filter(r => r.status === 'pending').length
   const approvedCount = registrations.filter(r => r.status === 'approved').length
+
+  const statusColor = { active: '#059669', full: '#D97706', cancelled: '#DC2626', completed: '#8C7060' }
+  const statusLabel = { active: 'פעיל', full: 'מלא', cancelled: 'בוטל', completed: 'הסתיים' }
 
   return (
     <>
-    <div className="relative min-h-dvh" style={{ background: '#FDFBF7' }}>
-      {/* Ambient background orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <div className="ambient-blob absolute rounded-full" style={{
-          width: 600, height: 600, top: -150, right: -200,
-          background: 'radial-gradient(circle at center, rgba(245,158,11,0.18) 0%, transparent 65%)',
-          filter: 'blur(50px)', animation: 'blob-drift-1 22s ease-in-out infinite',
-        }} />
-        <div className="ambient-blob absolute rounded-full" style={{
-          width: 500, height: 500, bottom: 50, left: -150,
-          background: 'radial-gradient(circle at center, rgba(200,90,50,0.14) 0%, transparent 65%)',
-          filter: 'blur(45px)', animation: 'blob-drift-2 28s ease-in-out infinite',
-        }} />
-      </div>
+      <div className="relative min-h-dvh"
+        style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
 
-      <div className="relative" style={{ zIndex: 1 }}>
-        <TopBar title="הארוחות שלי" />
+        {/* Luminous orbs */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+          <motion.div className="absolute rounded-full"
+            style={{ width: 700, height: 700, top: -260, right: -260,
+              background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+              filter: 'blur(80px)' }}
+            animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
+            transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
+          />
+          <motion.div className="absolute rounded-full"
+            style={{ width: 560, height: 560, bottom: 40, left: -220,
+              background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+              filter: 'blur(72px)' }}
+            animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
+            transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
+          />
+        </div>
 
-        <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-4 md:max-w-2xl">
-          {/* Event list or selected */}
-          {!selectedEvent ? (
-            <>
-              <div className="flex items-center justify-between">
-                <h2 className="section-title">הארוחות שפרסמתי</h2>
-                <Link to="/create-event">
-                  <button className="flex items-center gap-1.5 text-sm text-primary font-medium">
-                    <CalendarPlus className="w-4 h-4" />
-                    חדשה
-                  </button>
-                </Link>
-              </div>
+        <div className="relative" style={{ zIndex: 1 }}>
+          <TopBar title="הארוחות שלי" />
 
-              {loading ? <LoadingSpinner /> : events.length === 0 ? (
-                <EmptyState
-                  icon={<CalendarPlus className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />}
-                  title="עוד לא פרסמת ארוחה"
-                  description="פתח את ביתך לאורחים חדשים!"
-                  action={
+          <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-4 md:max-w-2xl">
+            <AnimatePresence mode="wait">
+              {!selectedEvent ? (
+                <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-sm font-bold" style={{ color: '#1A1714', letterSpacing: '-0.012em' }}>
+                      הארוחות שפרסמתי
+                    </h2>
                     <Link to="/create-event">
-                      <button className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2">
-                        <CalendarPlus className="w-4 h-4" />
-                        פרסם ארוחה ראשונה
-                      </button>
-                    </Link>
-                  }
-                />
-              ) : (
-                <motion.div
-                  className="space-y-3"
-                  initial="hidden"
-                  animate="show"
-                  variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
-                >
-                  {events.map(event => {
-                    const dateStr = format(new Date(event.event_date + 'T00:00:00'), 'd בMMM', { locale: he })
-                    const statusColor = {
-                      active: 'text-emerald-600',
-                      full: 'text-amber-600',
-                      cancelled: 'text-red-500',
-                      completed: 'text-muted-foreground',
-                    }[event.status]
-                    const statusLabel = {
-                      active: 'פעיל',
-                      full: 'מלא',
-                      cancelled: 'בוטל',
-                      completed: 'הסתיים',
-                    }[event.status]
-
-                    return (
                       <motion.button
-                        key={event.id}
-                        onClick={() => handleSelectEvent(event)}
-                        className="shulchan-card p-4 w-full text-right"
-                        variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}
-                        whileHover={{ y: -2, boxShadow: '0 10px 28px rgba(44,24,8,0.08)' }}
-                        whileTap={{ scale: 0.985 }}
-                        transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground text-sm">{event.title}</p>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {dateStr} • {event.event_time.slice(0, 5)}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Users className="w-3 h-3" />
-                                {event.current_guests}/{event.max_guests}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs badge bg-muted text-muted-foreground">
-                                {KASHRUT_LABELS[event.kashrut_level]}
-                              </span>
-                              <span className="text-xs badge bg-muted text-muted-foreground">
-                                {EVENT_TYPE_LABELS[event.event_type]}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className={`text-xs font-semibold ${statusColor}`}>{statusLabel}</span>
-                            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-                          </div>
-                        </div>
+                        whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }} transition={SPRING}
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl"
+                        style={{ background: 'rgba(192,82,42,0.10)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.16)' }}>
+                        <CalendarPlus className="w-3.5 h-3.5" /> חדשה
                       </motion.button>
-                    )
-                  })}
+                    </Link>
+                  </div>
+
+                  {loading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
+                    </div>
+                  ) : events.length === 0 ? (
+                    <EmptyState
+                      icon={<CalendarPlus className="w-8 h-8" style={{ color: '#8C7060' }} strokeWidth={1.5} />}
+                      title="עוד לא פרסמת ארוחה"
+                      description="פתח את ביתך לאורחים חדשים!"
+                      action={
+                        <Link to="/create-event">
+                          <motion.button
+                            whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(143,66,34,0.38)' }}
+                            whileTap={{ scale: 0.97 }} transition={SPRING}
+                            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl"
+                            style={{ background: 'linear-gradient(135deg,#C0522A,#8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>
+                            <CalendarPlus className="w-4 h-4" /> פרסם ארוחה ראשונה
+                          </motion.button>
+                        </Link>
+                      }
+                    />
+                  ) : (
+                    <motion.div className="space-y-3"
+                      initial="hidden" animate="show"
+                      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}>
+                      {events.map(event => {
+                        const dateStr = format(new Date(event.event_date + 'T00:00:00'), 'd בMMM', { locale: he })
+                        const sColor  = statusColor[event.status as keyof typeof statusColor] ?? '#8C7060'
+                        const sLabel  = statusLabel[event.status as keyof typeof statusLabel] ?? event.status
+                        return (
+                          <motion.button
+                            key={event.id}
+                            onClick={() => handleSelectEvent(event)}
+                            className="w-full text-right rounded-2xl p-4"
+                            style={{ ...GLASS }}
+                            variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } } }}
+                            whileHover={{ y: -3, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
+                            whileTap={{ scale: 0.985 }}
+                            transition={SPRING}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm leading-snug" style={{ color: '#1A1714', letterSpacing: '-0.01em' }}>
+                                  {event.title}
+                                </p>
+                                <div className="flex items-center gap-3 mt-1.5 text-xs" style={{ color: '#8C7060' }}>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />{dateStr} · {event.event_time.slice(0, 5)}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Users className="w-3 h-3" />{event.current_guests}/{event.max_guests}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                    style={{ background: 'rgba(232,226,216,0.70)', color: '#8C7060' }}>
+                                    {KASHRUT_LABELS[event.kashrut_level]}
+                                  </span>
+                                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                    style={{ background: 'rgba(232,226,216,0.70)', color: '#8C7060' }}>
+                                    {EVENT_TYPE_LABELS[event.event_type]}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0 mr-2">
+                                <span className="text-xs font-bold" style={{ color: sColor }}>{sLabel}</span>
+                                <ChevronLeft className="w-4 h-4" style={{ color: '#8C7060' }} />
+                              </div>
+                            </div>
+                          </motion.button>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div key="detail"
+                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.38, ease: EASE }}>
+
+                  {/* Back */}
+                  <motion.button
+                    onClick={() => setSelectedEvent(null)}
+                    className="flex items-center gap-1.5 text-sm font-medium mb-4"
+                    style={{ color: '#8C7060' }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={SPRING}
+                  >
+                    <ArrowRight className="w-4 h-4" /> כל הארוחות
+                  </motion.button>
+
+                  {/* Event header card */}
+                  <div className="rounded-2xl p-4 space-y-3 mb-4" style={{ ...GLASS }}>
+                    <h2 className="font-display font-bold text-lg" style={{ color: '#1A1714', letterSpacing: '-0.02em' }}>
+                      {selectedEvent.title}
+                    </h2>
+                    <div className="flex items-center gap-4 text-sm" style={{ color: '#8C7060' }}>
+                      <span>{format(new Date(selectedEvent.event_date + 'T00:00:00'), 'd בMMM yyyy', { locale: he })}</span>
+                      <span>{selectedEvent.event_time.slice(0, 5)}</span>
+                    </div>
+
+                    {/* Capacity bar */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(232,226,216,0.7)' }}>
+                        <div className="h-full rounded-full"
+                          style={{
+                            width: `${(selectedEvent.current_guests / selectedEvent.max_guests) * 100}%`,
+                            background: 'linear-gradient(90deg, #C0522A, #E8854A)',
+                          }} />
+                      </div>
+                      <span className="text-xs font-semibold" style={{ color: '#8C7060' }}>
+                        {selectedEvent.current_guests}/{selectedEvent.max_guests}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                        style={{ background: 'rgba(245,158,11,0.10)', color: '#D97706', border: '1px solid rgba(245,158,11,0.20)' }}>
+                        {pendingCount} ממתינים
+                      </span>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                        style={{ background: 'rgba(16,185,129,0.10)', color: '#059669', border: '1px solid rgba(16,185,129,0.20)' }}>
+                        {approvedCount} מאושרים
+                      </span>
+                    </div>
+
+                    {selectedEvent.status === 'active' && (
+                      <button onClick={() => handleCancelEvent(selectedEvent.id)}
+                        className="text-xs font-medium" style={{ color: '#DC2626' }}>
+                        ביטול האירוע
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Guests */}
+                  <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#8C7060' }}>אורחים</h3>
+                  {registrations.length === 0 ? (
+                    <EmptyState
+                      icon={<Users className="w-8 h-8" style={{ color: '#8C7060' }} strokeWidth={1.5} />}
+                      title="אין אורחים עדיין"
+                      description="ברגע שמישהו יירשם תקבל התראה"
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      {registrations.map(reg => (
+                        <div key={reg.id}>
+                          <GuestCard
+                            registration={reg}
+                            onApprove={reg.status === 'pending' ? handleApprove : undefined}
+                            onReject={reg.status === 'pending' ? handleReject : undefined}
+                            loading={actionLoading}
+                          />
+                          {canRateGuest(reg) && reg.guest && (
+                            <motion.button
+                              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={SPRING}
+                              onClick={() => setGuestRatingModal({ eventId: selectedEvent!.id, guestId: reg.guest_id, guestName: reg.guest!.display_name })}
+                              className="mt-1.5 mr-2 flex items-center gap-1.5 text-xs font-bold"
+                              style={{ color: '#C8860A' }}>
+                              <Star className="w-3.5 h-3.5 fill-current" /> דרג את {reg.guest.display_name}
+                            </motion.button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
-            </>
-          ) : (
-            <>
-              {/* Back button */}
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 rotate-180" />
-                כל הארוחות
-              </button>
-
-              {/* Event header */}
-              <div className="shulchan-card p-4 space-y-2">
-                <h2 className="font-display font-bold text-lg text-foreground">{selectedEvent.title}</h2>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>{format(new Date(selectedEvent.event_date + 'T00:00:00'), 'd בMMM yyyy', { locale: he })}</span>
-                  <span>{selectedEvent.event_time.slice(0, 5)}</span>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2">
-                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full"
-                      style={{ width: `${(selectedEvent.current_guests / selectedEvent.max_guests) * 100}%` }} />
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {selectedEvent.current_guests}/{selectedEvent.max_guests}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="badge bg-amber-100 text-amber-800">
-                    {pendingCount} ממתינים
-                  </span>
-                  <span className="badge bg-emerald-100 text-emerald-800">
-                    {approvedCount} מאושרים
-                  </span>
-                </div>
-
-                {selectedEvent.status === 'active' && (
-                  <button
-                    onClick={() => handleCancelEvent(selectedEvent.id)}
-                    className="text-xs text-destructive hover:underline"
-                  >
-                    ביטול האירוע
-                  </button>
-                )}
-              </div>
-
-              {/* Guests */}
-              <div>
-                <h3 className="section-title mb-3">אורחים</h3>
-                {registrations.length === 0 ? (
-                  <EmptyState icon={<Users className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />} title="אין אורחים עדיין" description="ברגע שמישהו יירשם תקבל התראה" />
-                ) : (
-                  <div className="space-y-3">
-                    {registrations.map(reg => (
-                      <div key={reg.id}>
-                        <GuestCard
-                          registration={reg}
-                          onApprove={reg.status === 'pending' ? handleApprove : undefined}
-                          onReject={reg.status === 'pending' ? handleReject : undefined}
-                          loading={actionLoading}
-                        />
-                        {canRateGuest(reg) && reg.guest && (
-                          <button
-                            onClick={() => setGuestRatingModal({ eventId: selectedEvent!.id, guestId: reg.guest_id, guestName: reg.guest!.display_name })}
-                            className="mt-1.5 mr-2 flex items-center gap-1.5 text-xs font-bold"
-                            style={{ color: '#C8860A' }}
-                          >
-                            <Star className="w-3.5 h-3.5 fill-current" />
-                            דרג את {reg.guest.display_name}
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-    {/* Rate guest modal */}
-    {guestRatingModal && (
-      <div className="fixed inset-0 z-50 flex items-end" style={{ background: 'rgba(0,0,0,0.65)' }} onClick={() => setGuestRatingModal(null)}>
-        <div
-          className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-5"
-          style={{ background: 'hsl(var(--card))', boxShadow: '0 -8px 40px rgba(0,0,0,0.2)' }}
-          onClick={e => e.stopPropagation()}
-        >
-          <div className="w-10 h-1 bg-border rounded-full mx-auto" />
-          <h3 className="font-display font-black text-xl text-foreground text-center">
-            דרג את {guestRatingModal.guestName}
-          </h3>
-          <div className="flex justify-center">
-            <StarRating score={guestRatingScore} interactive onChange={setGuestRatingScore} size="md" />
+            </AnimatePresence>
           </div>
-          <textarea
-            value={guestRatingComment}
-            onChange={e => setGuestRatingComment(e.target.value)}
-            placeholder="ספר על האורח (אופציונלי)..."
-            className="shulchan-input resize-none h-24 text-sm"
-            maxLength={300}
-          />
-          <button onClick={handleRateGuest} disabled={guestRatingLoading} className="w-full btn-gold py-4 font-bold text-base">
-            {guestRatingLoading
-              ? <div className="w-5 h-5 border-2 border-amber-900/40 border-t-amber-900 rounded-full animate-spin mx-auto" />
-              : 'שלח דירוג'}
-          </button>
         </div>
       </div>
-    )}
+
+      {/* Rate guest bottom sheet */}
+      <AnimatePresence>
+        {guestRatingModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end"
+            style={{ background: 'rgba(20,12,6,0.72)', backdropFilter: 'blur(4px)' }}
+            onClick={() => setGuestRatingModal(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 360, damping: 36 }}
+              className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-5"
+              style={{
+                background: 'rgba(253,249,243,0.95)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                boxShadow: '0 -20px 64px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.96)',
+                border: '1px solid rgba(255,255,255,0.88)',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 rounded-full mx-auto" style={{ background: 'rgba(120,108,99,0.28)' }} />
+              <h3 className="font-display font-black text-xl text-center"
+                style={{ color: '#1A1714', letterSpacing: '-0.022em' }}>
+                דרג את {guestRatingModal.guestName}
+              </h3>
+              <div className="flex justify-center">
+                <StarRating score={guestRatingScore} interactive onChange={setGuestRatingScore} size="md" />
+              </div>
+              <textarea
+                value={guestRatingComment}
+                onChange={e => setGuestRatingComment(e.target.value)}
+                placeholder="ספר על האורח (אופציונלי)..."
+                className="shulchan-input resize-none h-24 text-sm"
+                maxLength={300}
+              />
+              <motion.button
+                onClick={handleRateGuest} disabled={guestRatingLoading}
+                whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+                whileTap={{ scale: 0.98 }} transition={SPRING}
+                className="w-full py-4 font-bold text-base text-white rounded-2xl"
+                style={{ background: 'linear-gradient(135deg,#C8860A,#9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.30)' }}>
+                {guestRatingLoading
+                  ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin mx-auto" />
+                  : 'שלח דירוג'}
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

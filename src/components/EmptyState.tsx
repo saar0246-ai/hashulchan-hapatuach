@@ -1,6 +1,14 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 
+const GLASS = {
+  background: 'rgba(255,255,255,0.58)',
+  backdropFilter: 'blur(28px)',
+  WebkitBackdropFilter: 'blur(28px)',
+  border: '1px solid rgba(255,255,255,0.80)',
+  boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+}
+
 interface EmptyStateProps {
   icon?: ReactNode
   title: string
@@ -14,21 +22,26 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
       className="flex flex-col items-center justify-center text-center py-14 px-6"
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
+      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
     >
       {icon && (
         <motion.div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
-          style={{ background: 'hsl(var(--muted))', boxShadow: 'inset 0 1px 0 hsl(var(--card))' }}
+          style={{ ...GLASS }}
           whileHover={{ rotate: [0, -8, 8, 0] }}
           transition={{ duration: 0.4 }}
         >
           {icon}
         </motion.div>
       )}
-      <h3 className="font-display font-bold text-lg text-foreground mb-2">{title}</h3>
+      <h3 className="font-display font-bold text-lg mb-2"
+        style={{ color: '#1A1714', letterSpacing: '-0.015em' }}>
+        {title}
+      </h3>
       {description && (
-        <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mb-5">{description}</p>
+        <p className="text-sm leading-relaxed max-w-xs mb-5" style={{ color: '#8C7060' }}>
+          {description}
+        </p>
       )}
       {action}
     </motion.div>
