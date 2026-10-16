@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Search, X, CalendarPlus, MapPin, ChevronLeft, Utensils,
-  Moon, Sun, Star, Flame,
+  Moon, Sun, Star, Flame, ArrowUpRight,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence, LayoutGroup, type Variants } from 'framer-motion'
@@ -13,12 +13,10 @@ import type { Event } from '../types'
 import EventCard from '../components/EventCard'
 import TopBar from '../components/TopBar'
 
-// ── Emil Kowalski spring physics ──────────────────────────────
 type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
 const SPRING = { type: 'spring' as const, stiffness: 350, damping: 25 }
 
-// ── Palette lock — warm Mediterranean cream ───────────────────
 const BG     = '#FDFBF7'
 const TERRA  = '#C0390A'
 const OLIVE  = '#2D4A1E'
@@ -26,46 +24,50 @@ const TEXT   = '#1C1A17'
 const MUTED  = '#786C63'
 const BORDER = '#E8E2D8'
 
-// ── Glassmorphism surface ─────────────────────────────────────
 const GLASS = {
   background: 'rgba(255,255,255,0.62)',
   backdropFilter: 'blur(28px)',
   WebkitBackdropFilter: 'blur(28px)',
-  border: `1px solid rgba(255,255,255,0.82)`,
+  border: '1px solid rgba(255,255,255,0.82)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.92)',
 } as const
 
-// ── Category tabs ─────────────────────────────────────────────
+const GLASS_HEAVY = {
+  background: 'rgba(255,255,255,0.82)',
+  backdropFilter: 'blur(40px)',
+  WebkitBackdropFilter: 'blur(40px)',
+  border: '1px solid rgba(255,255,255,0.92)',
+  boxShadow: '0 24px 60px rgba(184,93,57,0.12), 0 4px 16px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.98)',
+} as const
+
 const TABS = [
-  { id: 'all',            label: 'הכל'         },
-  { id: 'shabbat_dinner', label: 'ארוחות שישי'  },
-  { id: 'shabbat_lunch',  label: 'ארוחות שבת'   },
-  { id: 'holiday',        label: 'חגים'         },
-  { id: 'weekday',        label: 'חול'          },
+  { id: 'all',            label: 'הכל'        },
+  { id: 'shabbat_dinner', label: 'ארוחות שישי' },
+  { id: 'shabbat_lunch',  label: 'ארוחות שבת'  },
+  { id: 'holiday',        label: 'חגים'        },
+  { id: 'weekday',        label: 'חול'         },
 ]
 
-// ── Regional settlement explorer ──────────────────────────────
 interface Region { name: string; label: string; color: string; cities: string[]; Icon: LucideIcon }
 const REGIONS: Region[] = [
   {
     name: 'ירושלים', label: 'ירושלים והסביבה', color: TERRA, Icon: Moon,
-    cities: ['ירושלים','בית שמש','מעלה אדומים','מבשרת ציון','גבעת זאב'],
+    cities: ['ירושלים', 'בית שמש', 'מעלה אדומים', 'מבשרת ציון', 'גבעת זאב'],
   },
   {
     name: 'גוש דן', label: 'גוש דן ותל אביב', color: OLIVE, Icon: Sun,
-    cities: ['תל אביב','רמת גן','גבעתיים','בני ברק','ראשון לציון','פתח תקוה','חולון','בת ים','אשדוד','נתניה'],
+    cities: ['תל אביב', 'רמת גן', 'גבעתיים', 'בני ברק', 'ראשון לציון', 'פתח תקוה', 'חולון', 'בת ים', 'אשדוד', 'נתניה'],
   },
   {
     name: 'הצפון', label: 'חיפה והצפון', color: '#1E5A8A', Icon: Star,
-    cities: ['חיפה','נהריה','עכו','טבריה','צפת','נצרת','קריית שמונה'],
+    cities: ['חיפה', 'נהריה', 'עכו', 'טבריה', 'צפת', 'נצרת', 'קריית שמונה'],
   },
   {
     name: 'הנגב', label: 'באר שבע והנגב', color: '#8F5A0A', Icon: Flame,
-    cities: ['באר שבע','אשקלון','אילת','דימונה','ערד','נתיבות'],
+    cities: ['באר שבע', 'אשקלון', 'אילת', 'דימונה', 'ערד', 'נתיבות'],
   },
 ]
 
-// ── Stagger variants ──────────────────────────────────────────
 const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -77,18 +79,14 @@ function greeting() {
   return h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב'
 }
 
-/* ═══════════════════════════════════════════════════════════
-   HOME — Warm Mediterranean Luxury
-   4 sections: Hero/Search · Bento Grid · Sliding Tabs · Geo Explorer
-═══════════════════════════════════════════════════════════ */
 export default function Home() {
   const { user }    = useAuth()
   const { profile } = useProfile(user?.id)
-  const [events, setEvents]             = useState<Event[]>([])
-  const [loading, setLoading]           = useState(true)
-  const [search, setSearch]             = useState('')
+  const [events, setEvents]               = useState<Event[]>([])
+  const [loading, setLoading]             = useState(true)
+  const [search, setSearch]               = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
-  const [activeTab, setActiveTab]       = useState('all')
+  const [activeTab, setActiveTab]         = useState('all')
   const [selectedRegion, setSelectedRegion] = useState('')
 
   const fetchEvents = useCallback(async () => {
@@ -121,116 +119,131 @@ export default function Home() {
   return (
     <div dir="rtl" className="relative min-h-dvh" style={{ background: BG }}>
 
-      {/* ════════════════════════════════════════════════════
-          SECTION 4: AMBIENT ANIMATED BACKGROUND
-          Multi-point floating gradient orbs — ultra-blurred
-      ════════════════════════════════════════════════════ */}
+      {/* ── Ambient mesh — 3 drifting orbs ── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden style={{ zIndex: 0 }}>
-
-        {/* Terracotta — top-right, 12% opacity */}
         <motion.div className="absolute rounded-full"
           style={{
-            width: 960, height: 960, top: -380, right: -360,
-            background: `radial-gradient(circle at 40% 38%, ${TERRA}1F 0%, ${TERRA}0A 44%, transparent 68%)`,
+            width: 1100, height: 1100, top: -440, right: -420,
+            background: `radial-gradient(circle at 38% 36%, ${TERRA}22 0%, ${TERRA}0C 44%, transparent 66%)`,
+            filter: 'blur(130px)',
+          }}
+          animate={{ x: [0, 84, -32, 0], y: [0, -72, 44, 0], scale: [1, 1.18, 0.88, 1] }}
+          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut' }} />
+
+        <motion.div className="absolute rounded-full"
+          style={{
+            width: 820, height: 820, bottom: 0, left: -320,
+            background: `radial-gradient(circle at 54% 50%, ${OLIVE}16 0%, ${OLIVE}08 48%, transparent 70%)`,
             filter: 'blur(120px)',
           }}
-          animate={{ x: [0, 72, -28, 0], y: [0, -64, 38, 0], scale: [1, 1.16, 0.88, 1] }}
-          transition={{ repeat: Infinity, duration: 30, ease: 'easeInOut' }}
-        />
+          animate={{ x: [0, -62, 72, 0], y: [0, 84, -52, 0], scale: [1, 0.86, 1.16, 1] }}
+          transition={{ repeat: Infinity, duration: 38, ease: 'easeInOut', delay: 8 }} />
 
-        {/* Olive/Carmel Green — bottom-left, 8% opacity */}
         <motion.div className="absolute rounded-full"
           style={{
-            width: 720, height: 720, bottom: 20, left: -280,
-            background: `radial-gradient(circle at 56% 52%, ${OLIVE}14 0%, ${OLIVE}07 48%, transparent 70%)`,
-            filter: 'blur(120px)',
+            width: 640, height: 640, top: '40%', left: '20%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(245,158,11,0.15) 0%, transparent 68%)',
+            filter: 'blur(110px)',
           }}
-          animate={{ x: [0, -58, 68, 0], y: [0, 76, -44, 0], scale: [1, 0.87, 1.15, 1] }}
-          transition={{ repeat: Infinity, duration: 36, ease: 'easeInOut', delay: 7 }}
-        />
-
-        {/* Warm amber — mid canvas */}
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 560, height: 560, top: '42%', left: '18%',
-            background: 'radial-gradient(circle at 50% 50%, rgba(220,150,55,0.13) 0%, transparent 68%)',
-            filter: 'blur(100px)',
-          }}
-          animate={{ x: [0, 46, -32, 0], y: [0, -40, 58, 0], scale: [1, 1.12, 0.94, 1] }}
-          transition={{ repeat: Infinity, duration: 24, ease: 'easeInOut', delay: 3 }}
-        />
+          animate={{ x: [0, 52, -38, 0], y: [0, -46, 62, 0], scale: [1, 1.14, 0.92, 1] }}
+          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut', delay: 3 }} />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
         <TopBar logo />
 
-        {/* ════════════════════════════════════════════════════
-            SECTION 1: EDITORIAL HERO + FLOATING GLASS SEARCH
-        ════════════════════════════════════════════════════ */}
-        <div className="px-5 pt-9 pb-6 max-w-lg mx-auto md:max-w-3xl">
+        {/* ══════════════════════════════════════════════
+            SECTION 1 — EDITORIAL HERO
+            Giant watermark "שולחן" sits behind copy.
+            Min-height 46vh forces a real section weight.
+        ══════════════════════════════════════════════ */}
+        <div className="relative overflow-hidden" style={{ minHeight: '46vh', paddingTop: '2.5rem', paddingBottom: '5.5rem' }}>
 
-          <motion.p
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.36, ease: EASE }}
-            className="text-sm font-semibold mb-3"
-            style={{ color: MUTED, letterSpacing: '0.01em' }}>
-            {greeting()}{profile?.display_name ? `, ${profile.display_name}` : ''}
-          </motion.p>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.58, ease: EASE, delay: 0.04 }}
-            className="font-black leading-[1.06]"
-            style={{
-              color: TEXT,
-              fontSize: 'clamp(1.90rem, 6.5vw, 2.65rem)',
-              letterSpacing: '-0.032em',
-              marginBottom: '1.25rem',
+          {/* Giant decorative watermark — ultra-low opacity */}
+          <div
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+            aria-hidden>
+            <span style={{
               fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 'clamp(120px, 40vw, 320px)',
+              color: `${TERRA}07`,
+              fontWeight: 900,
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+              whiteSpace: 'nowrap',
             }}>
-            מוצאים שולחן חם<br />
-            <span style={{ color: TERRA }}>לשבת ולחג</span>
-          </motion.h1>
+              שולחן
+            </span>
+          </div>
 
-          {/* Floating Glassmorphism Search Bar */}
+          <div className="relative px-5 max-w-lg mx-auto md:max-w-3xl">
+            <motion.p
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.34, ease: EASE }}
+              className="text-sm font-semibold mb-5"
+              style={{ color: MUTED, letterSpacing: '0.01em' }}>
+              {greeting()}{profile?.display_name ? `, ${profile.display_name}` : ''}
+            </motion.p>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.60, ease: EASE, delay: 0.05 }}
+              style={{
+                fontFamily: "'Frank Ruhl Libre', serif",
+                fontSize: 'clamp(2.5rem, 9.5vw, 3.8rem)',
+                color: TEXT,
+                fontWeight: 900,
+                letterSpacing: '-0.038em',
+                lineHeight: 1.03,
+              }}>
+              מוצאים שולחן חם<br />
+              <span style={{ color: TERRA }}>לשבת ולחג</span>
+            </motion.h1>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════
+            FLOATING SEARCH — bridges hero and bento
+            Negative margin creates visual layering.
+        ══════════════════════════════════════════════ */}
+        <div className="px-5 max-w-lg mx-auto md:max-w-3xl" style={{ marginTop: '-3.5rem', position: 'relative', zIndex: 10 }}>
           <motion.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.50, ease: EASE, delay: 0.10 }}>
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, ease: EASE, delay: 0.12 }}>
             <motion.div
-              className="relative rounded-2xl"
+              className="relative rounded-3xl"
+              style={{ ...GLASS_HEAVY }}
               animate={{
                 boxShadow: searchFocused
-                  ? `0 0 0 2.5px ${TERRA}42, 0 20px 50px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.96)`
-                  : '0 20px 50px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.96)',
-              }}
-              style={{
-                background: 'rgba(255,255,255,0.60)',
-                backdropFilter: 'blur(28px)',
-                WebkitBackdropFilter: 'blur(28px)',
-                border: '1px solid rgba(255,255,255,0.80)',
+                  ? `0 0 0 2.5px ${TERRA}42, 0 28px 64px rgba(184,93,57,0.16), inset 0 1px 0 rgba(255,255,255,0.98)`
+                  : '0 24px 60px rgba(184,93,57,0.12), 0 4px 16px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.98)',
               }}
               transition={SPRING}>
-              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                style={{ color: MUTED }} />
+              <Search
+                className="absolute top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
+                style={{ right: '1.25rem', color: searchFocused ? TERRA : MUTED }} />
               <input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 placeholder="חפש ארוחה, עיר, מארח..."
-                className="w-full py-4 pr-11 pl-11 text-sm font-medium outline-none bg-transparent rounded-2xl"
-                style={{ color: TEXT }}
+                className="w-full outline-none bg-transparent rounded-3xl text-base font-medium"
+                style={{
+                  color: TEXT,
+                  padding: '1.25rem 3.5rem 1.25rem 3.5rem',
+                }}
                 dir="rtl"
               />
               <AnimatePresence>
                 {search && (
                   <motion.button
-                    initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
+                    initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.6 }} transition={SPRING}
                     onClick={() => setSearch('')}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ background: 'rgba(28,26,23,0.07)' }}>
-                    <X className="w-3.5 h-3.5" style={{ color: MUTED }} />
+                    className="absolute top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ left: '1rem', background: 'rgba(28,26,23,0.07)' }}>
+                    <X className="w-4 h-4" style={{ color: MUTED }} />
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -238,162 +251,204 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <div className="max-w-lg mx-auto md:max-w-3xl px-4 pb-12 space-y-5">
+        <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-5 pb-14 space-y-8">
 
-          {/* ════════════════════════════════════════════════
-              SECTION 2: 21st.dev BENTO GRID
-              Card A: Terracotta Feature  |  Card B: Live Activity
-              Card C: Quick Region Shortcut
-          ════════════════════════════════════════════════ */}
+          {/* ══════════════════════════════════════════════
+              SECTION 2 — ASYMMETRIC BENTO
+              Row 1: Feature card — FULL WIDTH, 300px tall
+              Row 2: Live count + Geo shortcut — side by side
+          ══════════════════════════════════════════════ */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.52, ease: EASE, delay: 0.14 }}
-            className="space-y-3">
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.56, ease: EASE, delay: 0.18 }}
+            className="grid grid-cols-2 gap-3">
 
-            <div className="grid grid-cols-5 gap-3" style={{ gridTemplateRows: '164px' }}>
-
-              {/* ── Card A: Rich gradient terracotta feature ── */}
-              <Link to="/create-event" className="col-span-3 block">
-                <motion.div
-                  className="h-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(148deg, ${TERRA} 0%, #8F4222 100%)`,
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    boxShadow: `0 12px 44px ${TERRA}38, 0 4px 14px ${TERRA}20, inset 0 1px 0 rgba(255,255,255,0.16)`,
-                  }}
-                  whileHover={{ y: -6, scale: 1.015, boxShadow: `0 28px 72px ${TERRA}4A, 0 8px 20px ${TERRA}30` }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={SPRING}>
-
-                  {/* Inner backlight glow */}
-                  <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none"
-                    style={{ background: 'radial-gradient(circle, rgba(255,200,100,0.55), transparent 68%)', filter: 'blur(6px)' }} aria-hidden />
-                  <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.24), transparent)' }} aria-hidden />
-
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center relative z-10"
-                    style={{ background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(255,255,255,0.28)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}>
-                    <CalendarPlus className="w-5 h-5 text-white" strokeWidth={1.75} />
-                  </div>
-
-                  <div className="relative z-10">
-                    <p className="text-white/55 text-[10px] font-bold uppercase tracking-[0.16em] mb-1">מארח שולחן</p>
-                    <p className="text-white font-black text-[1.22rem] leading-tight"
-                      style={{ fontFamily: "'Frank Ruhl Libre', serif", letterSpacing: '-0.024em' }}>
-                      פרסם<br />ארוחה
-                    </p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <span className="text-white/65 text-xs font-semibold">התחל עכשיו</span>
-                      <ChevronLeft className="w-3 h-3 text-white/65" />
-                    </div>
-                  </div>
-                </motion.div>
-              </Link>
-
-              {/* ── Card B: Live activity glass card ── */}
+            {/* Feature card — full width (col-span-2), dominant at 300px */}
+            <Link to="/create-event" className="col-span-2 block">
               <motion.div
-                className="col-span-2 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden"
-                style={{ ...GLASS }}
-                whileHover={{ y: -6, scale: 1.015 }}
+                className="relative overflow-hidden rounded-3xl flex flex-col justify-between"
+                style={{
+                  minHeight: '300px',
+                  padding: '1.5rem',
+                  background: `linear-gradient(148deg, ${TERRA} 0%, #7A2E10 100%)`,
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  boxShadow: `0 24px 60px rgba(184,93,57,0.32), 0 6px 20px ${TERRA}28, inset 0 1px 0 rgba(255,255,255,0.20)`,
+                }}
+                whileHover={{ y: -8, scale: 1.018, boxShadow: `0 40px 90px rgba(184,93,57,0.44), 0 10px 30px ${TERRA}38` }}
+                whileTap={{ scale: 0.97 }}
                 transition={SPRING}>
-                <div className="flex items-center gap-1.5">
-                  <motion.span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ background: '#22c55e' }}
-                    animate={{ opacity: [1, 0.20, 1] }}
-                    transition={{ repeat: Infinity, duration: 1.8 }} />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: MUTED }}>עכשיו</p>
-                </div>
-                <AnimatePresence mode="wait">
-                  {loading ? (
-                    <motion.div key="skel"
-                      className="h-12 w-12 rounded-xl animate-pulse"
-                      style={{ background: `${TERRA}0F` }} />
-                  ) : (
-                    <motion.div key={events.length}
-                      initial={{ opacity: 0, scale: 0.68 }} animate={{ opacity: 1, scale: 1 }}
-                      transition={SPRING}>
-                      <p className="font-black text-[2.7rem] leading-none"
-                        style={{ color: TEXT, letterSpacing: '-0.06em' }}>
-                        {events.length}
-                      </p>
-                      <p className="text-[10px] font-medium mt-0.5 leading-snug" style={{ color: MUTED }}>
-                        ארוחות<br />זמינות
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            </div>
 
-            {/* ── Card C: Quick region shortcut with olive-green accent ── */}
+                {/* Highlight glow — top-right */}
+                <div className="absolute pointer-events-none rounded-full"
+                  style={{
+                    width: 260, height: 260, top: -80, right: -60,
+                    background: 'radial-gradient(circle, rgba(255,215,130,0.50), transparent 68%)',
+                    filter: 'blur(10px)',
+                  }} aria-hidden />
+
+                {/* Subtle grain overlay */}
+                <div className="absolute inset-0 rounded-3xl pointer-events-none"
+                  style={{
+                    opacity: 0.04,
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                  }} aria-hidden />
+
+                {/* Top section — icon + eyebrow */}
+                <div className="relative z-10">
+                  <div className="w-13 h-13 rounded-2xl flex items-center justify-center"
+                    style={{
+                      width: 52, height: 52,
+                      background: 'rgba(255,255,255,0.18)',
+                      border: '1px solid rgba(255,255,255,0.30)',
+                      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    }}>
+                    <CalendarPlus className="w-6 h-6 text-white" strokeWidth={1.75} />
+                  </div>
+                  <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.20em]"
+                    style={{ color: 'rgba(255,255,255,0.50)' }}>
+                    מארח שולחן
+                  </p>
+                </div>
+
+                {/* Bottom section — headline + CTA pill */}
+                <div className="relative z-10">
+                  <h2 style={{
+                    fontFamily: "'Frank Ruhl Libre', serif",
+                    fontSize: 'clamp(2.2rem, 7vw, 3rem)',
+                    color: 'white',
+                    fontWeight: 900,
+                    letterSpacing: '-0.032em',
+                    lineHeight: 1.04,
+                    marginBottom: '1.25rem',
+                  }}>
+                    פרסם<br />ארוחה
+                  </h2>
+                  <div className="inline-flex items-center gap-2 rounded-2xl px-5 py-2.5"
+                    style={{
+                      background: 'rgba(255,255,255,0.16)',
+                      border: '1px solid rgba(255,255,255,0.28)',
+                      backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    }}>
+                    <span className="text-white/80 text-sm font-bold">פתח לאורחים</span>
+                    <ArrowUpRight className="w-4 h-4 text-white/70" />
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* Live count card — col-span-1 */}
+            <motion.div
+              className="col-span-1 relative overflow-hidden rounded-3xl flex flex-col justify-between"
+              style={{ ...GLASS, minHeight: '168px', padding: '1.25rem' }}
+              whileHover={{ y: -6, scale: 1.018 }}
+              transition={SPRING}>
+
+              {/* Ambient inner glow */}
+              <div className="absolute pointer-events-none rounded-full"
+                style={{
+                  width: 140, height: 140, bottom: -50, left: -40,
+                  background: `radial-gradient(circle, ${TERRA}18, transparent 70%)`,
+                  filter: 'blur(24px)',
+                }} aria-hidden />
+
+              <div className="flex items-center gap-1.5">
+                <motion.span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ background: '#22c55e' }}
+                  animate={{ opacity: [1, 0.25, 1], scale: [1, 0.75, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.0 }} />
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em]" style={{ color: MUTED }}>עכשיו</p>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {loading ? (
+                  <motion.div key="skel"
+                    className="h-14 w-14 rounded-2xl animate-pulse"
+                    style={{ background: `${TERRA}0F` }} />
+                ) : (
+                  <motion.div key={events.length}
+                    initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
+                    transition={SPRING}>
+                    <p className="font-black leading-none"
+                      style={{ fontSize: 'clamp(3rem, 11vw, 4rem)', color: TEXT, letterSpacing: '-0.07em' }}>
+                      {events.length}
+                    </p>
+                    <p className="text-xs font-medium mt-1 leading-snug" style={{ color: MUTED }}>
+                      ארוחות<br />זמינות
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Geo shortcut card — col-span-1 */}
             <motion.button
-              className="w-full rounded-2xl p-4 flex items-center gap-3 text-right"
-              style={{ ...GLASS }}
-              whileHover={{ y: -3, scale: 1.005 }}
-              whileTap={{ scale: 0.98 }}
+              className="col-span-1 relative rounded-3xl flex flex-col justify-between text-right"
+              style={{
+                ...GLASS,
+                minHeight: '168px',
+                padding: '1.25rem',
+                border: `1.5px solid ${OLIVE}26`,
+              }}
+              whileHover={{ y: -6, scale: 1.018, boxShadow: `0 20px 48px ${OLIVE}18, inset 0 1px 0 rgba(255,255,255,0.92)` }}
+              whileTap={{ scale: 0.96 }}
               transition={SPRING}
               onClick={() => document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${OLIVE}12`, border: `1px solid ${OLIVE}22`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                <MapPin className="w-4 h-4" style={{ color: OLIVE }} strokeWidth={1.75} />
+
+              <div className="flex items-start justify-between">
+                <ChevronLeft className="w-4 h-4 mt-0.5" style={{ color: MUTED }} />
+                <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                  style={{ background: `${OLIVE}14`, border: `1px solid ${OLIVE}28` }}>
+                  <MapPin className="w-5 h-5" style={{ color: OLIVE }} strokeWidth={1.75} />
+                </div>
               </div>
-              <div className="flex-1 text-right">
-                <p className="text-xs font-bold" style={{ color: TEXT, letterSpacing: '-0.01em' }}>
+
+              <div>
+                <p className="text-sm font-bold leading-tight" style={{ color: TEXT }}>
                   גלה לפי אזור
                 </p>
-                <p className="text-[10px]" style={{ color: MUTED }}>
-                  ירושלים · גוש דן · הצפון · הנגב
+                <p className="text-[10px] mt-1" style={{ color: MUTED }}>
+                  ירושלים · גוש דן<br />הצפון · הנגב
                 </p>
-              </div>
-              <div className="flex gap-1.5 flex-shrink-0">
-                {[TERRA, OLIVE, '#1E5A8A', '#8F5A0A'].map((c, i) => (
-                  <div key={i} className="w-2 h-2 rounded-full"
-                    style={{ background: c, boxShadow: `0 0 4px ${c}80` }} />
-                ))}
-                <ChevronLeft className="w-3.5 h-3.5 mr-0.5" style={{ color: MUTED }} />
               </div>
             </motion.button>
           </motion.div>
 
-          {/* ════════════════════════════════════════════════
-              SECTION 3A: SLIDING CATEGORY TABS
-              Emil Kowalski layoutId="activeFilterTab" sliding indicator
-          ════════════════════════════════════════════════ */}
+          {/* ══════════════════════════════════════════════
+              SECTION 3 — CATEGORY TABS
+              Emil Kowalski sliding pill indicator
+          ══════════════════════════════════════════════ */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 0.46, ease: EASE }}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3"
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] mb-4"
               style={{ color: MUTED }}>
               סנן לפי סוג
             </p>
-
-            {/* LayoutGroup creates the shared animation context */}
             <LayoutGroup>
-              <div className="flex gap-1.5 flex-wrap">
+              <div className="flex gap-2 flex-wrap">
                 {TABS.map(tab => {
                   const isActive = activeTab === tab.id
                   return (
                     <motion.button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className="relative px-4 py-2 rounded-full text-sm font-semibold"
+                      className="relative px-5 py-2.5 rounded-full text-sm font-semibold"
                       style={{ color: isActive ? '#fff' : MUTED }}
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       transition={SPRING}>
                       {isActive && (
-                        /* layoutId makes this pill slide physically between tabs */
                         <motion.span
                           layoutId="activeFilterTab"
                           className="absolute inset-0 rounded-full"
                           style={{
-                            background: TERRA,
-                            boxShadow: `0 4px 16px ${TERRA}40`,
+                            background: `linear-gradient(135deg, ${TERRA}, #8F3A18)`,
+                            boxShadow: `0 4px 18px ${TERRA}45`,
                           }}
-                          transition={SPRING}
-                        />
+                          transition={SPRING} />
                       )}
                       <span className="relative z-10">{tab.label}</span>
                     </motion.button>
@@ -403,112 +458,131 @@ export default function Home() {
             </LayoutGroup>
           </motion.div>
 
-          {/* ════════════════════════════════════════════════
-              SECTION 3B: INTERACTIVE GEOGRAPHIC EXPLORER
-              Israeli hosting hubs with glassmorphic surfaces
-              and warm hover elevation
-          ════════════════════════════════════════════════ */}
+          {/* ══════════════════════════════════════════════
+              SECTION 4 — GEOGRAPHIC EXPLORER
+              Horizontal bands — each region is a full-width
+              row showing label + city names + live count.
+              Structurally different from the old 2×2 grid.
+          ══════════════════════════════════════════════ */}
           <motion.div id="regions"
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.52, ease: EASE }}>
 
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: MUTED }}>
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: MUTED }}>
                 גלה לפי אזור
               </p>
               <AnimatePresence>
                 {selectedRegion && (
                   <motion.button
-                    initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 8 }} transition={SPRING}
+                    initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }} transition={SPRING}
                     onClick={() => setSelectedRegion('')}
-                    className="text-[11px] font-semibold flex items-center gap-1"
+                    className="text-[11px] font-semibold flex items-center gap-1.5"
                     style={{ color: TERRA }}>
-                    <X className="w-3 h-3" /> נקה
+                    <X className="w-3 h-3" />
+                    נקה
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
 
-            <LayoutGroup id="geo-regions">
-              <div className="grid grid-cols-2 gap-2.5">
-                {REGIONS.map(r => {
-                  const count    = events.filter(e => r.cities.includes(e.city)).length
-                  const isActive = selectedRegion === r.name
-                  const { Icon } = r
-                  return (
-                    <motion.button
-                      key={r.name}
-                      onClick={() => setSelectedRegion(p => p === r.name ? '' : r.name)}
-                      className="relative flex flex-col gap-2.5 p-4 rounded-2xl text-right"
-                      style={isActive ? {
-                        ...GLASS,
-                        background: `linear-gradient(148deg, ${r.color}0E, rgba(255,255,255,0.75))`,
-                        border: `1.5px solid ${r.color}36`,
-                        boxShadow: `0 14px 48px ${r.color}18, 0 4px 14px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.92)`,
+            <div className="space-y-2">
+              {REGIONS.map((r, idx) => {
+                const count    = events.filter(e => r.cities.includes(e.city)).length
+                const isActive = selectedRegion === r.name
+                const { Icon } = r
+                return (
+                  <motion.div
+                    key={r.name}
+                    initial={{ opacity: 0, x: -14 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.42, ease: EASE, delay: idx * 0.07 }}>
+                  <motion.button
+                    onClick={() => setSelectedRegion(p => p === r.name ? '' : r.name)}
+                    className="w-full flex items-center gap-4 rounded-3xl text-right"
+                    style={{
+                      padding: '1rem 1.25rem',
+                      ...(isActive ? {
+                        background: `linear-gradient(135deg, ${r.color}10, rgba(255,255,255,0.72))`,
+                        border: `1.5px solid ${r.color}40`,
+                        boxShadow: `0 10px 32px ${r.color}18, inset 0 1px 0 rgba(255,255,255,0.90)`,
+                        backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
                       } : {
                         ...GLASS,
                         border: `1px solid ${BORDER}`,
-                      }}
-                      whileHover={{ y: -6, scale: 1.015 }}
-                      whileTap={{ scale: 0.96 }}
-                      transition={SPRING}>
+                      }),
+                    }}
+                    whileHover={{ y: -3, scale: 1.008 }}
+                    whileTap={{ scale: 0.97 }}
+                    transition={SPRING}>
 
-                      {/* Subtle top accent bar on active */}
-                      {isActive && (
-                        <motion.div
-                          layoutId={`regionAccent-${r.name}`}
-                          className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-                          style={{ background: `linear-gradient(90deg, ${r.color}, ${r.color}55)` }}
-                          transition={SPRING}
-                        />
+                    {/* Active accent bar on the right edge (RTL leading edge) */}
+                    {isActive && (
+                      <motion.div
+                        layoutId={`regionAccent-${r.name}`}
+                        className="absolute top-3 bottom-3 rounded-full"
+                        style={{ right: 0, width: 3, background: r.color }}
+                        transition={SPRING} />
+                    )}
+
+                    {/* Icon container */}
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: isActive ? `${r.color}1E` : `${r.color}0E`,
+                        border: `1px solid ${r.color}28`,
+                      }}>
+                      <Icon className="w-5 h-5" style={{ color: r.color }} strokeWidth={1.75} />
+                    </div>
+
+                    {/* Label + cities */}
+                    <div className="flex-1 text-right min-w-0">
+                      <p className="text-sm font-bold truncate"
+                        style={{ color: isActive ? r.color : TEXT, letterSpacing: '-0.012em' }}>
+                        {r.label}
+                      </p>
+                      <p className="text-[10px] mt-0.5 truncate" style={{ color: MUTED }}>
+                        {r.cities.slice(0, 4).join(' · ')}
+                      </p>
+                    </div>
+
+                    {/* Count badge + arrow */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {count > 0 && (
+                        <motion.span
+                          initial={{ scale: 0.5 }} animate={{ scale: 1 }} transition={SPRING}
+                          className="text-[10px] font-bold rounded-full px-2.5 py-1"
+                          style={{ background: `${r.color}16`, color: r.color, border: `1px solid ${r.color}28` }}>
+                          {count}
+                        </motion.span>
                       )}
-
-                      <div className="flex items-center justify-between">
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                          style={{ background: `${r.color}12`, border: `1px solid ${r.color}20`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                          <Icon className="w-4 h-4" style={{ color: r.color }} strokeWidth={1.75} />
-                        </div>
-                        <AnimatePresence>
-                          {count > 0 && (
-                            <motion.span
-                              initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
-                              className="text-[10px] font-bold rounded-full px-2 py-0.5"
-                              style={{ background: `${r.color}14`, color: r.color, border: `1px solid ${r.color}26` }}>
-                              {count}
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      <div>
-                        <p className="text-xs font-bold leading-snug"
-                          style={{ color: isActive ? r.color : TEXT, letterSpacing: '-0.01em' }}>
-                          {r.label}
-                        </p>
-                        <p className="text-[10px] mt-0.5" style={{ color: MUTED }}>
-                          {count > 0 ? `${count} ארוחות` : 'ממתין לפעילות'}
-                        </p>
-                      </div>
-                    </motion.button>
-                  )
-                })}
-              </div>
-            </LayoutGroup>
+                      <ChevronLeft
+                        className="w-4 h-4"
+                        style={{
+                          color: isActive ? r.color : MUTED,
+                          transform: isActive ? 'rotate(180deg)' : 'none',
+                          transition: 'transform 0.3s',
+                        }} />
+                    </div>
+                  </motion.button>
+                  </motion.div>
+                )
+              })}
+            </div>
           </motion.div>
 
-          {/* ── EVENTS LIST ── */}
+          {/* ── Events list ── */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: MUTED }}>
+            <div className="flex items-center justify-between mb-5">
+              <p className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: MUTED }}>
                 {selectedRegion ? `ארוחות — ${selectedRegion}` : 'ארוחות קרובות'}
               </p>
               {displayed.length > 0 && (
-                <span className="text-[10px] font-bold rounded-full px-2 py-0.5"
-                  style={{ background: `${TERRA}10`, color: TERRA, border: `1px solid ${TERRA}20` }}>
+                <span className="text-[10px] font-bold rounded-full px-2.5 py-1"
+                  style={{ background: `${TERRA}10`, color: TERRA, border: `1px solid ${TERRA}22` }}>
                   {displayed.length}
                 </span>
               )}
@@ -517,8 +591,8 @@ export default function Home() {
             {loading ? (
               <div className="space-y-3">
                 {[0, 1, 2].map(i => (
-                  <motion.div key={i} className="rounded-2xl h-28"
-                    style={{ ...GLASS }}
+                  <motion.div key={i} className="rounded-3xl"
+                    style={{ ...GLASS, height: 112 }}
                     animate={{ opacity: [0.40, 0.85, 0.40] }}
                     transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: i * 0.15 }} />
                 ))}
@@ -526,29 +600,29 @@ export default function Home() {
             ) : displayed.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.42, ease: EASE }}
-                className="flex flex-col items-center py-16 px-6 text-center">
-                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
-                  style={{ ...GLASS }}>
-                  <Utensils className="w-8 h-8" style={{ color: MUTED }} strokeWidth={1.5} />
+                transition={{ duration: 0.44, ease: EASE }}
+                className="flex flex-col items-center py-20 px-6 text-center">
+                <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-6"
+                  style={{ ...GLASS, boxShadow: '0 12px 40px rgba(44,24,8,0.08)' }}>
+                  <Utensils className="w-9 h-9" style={{ color: MUTED }} strokeWidth={1.5} />
                 </div>
-                <h3 className="font-black text-lg mb-2"
-                  style={{ color: TEXT, fontFamily: "'Frank Ruhl Libre', serif", letterSpacing: '-0.015em' }}>
+                <h3 className="font-black text-xl mb-3"
+                  style={{ color: TEXT, fontFamily: "'Frank Ruhl Libre', serif", letterSpacing: '-0.018em' }}>
                   {search ? 'לא נמצאו ארוחות' : 'אין ארוחות כרגע'}
                 </h3>
-                <p className="text-sm max-w-xs mb-6" style={{ color: MUTED }}>
+                <p className="text-sm max-w-xs mb-8 leading-relaxed" style={{ color: MUTED }}>
                   {search ? 'נסה חיפוש אחר' : 'היה הראשון לפרסם ארוחה באזורך'}
                 </p>
                 <Link to="/create-event">
                   <motion.button
-                    whileHover={{ scale: 1.03, boxShadow: `0 12px 32px ${TERRA}38` }}
+                    whileHover={{ scale: 1.04, boxShadow: `0 14px 36px ${TERRA}42` }}
                     whileTap={{ scale: 0.97 }} transition={SPRING}
-                    className="px-6 py-2.5 text-sm font-bold text-white rounded-xl"
+                    className="px-8 py-3.5 text-sm font-bold text-white rounded-2xl"
                     style={{
-                      background: `linear-gradient(135deg, ${TERRA}, #8F4222)`,
-                      boxShadow: `0 4px 16px ${TERRA}28`,
+                      background: `linear-gradient(135deg, ${TERRA}, #8F3A18)`,
+                      boxShadow: `0 4px 18px ${TERRA}30`,
                     }}>
-                    פרסם ארוחה
+                    פרסם ארוחה ראשונה
                   </motion.button>
                 </Link>
               </motion.div>
