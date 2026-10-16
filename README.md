@@ -4,6 +4,27 @@
 
 ---
 
+## 📦 גירסאות
+
+### טיוטא 1 — commit `118b3ed` (אוקטובר 2026)
+
+ה-UI הראשון הבשל. כל הדפים מאוחדים לעיצוב בהיר (light-only).
+
+**עמוד הבית:**
+- Hero עם ברכה אישית + badge "ארוחות זמינות"
+- Bento Grid 5-עמודות: כרטיס ארוחות (3-col, עם count) + כרטיס "פרסם ארוחה" (2-col, טרקוטה)
+- CityCard — גלילה אופקית עם 7 ערים, live-dot, layoutId accent strip
+- FilterBar קולפסיבל מאחורי כפתור "סינון" עם badge מונה סינונים פעילים
+- SkeletonCard (3 כרטיסים) במקום spinner בזמן טעינה
+- Empty state עם 3 אייקונים מרחפים (Moon/Sun/Star)
+
+**עיצוב (Tokens):**
+- רקע: `#FDFBF7` · מבטא: `#C0522A` · גבולות: `#E8E2D8` · טקסט: `#1C1A17` · muted: `#786C63`
+- Framer Motion ambient orbs (2 כדורים קבועים ברקע, animate loops)
+- Spring: `stiffness: 400, damping: 28`
+
+---
+
 ## 📋 תיעוד מצב הפרויקט (עדכן בכל פתיחת חלון חדש!)
 
 ### 🗓️ נוצר: 28 ספטמבר 2026
