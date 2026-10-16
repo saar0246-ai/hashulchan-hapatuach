@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Search, X, CalendarPlus, ArrowLeft,
-  MapPin, Users, Moon, Sun, Star, Cake, Utensils, ChevronLeft,
+  MapPin, Moon, Sun, Star, Utensils, ChevronLeft,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence, LayoutGroup, type Variants } from 'framer-motion'
@@ -11,67 +11,68 @@ import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import type { Event } from '../types'
 import EventCard from '../components/EventCard'
-import FilterBar, { type FilterState } from '../components/FilterBar'
 import TopBar from '../components/TopBar'
 
+// ── Motion primitives ────────────────────────────────────────
 type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
-const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
+const SPRING = { type: 'spring' as const, stiffness: 420, damping: 30 }
 
-/* ─── Shared glass surface ─────────────────────────────── */
-const GLASS = {
-  background: 'rgba(255,255,255,0.58)',
-  backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
-  border: '1px solid rgba(255,255,255,0.80)',
-  boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+// ── Design Tokens ────────────────────────────────────────────
+const ACCENT  = '#C0390A'
+const FOREST  = '#2D4A1E'
+const TEXT    = '#1C1A17'
+const MUTED   = '#8A6650'
+
+// Warm-tinted glass surface — replaces the cold white/40 default
+function S(opacity = 0.70) {
+  return {
+    background: `rgba(255,248,240,${opacity})`,
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    border: '1px solid rgba(255,210,170,0.48)',
+    boxShadow: '0 8px 32px rgba(28,12,4,0.07), inset 0 1px 0 rgba(255,255,255,0.88)',
+  } as const
 }
 
+// ── Regions ──────────────────────────────────────────────────
+interface Region { name: string; label: string; cities: string[]; color: string; Icon: LucideIcon }
+const REGIONS: Region[] = [
+  { name: 'ירושלים', label: 'ירושלים והסביבה', color: ACCENT,    Icon: Moon,
+    cities: ['ירושלים','בית שמש','מעלה אדומים','מבשרת ציון','גבעת זאב'] },
+  { name: 'גוש דן',  label: 'גוש דן ותל אביב', color: FOREST,    Icon: Sun,
+    cities: ['תל אביב','רמת גן','גבעתיים','בני ברק','ראשון לציון','פתח תקוה','חולון','בת ים','אשדוד','נתניה'] },
+  { name: 'הצפון',   label: 'חיפה והצפון',      color: '#1E5A8A', Icon: Star,
+    cities: ['חיפה','נהריה','עכו','טבריה','צפת','נצרת','קריית שמונה'] },
+  { name: 'הנגב',    label: 'באר שבע והנגב',     color: '#8F5A0A', Icon: Utensils,
+    cities: ['באר שבע','אשקלון','אילת','דימונה','ערד','נתיבות'] },
+]
+const REGION_COLORS = REGIONS.map(r => r.color)
 
-interface BirthdayProfile {
-  id: string; display_name: string; avatar_url: string | null; birthday: string
+// ── Category tabs ────────────────────────────────────────────
+const TABS = [
+  { id: 'all',            label: 'הכל'   },
+  { id: 'shabbat_dinner', label: 'שישי'  },
+  { id: 'shabbat_lunch',  label: 'שבת'   },
+  { id: 'holiday',        label: 'חג'    },
+  { id: 'weekday',        label: 'רגיל'  },
+]
+
+// ── Variants ─────────────────────────────────────────────────
+const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
+const fadeUp:  Variants = {
+  hidden: { opacity: 0, y: 22 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.46, ease: EASE } },
 }
-function isBirthdayThisWeek(birthday: string): boolean {
-  const today = new Date()
-  const bday  = new Date(birthday + 'T00:00:00')
-  for (let i = 0; i <= 6; i++) {
-    const d = new Date(today); d.setDate(today.getDate() + i)
-    if (bday.getMonth() === d.getMonth() && bday.getDate() === d.getDate()) return true
-  }
-  return false
-}
+
 function greeting() {
   const h = new Date().getHours()
   return h < 12 ? 'בוקר טוב' : h < 17 ? 'צהריים טובים' : 'ערב טוב'
 }
 
-interface Region { name: string; cities: string[]; color: string; bg: string; Icon: LucideIcon }
-const REGIONS: Region[] = [
-  { name: 'ירושלים והסביבה', cities: ['ירושלים','בית שמש','מעלה אדומים','מבשרת ציון','גבעת זאב'], color: '#C0522A', bg: 'rgba(192,82,42,0.09)',   Icon: Moon    },
-  { name: 'גוש דן ותל אביב',  cities: ['תל אביב','רמת גן','גבעתיים','בני ברק','ראשון לציון','נתניה','פתח תקוה','חולון','בת ים','אשדוד'], color: '#1a7a4a', bg: 'rgba(26,122,74,0.09)',   Icon: Sun     },
-  { name: 'חיפה והצפון',       cities: ['חיפה','נהריה','עכו','טבריה','צפת','נצרת','קריית שמונה'],          color: '#1e5fa5', bg: 'rgba(30,95,165,0.09)',  Icon: Star    },
-  { name: 'באר שבע והנגב',     cities: ['באר שבע','אשקלון','אילת','דימונה','ערד','נתיבות'],               color: '#B8780A', bg: 'rgba(184,120,10,0.09)', Icon: Utensils },
-]
-
-const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } }
-const fadeItem: Variants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } } }
-
-function SkeletonCard() {
-  return (
-    <motion.div className="rounded-2xl overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
-      animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
-      <div className="h-20 rounded-t-2xl" style={{ background: 'linear-gradient(135deg, rgba(240,234,224,0.7), rgba(232,222,210,0.5))' }} />
-      <div className="p-4 space-y-2">
-        <div className="h-3 rounded-full w-3/4" style={{ background: 'rgba(232,226,216,0.7)' }} />
-        <div className="h-2.5 rounded-full w-1/2" style={{ background: 'rgba(240,235,228,0.6)' }} />
-      </div>
-    </motion.div>
-  )
-}
-
-/* ═══════════════════════════════════════════════════════
-   HOME
-═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   HOME  —  draft-2
+═══════════════════════════════════════════════════ */
 export default function Home() {
   const { user }    = useAuth()
   const { profile } = useProfile(user?.id)
@@ -79,18 +80,8 @@ export default function Home() {
   const [loading, setLoading]             = useState(true)
   const [search, setSearch]               = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
-  const [filters, setFilters]             = useState<FilterState>({ kashrut: [], religious: '', city: '', eventType: '' })
-  const [filtersInit, setFiltersInit]     = useState(false)
-  const [birthdays, setBirthdays]         = useState<BirthdayProfile[]>([])
-  const [showFilters, setShowFilters]     = useState(false)
+  const [activeTab, setActiveTab]         = useState('all')
   const [selectedRegion, setSelectedRegion] = useState('')
-
-  useEffect(() => {
-    if (profile && !filtersInit) {
-      if (profile.guest_kashrut_prefs?.length) setFilters(f => ({ ...f, kashrut: profile.guest_kashrut_prefs! }))
-      setFiltersInit(true)
-    }
-  }, [profile, filtersInit])
 
   const fetchEvents = useCallback(async () => {
     setLoading(true)
@@ -98,26 +89,17 @@ export default function Home() {
       .eq('status', 'active')
       .gt('event_date', new Date(Date.now() - 86400000).toISOString().split('T')[0])
       .order('event_date', { ascending: true })
-    if (filters.kashrut.length) q = q.in('kashrut_level', filters.kashrut)
-    if (filters.eventType)      q = q.eq('event_type', filters.eventType)
-    if (filters.city)           q = q.eq('city', filters.city)
-    if (filters.religious)      q = q.contains('preferred_religious_levels', [filters.religious])
-    if (search.trim())          q = q.ilike('title', `%${search.trim()}%`)
+    if (activeTab !== 'all') q = q.eq('event_type', activeTab)
+    if (search.trim())       q = q.ilike('title', `%${search.trim()}%`)
     const { data } = await q.limit(50)
     setEvents(data ?? [])
     setLoading(false)
-  }, [filters, search])
-
-  useEffect(() => { const t = setTimeout(fetchEvents, 300); return () => clearTimeout(t) }, [fetchEvents])
+  }, [activeTab, search])
 
   useEffect(() => {
-    if (!user) return
-    supabase.from('profiles').select('id, display_name, avatar_url, birthday')
-      .not('birthday', 'is', null).neq('id', user.id)
-      .then(({ data }) => { if (data) setBirthdays((data as BirthdayProfile[]).filter(p => isBirthdayThisWeek(p.birthday))) })
-  }, [user])
-
-  const regionCount = (r: Region) => events.filter(e => r.cities.includes(e.city)).length
+    const t = setTimeout(fetchEvents, 300)
+    return () => clearTimeout(t)
+  }, [fetchEvents])
 
   const displayedEvents = selectedRegion
     ? (() => {
@@ -126,182 +108,176 @@ export default function Home() {
       })()
     : events
 
-  const hasFilters     = filters.kashrut.length > 0 || !!filters.city || !!filters.religious || !!filters.eventType || !!search || !!selectedRegion
-  const activeFilters  = [filters.kashrut.length > 0, !!filters.city, !!filters.religious, !!filters.eventType].filter(Boolean).length
-
-  const handleFiltersChange = (f: FilterState) => { setFilters(f); if (f.city) setSelectedRegion('') }
-  const handleRegionClick   = (name: string) => {
-    setSelectedRegion(p => p === name ? '' : name)
-    setFilters(f => ({ ...f, city: '' }))
-  }
-
-  /* ── Region dot colors ── */
-  const dotColors = ['#C0522A', '#1a7a4a', '#1e5fa5', '#B8780A']
-  const dotGlows  = ['rgba(192,82,42,0.5)', 'rgba(26,122,74,0.5)', 'rgba(30,95,165,0.5)', 'rgba(184,120,10,0.5)']
-
   return (
-    <div className="relative min-h-dvh"
-      style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
+    <div dir="rtl" className="relative min-h-dvh"
+      style={{ background: '#FFF3E0' }}>
 
-      {/* ══ AMBIENT BACKGROUND ══ */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#F59E0B]/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-[#C85A32]/15 rounded-full blur-3xl animate-pulse" />
+      {/* ── Ambient canvas: three drifting colour spheres ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        {/* terracotta — top-right */}
+        <motion.div className="absolute rounded-full"
+          style={{ width: 960, height: 960, top: -380, right: -380,
+            background: `radial-gradient(circle at 40% 38%, ${ACCENT}26 0%, ${ACCENT}0C 44%, transparent 68%)`,
+            filter: 'blur(120px)' }}
+          animate={{ x: [0, 80, -30, 0], y: [0, -70, 40, 0], scale: [1, 1.16, 0.88, 1] }}
+          transition={{ repeat: Infinity, duration: 30, ease: 'easeInOut' }}
+        />
+        {/* forest green — bottom-left */}
+        <motion.div className="absolute rounded-full"
+          style={{ width: 720, height: 720, bottom: 20, left: -280,
+            background: `radial-gradient(circle at 56% 52%, ${FOREST}1C 0%, ${FOREST}08 48%, transparent 70%)`,
+            filter: 'blur(120px)' }}
+          animate={{ x: [0, -60, 72, 0], y: [0, 80, -48, 0], scale: [1, 0.86, 1.16, 1] }}
+          transition={{ repeat: Infinity, duration: 36, ease: 'easeInOut', delay: 7 }}
+        />
+        {/* amber — mid */}
+        <motion.div className="absolute rounded-full"
+          style={{ width: 520, height: 520, top: '42%', left: '20%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(240,160,60,0.18) 0%, transparent 68%)',
+            filter: 'blur(90px)' }}
+          animate={{ x: [0, 50, -28, 0], y: [0, -40, 60, 0], scale: [1, 1.14, 0.92, 1] }}
+          transition={{ repeat: Infinity, duration: 24, ease: 'easeInOut', delay: 3 }}
+        />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
         <TopBar logo />
 
-        {/* ══ HERO ══ */}
-        <div className="relative px-5 pt-9 pb-7 overflow-hidden">
-          <div className="relative max-w-lg mx-auto md:max-w-3xl">
+        {/* ── Hero ── */}
+        <div className="px-5 pt-9 pb-6 max-w-lg mx-auto md:max-w-3xl">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.36, ease: EASE }}
+            className="text-sm font-semibold mb-2.5"
+            style={{ color: MUTED, letterSpacing: '0.01em' }}>
+            {greeting()}{profile?.display_name ? `, ${profile.display_name}` : ''}
+          </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.38, ease: EASE }}
-              className="text-sm font-semibold mb-2.5"
-              style={{ color: '#8C6E5A', letterSpacing: '0.01em' }}
-            >
-              {greeting()}{profile?.display_name ? `, ${profile.display_name}` : ''}
-            </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.58, ease: EASE, delay: 0.04 }}
+            className="font-display font-black leading-[1.08]"
+            style={{ color: TEXT, fontSize: 'clamp(1.80rem, 6vw, 2.40rem)', letterSpacing: '-0.032em' }}>
+            מוצאים שולחן חם<br />
+            <span style={{ color: ACCENT }}>לשבת ולחג</span>
+          </motion.h1>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.56, ease: EASE, delay: 0.04 }}
-              className="font-display font-black"
-              style={{
-                color: '#1A1714',
-                fontSize: 'clamp(1.72rem, 5.8vw, 2.28rem)',
-                lineHeight: '1.11',
-                letterSpacing: '-0.028em',
-              }}
-            >
-              מוצאים שולחן חם<br />
-              <span style={{ color: '#C0522A' }}>לשבת ולחג</span>
-            </motion.h1>
-
-            {/* ── Floating glass search ── */}
+          {/* Floating search dock */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, ease: EASE, delay: 0.10 }}
+            className="mt-5">
             <motion.div
-              initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.54, ease: EASE, delay: 0.10 }}
-              className="mt-6"
-            >
-              <motion.div
-                className="relative rounded-2xl"
-                animate={{
-                  boxShadow: searchFocused
-                    ? '0 0 0 2.5px rgba(192,82,42,0.32), 0 14px 52px rgba(192,82,42,0.15), inset 0 1px 0 rgba(255,255,255,0.96)'
-                    : '0 10px 40px rgba(44,24,8,0.11), 0 2px 8px rgba(44,24,8,0.05), inset 0 1px 0 rgba(255,255,255,0.96)',
-                }}
-                style={{
-                  background: 'rgba(255,255,255,0.80)',
-                  backdropFilter: 'blur(40px)',
-                  WebkitBackdropFilter: 'blur(40px)',
-                  border: '1px solid rgba(255,255,255,0.92)',
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              >
-                <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: '#8C6E5A' }} />
-                <input
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  placeholder="חפש ארוחה, עיר, מארח..."
-                  className="w-full py-4 pr-11 pl-11 text-sm font-medium outline-none bg-transparent rounded-2xl"
-                  style={{ color: '#1A1714' }}
-                  dir="rtl"
-                />
-                <AnimatePresence>
-                  {search && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
-                      onClick={() => setSearch('')}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(120,108,99,0.12)' }}
-                    >
-                      <X className="w-3.5 h-3.5" style={{ color: '#8C6E5A' }} />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+              className="relative rounded-2xl"
+              animate={{
+                boxShadow: searchFocused
+                  ? `0 0 0 2.5px ${ACCENT}4A, 0 14px 52px rgba(192,57,10,0.14), inset 0 1px 0 rgba(255,255,255,0.96)`
+                  : '0 8px 32px rgba(28,12,4,0.09), inset 0 1px 0 rgba(255,255,255,0.96)',
+              }}
+              style={{
+                background: 'rgba(255,251,246,0.90)',
+                backdropFilter: 'blur(40px)',
+                WebkitBackdropFilter: 'blur(40px)',
+                border: '1px solid rgba(255,215,175,0.65)',
+              }}
+              transition={SPRING}>
+              <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: MUTED }} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setSearchFocused(false)}
+                placeholder="חפש ארוחה, עיר, מארח..."
+                className="w-full py-4 pr-11 pl-11 text-sm font-medium outline-none bg-transparent rounded-2xl"
+                style={{ color: TEXT }}
+                dir="rtl"
+              />
+              <AnimatePresence>
+                {search && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
+                    onClick={() => setSearch('')}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{ background: 'rgba(120,90,60,0.12)' }}>
+                    <X className="w-3.5 h-3.5" style={{ color: MUTED }} />
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="max-w-lg mx-auto md:max-w-3xl px-4 pt-2 pb-10 space-y-4">
+        <div className="max-w-lg mx-auto md:max-w-3xl px-4 pb-12 space-y-5">
 
-          {/* ══ BENTO GRID ══ */}
+          {/* ── BENTO GRID ── */}
           <motion.div
-            initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.54, ease: EASE, delay: 0.12 }}
-            className="space-y-3"
-          >
-            {/* Row: Create + Stats */}
-            <div className="grid grid-cols-5 gap-3" style={{ gridTemplateRows: '152px' }}>
+            initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.52, ease: EASE, delay: 0.12 }}
+            className="space-y-3">
 
-              {/* a) Deep terracotta create card */}
+            <div className="grid grid-cols-5 gap-3" style={{ gridTemplateRows: '156px' }}>
+
+              {/* Create card — deep terracotta */}
               <Link to="/create-event" className="col-span-3 block">
                 <motion.div
-                  className="h-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-[#C85A32] via-[#A9603D] to-[#6E2E17] text-white shadow-lg"
-                  whileHover={{ y: -4, scale: 1.01 }}
+                  className="h-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden"
+                  style={{
+                    background: `linear-gradient(148deg, ${ACCENT} 0%, #8F2808 100%)`,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    boxShadow: `0 12px 44px ${ACCENT}40, 0 4px 14px ${ACCENT}22, inset 0 1px 0 rgba(255,255,255,0.16)`,
+                  }}
+                  whileHover={{ y: -5, scale: 1.015, boxShadow: `0 28px 72px ${ACCENT}50, 0 8px 20px ${ACCENT}30, inset 0 1px 0 rgba(255,255,255,0.22)` }}
                   whileTap={{ scale: 0.97 }}
-                  transition={SPRING}
-                >
-                  {/* luminous spot */}
-                  <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full pointer-events-none" aria-hidden
-                    style={{ background: 'radial-gradient(circle, rgba(255,178,96,0.62), rgba(255,135,55,0.22) 60%, transparent)', filter: 'blur(3px)' }} />
-                  {/* bottom vignette */}
-                  <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none" aria-hidden
-                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.28), transparent)' }} />
+                  transition={SPRING}>
+                  {/* inner backlight */}
+                  <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full pointer-events-none"
+                    style={{ background: 'radial-gradient(circle, rgba(255,180,100,0.55), transparent 68%)', filter: 'blur(4px)' }} aria-hidden />
+                  <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.24), transparent)' }} aria-hidden />
 
-                  {/* icon pill */}
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center relative z-10"
-                    style={{ background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.30)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}>
+                    style={{ background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(255,255,255,0.28)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}>
                     <CalendarPlus className="w-5 h-5 text-white" strokeWidth={1.75} />
                   </div>
 
                   <div className="relative z-10">
-                    <p className="text-white/60 text-[10px] font-bold uppercase tracking-[0.14em] mb-1">מארח שולחן</p>
-                    <p className="text-white font-black text-[1.2rem] leading-tight font-display" style={{ letterSpacing: '-0.022em' }}>
+                    <p className="text-white/55 text-[10px] font-bold uppercase tracking-[0.16em] mb-1">מארח שולחן</p>
+                    <p className="text-white font-black text-[1.22rem] leading-tight font-display" style={{ letterSpacing: '-0.024em' }}>
                       פרסם<br />ארוחה
                     </p>
                     <div className="flex items-center gap-1 mt-2">
-                      <span className="text-white/72 text-xs font-semibold">התחל עכשיו</span>
-                      <ArrowLeft className="w-3 h-3 text-white/72" />
+                      <span className="text-white/65 text-xs font-semibold">התחל עכשיו</span>
+                      <ArrowLeft className="w-3 h-3 text-white/65" />
                     </div>
                   </div>
                 </motion.div>
               </Link>
 
-              {/* b) Live stats — full glassmorphism */}
+              {/* Live stats card */}
               <motion.div
-                className="col-span-2 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
-                whileHover={{ y: -4, scale: 1.01 }}
-                transition={SPRING}
-              >
+                className="col-span-2 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden"
+                style={{ ...S(0.72) }}
+                whileHover={{ y: -5, scale: 1.015 }}
+                transition={SPRING}>
                 <div className="flex items-center gap-1.5">
                   <motion.span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#22c55e' }}
-                    animate={{ opacity: [1, 0.22, 1] }} transition={{ repeat: Infinity, duration: 1.8 }} />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: '#8C7060' }}>עכשיו</p>
+                    animate={{ opacity: [1, 0.20, 1] }} transition={{ repeat: Infinity, duration: 1.8 }} />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: MUTED }}>עכשיו</p>
                 </div>
 
                 <AnimatePresence mode="wait">
                   {loading ? (
-                    <motion.div key="skel" className="h-10 w-10 rounded-xl"
-                      style={{ background: 'rgba(192,82,42,0.06)' }}
-                      animate={{ opacity: [0.4, 0.9, 0.4] }} transition={{ repeat: Infinity, duration: 1.4 }} />
+                    <motion.div key="skel" className="h-10 w-10 rounded-xl animate-pulse"
+                      style={{ background: `${ACCENT}0F` }} />
                   ) : (
                     <motion.div key={events.length}
-                      initial={{ opacity: 0, scale: 0.70 }} animate={{ opacity: 1, scale: 1 }}
-                      transition={SPRING}
-                    >
-                      <p className="font-black text-[2.4rem] leading-none" style={{ color: '#1A1714', letterSpacing: '-0.05em' }}>
+                      initial={{ opacity: 0, scale: 0.68 }} animate={{ opacity: 1, scale: 1 }}
+                      transition={SPRING}>
+                      <p className="font-black text-[2.5rem] leading-none" style={{ color: TEXT, letterSpacing: '-0.06em' }}>
                         {events.length}
                       </p>
-                      <p className="text-[10px] font-medium mt-1 leading-snug" style={{ color: '#8C7060' }}>
+                      <p className="text-[10px] font-medium mt-1 leading-snug" style={{ color: MUTED }}>
                         ארוחות<br />זמינות
                       </p>
                     </motion.div>
@@ -310,45 +286,76 @@ export default function Home() {
               </motion.div>
             </div>
 
-            {/* c) Geographic shortcut — glassmorphism */}
+            {/* Geo shortcut */}
             <motion.button
-              className="w-full rounded-2xl p-3.5 flex items-center gap-3 text-right overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
+              className="w-full rounded-2xl p-4 flex items-center gap-3 text-right"
+              style={{ ...S(0.65) }}
               whileHover={{ y: -2, scale: 1.005 }}
               whileTap={{ scale: 0.98 }}
               transition={SPRING}
-              onClick={() => document.getElementById('regions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-            >
-              {/* icon pill */}
+              onClick={() => document.getElementById('regions')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(192,82,42,0.11)', border: '1px solid rgba(192,82,42,0.16)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                <MapPin className="w-4 h-4" style={{ color: '#C0522A' }} strokeWidth={1.75} />
+                style={{ background: `${ACCENT}14`, border: `1px solid ${ACCENT}22`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                <MapPin className="w-4 h-4" style={{ color: ACCENT }} strokeWidth={1.75} />
               </div>
-              <div className="flex-1 min-w-0 text-right">
-                <p className="text-xs font-bold" style={{ color: '#1A1714', letterSpacing: '-0.01em' }}>גלה לפי אזור</p>
-                <p className="text-[10px] truncate" style={{ color: '#8C7060' }}>ירושלים · גוש דן · חיפה והצפון · הנגב</p>
+              <div className="flex-1 text-right">
+                <p className="text-xs font-bold" style={{ color: TEXT, letterSpacing: '-0.01em' }}>גלה לפי אזור</p>
+                <p className="text-[10px]" style={{ color: MUTED }}>ירושלים · גוש דן · הצפון · הנגב</p>
               </div>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                {dotColors.map((c, i) => (
-                  <div key={i} className="w-2 h-2 rounded-full"
-                    style={{ background: c, boxShadow: `0 0 5px ${dotGlows[i]}` }} />
+              <div className="flex gap-1.5 flex-shrink-0">
+                {REGION_COLORS.map((c, i) => (
+                  <div key={i} className="w-2 h-2 rounded-full" style={{ background: c, boxShadow: `0 0 5px ${c}80` }} />
                 ))}
-                <ChevronLeft className="w-3.5 h-3.5 mr-0.5" style={{ color: '#8C7060' }} />
+                <ChevronLeft className="w-3.5 h-3.5 mr-0.5" style={{ color: MUTED }} />
               </div>
             </motion.button>
           </motion.div>
 
-          {/* ══ REGIONAL EXPLORER ══ */}
+          {/* ── CATEGORY TABS — animated sliding pill ── */}
           <motion.div
-            id="regions-section"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.48, ease: EASE }}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] mb-3" style={{ color: MUTED }}>סנן לפי סוג</p>
+            <LayoutGroup>
+              <div className="flex gap-2 flex-wrap">
+                {TABS.map(tab => {
+                  const isActive = activeTab === tab.id
+                  return (
+                    <motion.button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className="relative px-4 py-2 rounded-full text-sm font-semibold"
+                      style={{ color: isActive ? '#fff' : MUTED }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={SPRING}>
+                      {isActive && (
+                        <motion.span
+                          layoutId="draft2ActiveTab"
+                          className="absolute inset-0 rounded-full"
+                          style={{ background: ACCENT, boxShadow: `0 4px 18px ${ACCENT}40` }}
+                          transition={SPRING}
+                        />
+                      )}
+                      <span className="relative z-10">{tab.label}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </LayoutGroup>
+          </motion.div>
+
+          {/* ── REGIONAL EXPLORER ── */}
+          <motion.div id="regions"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.54, ease: EASE }}
-          >
+            transition={{ duration: 0.54, ease: EASE }}>
+
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.13em]" style={{ color: '#8C7060' }}>
-                גלה לפי אזור
-              </p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: MUTED }}>גלה לפי אזור</p>
               <AnimatePresence>
                 {selectedRegion && (
                   <motion.button
@@ -356,64 +363,54 @@ export default function Home() {
                     exit={{ opacity: 0, x: 8 }} transition={SPRING}
                     onClick={() => setSelectedRegion('')}
                     className="text-[11px] font-semibold flex items-center gap-1"
-                    style={{ color: '#C0522A' }}
-                  >
+                    style={{ color: ACCENT }}>
                     <X className="w-3 h-3" /> נקה
                   </motion.button>
                 )}
               </AnimatePresence>
             </div>
 
-            <LayoutGroup>
+            <LayoutGroup id="regions-lg">
               <div className="grid grid-cols-2 gap-2.5">
-                {REGIONS.map((region) => {
-                  const count    = regionCount(region)
-                  const isActive = selectedRegion === region.name
-                  const { Icon } = region
+                {REGIONS.map(r => {
+                  const count    = events.filter(e => r.cities.includes(e.city)).length
+                  const isActive = selectedRegion === r.name
+                  const { Icon } = r
                   return (
                     <motion.button
-                      key={region.name}
-                      onClick={() => handleRegionClick(region.name)}
+                      key={r.name}
+                      onClick={() => setSelectedRegion(p => p === r.name ? '' : r.name)}
                       className="relative flex flex-col gap-2.5 p-4 rounded-2xl text-right"
                       style={isActive ? {
-                        background: `linear-gradient(148deg, ${region.bg}, rgba(255,255,255,0.70))`,
-                        backdropFilter: 'blur(28px)',
-                        WebkitBackdropFilter: 'blur(28px)',
-                        border: `1.5px solid ${region.color}3A`,
-                        boxShadow: `0 14px 44px ${region.color}22, 0 4px 14px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.90)`,
-                      } : { background: 'rgba(255,255,255,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.60)', boxShadow: '0 8px 32px 0 rgba(184,93,57,0.10)' }}
-                      whileHover={{
-                        y: -6, scale: 1.02,
-                        boxShadow: `0 22px 56px ${region.color}1E, 0 6px 18px rgba(44,24,8,0.08), inset 0 1px 0 rgba(255,255,255,0.96)`,
-                      }}
+                        background: `linear-gradient(148deg, ${r.color}12, rgba(255,248,240,0.75))`,
+                        backdropFilter: 'blur(24px)',
+                        WebkitBackdropFilter: 'blur(24px)',
+                        border: `1.5px solid ${r.color}40`,
+                        boxShadow: `0 14px 48px ${r.color}20, 0 4px 14px rgba(28,12,4,0.06), inset 0 1px 0 rgba(255,255,255,0.90)`,
+                      } : { ...S(0.60) }}
+                      whileHover={{ y: -6, scale: 1.02 }}
                       whileTap={{ scale: 0.96 }}
-                      transition={SPRING}
-                    >
-                      {/* sliding accent bar */}
+                      transition={SPRING}>
+
                       {isActive && (
-                        <motion.div
-                          layoutId="regionAccent"
+                        <motion.div layoutId={`regionBar-${r.name}`}
                           className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
-                          style={{ background: `linear-gradient(90deg, ${region.color}, ${region.color}70)` }}
-                          transition={SPRING}
-                        />
+                          style={{ background: `linear-gradient(90deg, ${r.color}, ${r.color}60)` }}
+                          transition={SPRING} />
                       )}
 
                       <div className="flex items-center justify-between">
-                        {/* icon micro-pill */}
                         <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                          style={{ background: region.bg, border: `1px solid ${region.color}22`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
-                          <Icon className="w-4 h-4" style={{ color: region.color }} strokeWidth={1.75} />
+                          style={{ background: `${r.color}14`, border: `1px solid ${r.color}22`, backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                          <Icon className="w-4 h-4" style={{ color: r.color }} strokeWidth={1.75} />
                         </div>
-
                         <AnimatePresence>
                           {count > 0 && (
                             <motion.span
                               initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
                               className="text-[10px] font-bold rounded-full px-2 py-0.5"
-                              style={{ background: `${region.color}16`, color: region.color, border: `1px solid ${region.color}24` }}
-                            >
+                              style={{ background: `${r.color}16`, color: r.color, border: `1px solid ${r.color}28` }}>
                               {count}
                             </motion.span>
                           )}
@@ -422,10 +419,8 @@ export default function Home() {
 
                       <div>
                         <p className="text-xs font-bold leading-snug"
-                          style={{ color: isActive ? region.color : '#1A1714', letterSpacing: '-0.01em' }}>
-                          {region.name}
-                        </p>
-                        <p className="text-[10px] mt-0.5" style={{ color: '#8C7060' }}>
+                          style={{ color: isActive ? r.color : TEXT, letterSpacing: '-0.01em' }}>{r.label}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: MUTED }}>
                           {count > 0 ? `${count} ארוחות` : 'ממתין לפעילות'}
                         </p>
                       </div>
@@ -436,243 +431,64 @@ export default function Home() {
             </LayoutGroup>
           </motion.div>
 
-          {/* ══ FILTERS TOGGLE ══ */}
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-30px' }}
-            transition={{ duration: 0.46, ease: EASE }}
-            className="space-y-2"
-          >
-            <div className="flex gap-2">
-              {/* Filter pill */}
-              <motion.button
-                onClick={() => setShowFilters(v => !v)}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold"
-                style={showFilters || activeFilters > 0 ? {
-                  background: 'linear-gradient(135deg, #C0522A, #923D1A)',
-                  color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  boxShadow: '0 4px 18px rgba(192,82,42,0.34)',
-                } : {
-                  background: 'rgba(255,255,255,0.64)',
-                  color: '#8C7060',
-                  border: '1px solid rgba(255,255,255,0.82)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  boxShadow: '0 2px 10px rgba(44,24,8,0.05)',
-                }}
-                whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }} transition={SPRING}
-              >
-                {activeFilters > 0
-                  ? <span className="w-4 h-4 rounded-full bg-white/30 text-[10px] font-bold flex items-center justify-center">{activeFilters}</span>
-                  : <Users className="w-3.5 h-3.5" />
-                }
-                סינון
-              </motion.button>
-
-              {/* Inline search (secondary) */}
-              <motion.div
-                className="relative flex-1 rounded-xl overflow-hidden"
-                animate={{
-                  boxShadow: searchFocused
-                    ? '0 0 0 2px rgba(192,82,42,0.26), 0 4px 20px rgba(192,82,42,0.10)'
-                    : '0 2px 8px rgba(44,24,8,0.05)',
-                }}
-                style={{
-                  background: 'rgba(255,255,255,0.66)',
-                  backdropFilter: 'blur(24px)',
-                  WebkitBackdropFilter: 'blur(24px)',
-                  border: '1px solid rgba(255,255,255,0.86)',
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-              >
-                <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: '#8C7060' }} />
-                <input
-                  value={search} onChange={e => setSearch(e.target.value)}
-                  onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)}
-                  placeholder="חפש ארוחה, מארח..."
-                  dir="rtl"
-                  className="w-full py-2.5 pr-10 pl-8 text-sm font-medium outline-none bg-transparent"
-                  style={{ color: '#1A1714' }}
-                />
-                <AnimatePresence>
-                  {search && (
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.7 }} transition={SPRING}
-                      onClick={() => setSearch('')}
-                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(120,108,99,0.14)' }}
-                    >
-                      <X className="w-3 h-3" style={{ color: '#8C7060' }} />
-                    </motion.button>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+          {/* ── EVENTS LIST ── */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em]" style={{ color: MUTED }}>
+                {selectedRegion ? `ארוחות — ${selectedRegion}` : 'ארוחות קרובות'}
+              </p>
+              {displayedEvents.length > 0 && (
+                <span className="text-[10px] font-bold rounded-full px-2 py-0.5"
+                  style={{ background: `${ACCENT}12`, color: ACCENT, border: `1px solid ${ACCENT}22` }}>
+                  {displayedEvents.length}
+                </span>
+              )}
             </div>
 
-            <AnimatePresence>
-              {showFilters && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.28, ease: EASE }}
-                  style={{ overflow: 'hidden' }}
-                >
-                  <div className="pt-1">
-                    <FilterBar value={filters} onChange={handleFiltersChange} />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* ── Birthday wall ── */}
-          <AnimatePresence>
-            {birthdays.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.35 }}>
-                <div className="rounded-2xl p-4"
-                  style={{
-                    ...GLASS,
-                    background: 'rgba(255,248,228,0.65)',
-                    borderRight: '3px solid rgba(200,134,10,0.55)',
-                  }}>
-                  <p className="text-xs font-bold mb-3 flex items-center gap-1.5" style={{ color: '#1A1714' }}>
-                    <Cake className="w-4 h-4" style={{ color: '#C8860A' }} /> ימי הולדת השבוע
-                  </p>
-                  <div className="flex flex-col gap-2">
-                    {birthdays.map(p => {
-                      const bday  = new Date(p.birthday + 'T00:00:00')
-                      const today = new Date()
-                      const isToday = bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate()
-                      return (
-                        <div key={p.id} className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                            style={{ background: 'linear-gradient(135deg,#C8860A,#F0B428)', color: '#1A0800' }}>
-                            {p.display_name.charAt(0)}
-                          </div>
-                          <span className="text-xs font-medium truncate flex-1" style={{ color: '#1A1714' }}>{p.display_name}</span>
-                          <span className="text-[11px] font-bold flex-shrink-0" style={{ color: '#C8860A' }}>
-                            {isToday ? 'היום!' : `${bday.getDate()}/${bday.getMonth() + 1}`}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
+            {loading ? (
+              <div className="space-y-3">
+                {[0,1,2].map(i => (
+                  <motion.div key={i} className="rounded-2xl h-24"
+                    style={{ ...S(0.52) }}
+                    animate={{ opacity: [0.35, 0.85, 0.35] }}
+                    transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: i * 0.15 }} />
+                ))}
+              </div>
+            ) : displayedEvents.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.42, ease: EASE }}
+                className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5" style={{ ...S(0.65) }}>
+                  <Utensils className="w-8 h-8" style={{ color: MUTED }} strokeWidth={1.5} />
                 </div>
+                <h3 className="font-display font-bold text-lg mb-2"
+                  style={{ color: TEXT, letterSpacing: '-0.015em' }}>
+                  {search ? 'לא נמצאו ארוחות' : 'אין ארוחות כרגע'}
+                </h3>
+                <p className="text-sm max-w-xs mb-6" style={{ color: MUTED }}>
+                  {search ? 'נסה חיפוש אחר' : 'היה הראשון לפרסם ארוחה באזורך'}
+                </p>
+                <Link to="/create-event">
+                  <motion.button
+                    whileHover={{ scale: 1.03, boxShadow: `0 12px 32px ${ACCENT}38` }}
+                    whileTap={{ scale: 0.97 }} transition={SPRING}
+                    className="px-6 py-2.5 text-sm font-bold text-white rounded-xl"
+                    style={{ background: `linear-gradient(135deg, ${ACCENT}, #8F2808)`, boxShadow: `0 4px 16px ${ACCENT}28` }}>
+                    פרסם ארוחה
+                  </motion.button>
+                </Link>
+              </motion.div>
+            ) : (
+              <motion.div className="space-y-3" variants={stagger} initial="hidden" animate="show">
+                {displayedEvents.map(event => (
+                  <motion.div key={event.id} variants={fadeUp}>
+                    <EventCard event={event} />
+                  </motion.div>
+                ))}
               </motion.div>
             )}
-          </AnimatePresence>
-
-          {/* ══ EVENTS SECTION ══ */}
-          <motion.div
-            initial={{ opacity: 0, y: 26 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.52, ease: EASE }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold" style={{ color: '#1A1714', letterSpacing: '-0.012em' }}>
-                {hasFilters ? 'תוצאות חיפוש' : 'ארוחות קרובות'}
-              </h2>
-              <AnimatePresence>
-                {!loading && displayedEvents.length > 0 && (
-                  <motion.span
-                    initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }} transition={SPRING}
-                    className="text-xs font-semibold rounded-full px-2.5 py-1"
-                    style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.15)' }}>
-                    {displayedEvents.length}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {loading ? (
-                <motion.div key="loading"
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {[1, 2, 3].map(i => <SkeletonCard key={i} />)}
-                </motion.div>
-
-              ) : displayedEvents.length === 0 ? (
-                <motion.div key="empty"
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} transition={{ duration: 0.42, ease: EASE }}>
-                  <div className="rounded-3xl py-10 px-6 flex flex-col items-center text-center gap-5"
-                    style={{ ...GLASS, border: '1.5px dashed rgba(232,226,216,0.55)' }}>
-                    <div className="relative w-20 h-20">
-                      {([Moon, Sun, Star] as const).map((Icon, i) => (
-                        <motion.div key={i}
-                          className="absolute w-8 h-8 rounded-xl flex items-center justify-center"
-                          style={{
-                            background: ['rgba(192,82,42,0.11)', 'rgba(184,120,10,0.11)', 'rgba(74,140,58,0.11)'][i],
-                            top: [0, 28, 8][i], left: [28, 0, 52][i],
-                          }}
-                          animate={{ y: [0, -6, 0], rotate: [0, i % 2 === 0 ? 5 : -5, 0] }}
-                          transition={{ repeat: Infinity, duration: 2.5 + i * 0.6, ease: 'easeInOut', delay: i * 0.4 }}
-                        >
-                          <Icon className="w-4 h-4" strokeWidth={1.75}
-                            style={{ color: ['#C0522A', '#B8780A', '#4A8C3A'][i] }} />
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <p className="font-bold text-base" style={{ color: '#1A1714', letterSpacing: '-0.012em' }}>
-                        {hasFilters ? 'לא נמצאו ארוחות' : 'אין ארוחות כרגע'}
-                      </p>
-                      <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#8C7060' }}>
-                        {hasFilters
-                          ? 'נסה לשנות את הסינון'
-                          : 'הפלטפורמה גדלה — פרסם ארוחה ביישוב שלך וצא ראשון'}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-2 w-full max-w-[220px]">
-                      {hasFilters && (
-                        <motion.button
-                          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={SPRING}
-                          onClick={() => { setFilters({ kashrut: [], religious: '', city: '', eventType: '' }); setSearch(''); setSelectedRegion('') }}
-                          className="w-full py-2.5 rounded-xl text-sm font-semibold"
-                          style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A' }}>
-                          נקה סינונים
-                        </motion.button>
-                      )}
-                      <Link to="/create-event" className="w-full">
-                        <motion.button
-                          whileHover={{ scale: 1.03, boxShadow: '0 14px 36px rgba(143,66,34,0.44)' }}
-                          whileTap={{ scale: 0.97 }} transition={SPRING}
-                          className="w-full py-2.5 rounded-xl text-sm font-semibold text-white flex items-center justify-center gap-2"
-                          style={{ background: 'linear-gradient(135deg,#C0522A,#8C3318)', boxShadow: '0 4px 18px rgba(192,82,42,0.32)' }}>
-                          <CalendarPlus className="w-4 h-4" />
-                          פרסם ארוחה ראשונה
-                          <ArrowLeft className="w-3.5 h-3.5" />
-                        </motion.button>
-                      </Link>
-                    </div>
-                  </div>
-                </motion.div>
-
-              ) : (
-                <motion.div key="events"
-                  variants={stagger} initial="hidden" animate="show"
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {displayedEvents.map(event => (
-                    <motion.div key={event.id} variants={fadeItem}>
-                      <EventCard event={event} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+          </div>
 
         </div>
       </div>
