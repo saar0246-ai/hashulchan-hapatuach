@@ -26,7 +26,7 @@ const GLASS = {
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
-const GLASS_HOVER = '0 18px 52px rgba(44,24,8,0.11), 0 4px 12px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.95)'
+
 
 interface BirthdayProfile {
   id: string; display_name: string; avatar_url: string | null; birthday: string
@@ -58,7 +58,7 @@ const fadeItem: Variants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, 
 
 function SkeletonCard() {
   return (
-    <motion.div className="rounded-2xl overflow-hidden" style={{ ...GLASS }}
+    <motion.div className="rounded-2xl overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
       animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
       <div className="h-20 rounded-t-2xl" style={{ background: 'linear-gradient(135deg, rgba(240,234,224,0.7), rgba(232,222,210,0.5))' }} />
       <div className="p-4 space-y-2">
@@ -143,32 +143,10 @@ export default function Home() {
     <div className="relative min-h-dvh"
       style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
 
-      {/* ══ LUMINOUS MESH BACKGROUND ══ */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        {/* warm amber — top-right */}
-        <motion.div className="absolute rounded-full"
-          style={{ width: 840, height: 840, top: -310, right: -310,
-            background: 'radial-gradient(circle at 40% 38%, rgba(248,163,22,0.40) 0%, rgba(245,140,10,0.15) 42%, transparent 68%)',
-            filter: 'blur(88px)' }}
-          animate={{ x: [0, 74, -30, 0], y: [0, -64, 40, 0], scale: [1, 1.17, 0.89, 1] }}
-          transition={{ repeat: Infinity, duration: 28, ease: 'easeInOut' }}
-        />
-        {/* terracotta — bottom-left */}
-        <motion.div className="absolute rounded-full"
-          style={{ width: 700, height: 700, bottom: 10, left: -270,
-            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.36) 0%, rgba(180,70,30,0.12) 47%, transparent 70%)',
-            filter: 'blur(76px)' }}
-          animate={{ x: [0, -56, 66, 0], y: [0, 74, -44, 0], scale: [1, 0.87, 1.14, 1] }}
-          transition={{ repeat: Infinity, duration: 34, ease: 'easeInOut', delay: 6 }}
-        />
-        {/* soft rose — mid */}
-        <motion.div className="absolute rounded-full"
-          style={{ width: 500, height: 500, top: '36%', left: '12%',
-            background: 'radial-gradient(circle at 50% 50%, rgba(228,118,88,0.22) 0%, rgba(218,108,78,0.07) 50%, transparent 72%)',
-            filter: 'blur(68px)' }}
-          animate={{ x: [0, 46, -24, 0], y: [0, -36, 56, 0], scale: [1, 1.13, 0.93, 1] }}
-          transition={{ repeat: Infinity, duration: 23, ease: 'easeInOut', delay: 3 }}
-        />
+      {/* ══ AMBIENT BACKGROUND ══ */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#F59E0B]/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -left-40 w-96 h-96 bg-[#C85A32]/15 rounded-full blur-3xl animate-pulse" />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
@@ -267,13 +245,8 @@ export default function Home() {
               {/* a) Deep terracotta create card */}
               <Link to="/create-event" className="col-span-3 block">
                 <motion.div
-                  className="h-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(148deg, #B85D39 0%, #8A3E1E 100%)',
-                    border: '1px solid rgba(255,255,255,0.13)',
-                    boxShadow: '0 10px 40px rgba(143,66,34,0.42), 0 3px 12px rgba(143,66,34,0.24), inset 0 1px 0 rgba(255,255,255,0.18)',
-                  }}
-                  whileHover={{ y: -4, scale: 1.01, boxShadow: '0 26px 68px rgba(143,66,34,0.52), 0 6px 18px rgba(143,66,34,0.30), inset 0 1px 0 rgba(255,255,255,0.22)' }}
+                  className="h-full rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-[#C85A32] via-[#A9603D] to-[#6E2E17] text-white shadow-lg"
+                  whileHover={{ y: -4, scale: 1.01 }}
                   whileTap={{ scale: 0.97 }}
                   transition={SPRING}
                 >
@@ -305,9 +278,8 @@ export default function Home() {
 
               {/* b) Live stats — full glassmorphism */}
               <motion.div
-                className="col-span-2 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden"
-                style={{ ...GLASS }}
-                whileHover={{ y: -4, scale: 1.01, boxShadow: GLASS_HOVER }}
+                className="col-span-2 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
+                whileHover={{ y: -4, scale: 1.01 }}
                 transition={SPRING}
               >
                 <div className="flex items-center gap-1.5">
@@ -340,9 +312,8 @@ export default function Home() {
 
             {/* c) Geographic shortcut — glassmorphism */}
             <motion.button
-              className="w-full rounded-2xl p-3.5 flex items-center gap-3 text-right overflow-hidden"
-              style={{ ...GLASS }}
-              whileHover={{ y: -2, scale: 1.005, boxShadow: GLASS_HOVER }}
+              className="w-full rounded-2xl p-3.5 flex items-center gap-3 text-right overflow-hidden bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(184,93,57,0.1)]"
+              whileHover={{ y: -2, scale: 1.005 }}
               whileTap={{ scale: 0.98 }}
               transition={SPRING}
               onClick={() => document.getElementById('regions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
@@ -410,7 +381,7 @@ export default function Home() {
                         WebkitBackdropFilter: 'blur(28px)',
                         border: `1.5px solid ${region.color}3A`,
                         boxShadow: `0 14px 44px ${region.color}22, 0 4px 14px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.90)`,
-                      } : { ...GLASS }}
+                      } : { background: 'rgba(255,255,255,0.40)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.60)', boxShadow: '0 8px 32px 0 rgba(184,93,57,0.10)' }}
                       whileHover={{
                         y: -6, scale: 1.02,
                         boxShadow: `0 22px 56px ${region.color}1E, 0 6px 18px rgba(44,24,8,0.08), inset 0 1px 0 rgba(255,255,255,0.96)`,
