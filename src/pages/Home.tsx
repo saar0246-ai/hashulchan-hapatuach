@@ -7,21 +7,25 @@ import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
 import type { Event } from '../types'
 import EventCard from '../components/EventCard'
-import FluidCanvas from '../components/FluidCanvas'
 import { AnimatedNumber } from '../components/ui/AnimatedNumber'
 import { TextShimmer } from '../components/ui/TextShimmer'
 import { InView } from '../components/ui/InView'
 import { Tilt } from '../components/ui/Tilt'
 
-/* ─── Design tokens ────────────────────────────────────────────────────── */
-const VOID        = '#0D0D0B'
-const SURFACE     = '#191917'
-const TEXT        = '#F5F3EE'
-const MUTED       = '#8A8278'
-const FIRE        = '#E8601C'
-const AMBER       = '#D4A017'
-const BORDER      = 'rgba(255,255,255,0.07)'
-const BORDER_FIRE = 'rgba(232,96,28,0.22)'
+/* ─── Design tokens (light palette) ───────────────────────────────────── */
+const TEXT        = '#1A1714'
+const MUTED       = '#8C7060'
+const FIRE        = '#C0522A'
+const AMBER       = '#C8860A'
+const BORDER      = 'rgba(232,226,216,0.70)'
+const BORDER_FIRE = 'rgba(192,82,42,0.20)'
+const GLASS = {
+  background:           'rgba(255,255,255,0.58)',
+  backdropFilter:       'blur(28px)',
+  WebkitBackdropFilter: 'blur(28px)',
+  border:               '1px solid rgba(255,255,255,0.80)',
+  boxShadow:            '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+}
 
 /* ─── Tabs ──────────────────────────────────────────────────────────────── */
 const TABS = [
@@ -35,26 +39,25 @@ const TABS = [
 /* ─── Region filter ─────────────────────────────────────────────────────── */
 interface Region { id: string; label: string; cities: string[] }
 const REGIONS: Region[] = [
-  { id: 'jerusalem', label: 'ירושלים',      cities: ['ירושלים','בית שמש','מעלה אדומים','מבשרת ציון','גבעת זאב'] },
-  { id: 'gush_dan',  label: 'תל אביב',      cities: ['תל אביב','רמת גן','גבעתיים','בני ברק','ראשון לציון','פתח תקוה','חולון','בת ים','אשדוד','נתניה'] },
-  { id: 'north',     label: 'הצפון',        cities: ['חיפה','נהריה','עכו','טבריה','צפת','נצרת','קריית שמונה'] },
-  { id: 'negev',     label: 'דרום',         cities: ['באר שבע','אשקלון','אילת','דימונה','ערד','נתיבות'] },
+  { id: 'jerusalem', label: 'ירושלים', cities: ['ירושלים','בית שמש','מעלה אדומים','מבשרת ציון','גבעת זאב'] },
+  { id: 'gush_dan',  label: 'תל אביב', cities: ['תל אביב','רמת גן','גבעתיים','בני ברק','ראשון לציון','פתח תקוה','חולון','בת ים','אשדוד','נתניה'] },
+  { id: 'north',     label: 'הצפון',   cities: ['חיפה','נהריה','עכו','טבריה','צפת','נצרת','קריית שמונה'] },
+  { id: 'negev',     label: 'דרום',    cities: ['באר שבע','אשקלון','אילת','דימונה','ערד','נתיבות'] },
 ]
 
-/* ─── Spring ────────────────────────────────────────────────────────────── */
 const SP = { type: 'spring' as const, stiffness: 380, damping: 26 }
 
 export default function Home() {
   const { user }    = useAuth()
   const { profile } = useProfile(user?.id)
 
-  const [events, setEvents]               = useState<Event[]>([])
-  const [loading, setLoading]             = useState(true)
-  const [search, setSearch]               = useState('')
-  const [searchFocused, setSearchFocused] = useState(false)
-  const [activeTab, setActiveTab]         = useState('all')
+  const [events, setEvents]                 = useState<Event[]>([])
+  const [loading, setLoading]               = useState(true)
+  const [search, setSearch]                 = useState('')
+  const [searchFocused, setSearchFocused]   = useState(false)
+  const [activeTab, setActiveTab]           = useState('all')
   const [selectedRegion, setSelectedRegion] = useState('')
-  const [regionOpen, setRegionOpen]       = useState(false)
+  const [regionOpen, setRegionOpen]         = useState(false)
 
   const fetchEvents = useCallback(async () => {
     setLoading(true)
@@ -81,197 +84,156 @@ export default function Home() {
     ? events.filter(e => activeRegionObj.cities.includes(e.city))
     : events
 
-  /* Force dark body so the WebGL hero zone reads dark, not cream */
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = VOID
-    document.body.style.overscrollBehavior = 'none'
-    return () => { document.body.style.background = prev }
-  }, [])
-
   return (
-    <div dir="rtl" style={{ minHeight: '100dvh', background: 'transparent', color: TEXT, position: 'relative' }}>
+    <div
+      style={{
+        minHeight:  '100dvh',
+        background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)',
+        color:      TEXT,
+        position:   'relative',
+      }}
+    >
+      {/* ── Luminous orbs ─────────────────────────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
+        <motion.div className="absolute rounded-full"
+          style={{
+            width: 700, height: 700, top: -260, right: -260,
+            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+            filter: 'blur(80px)',
+          }}
+          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
+          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
+        />
+        <motion.div className="absolute rounded-full"
+          style={{
+            width: 560, height: 560, bottom: 40, left: -220,
+            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+            filter: 'blur(72px)',
+          }}
+          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
+          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
+        />
+      </div>
 
-      {/* ── WebGL canvas — fixed behind everything ─────────────────────── */}
-      <FluidCanvas />
-
-      {/* ── HERO — transparent, WebGL fully visible ────────────────────── */}
+      {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <div
         style={{
-          minHeight: '52vh',
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex',
+          position:      'relative',
+          zIndex:        1,
+          display:       'flex',
           flexDirection: 'column',
-          justifyContent: 'flex-end',
-          padding: '0 clamp(1rem, 4vw, 2.5rem) 7vh',
+          justifyContent:'flex-end',
+          padding:       '7vh clamp(1rem, 4vw, 2.5rem) 6vh',
         }}
       >
         <div style={{ maxWidth: 680, margin: '0 auto', width: '100%', textAlign: 'center' }}>
-        {/* Eyebrow */}
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          style={{
-            color: AMBER,
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            marginBottom: 16,
-          }}
-        >
-          {profile?.display_name
-            ? `✦ שלום ${profile.display_name} ✦`
-            : '✦ שולחן פתוח ✦'}
-        </motion.p>
 
-        {/* Headline line 1 */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18, duration: 0.55 }}
-        >
-          <TextShimmer
-            as="h1"
-            baseColor={TEXT}
-            shimmerColor={AMBER}
-            duration={3}
-            spread={4}
-            style={{
-              fontFamily:    "'Frank Ruhl Libre', serif",
-              fontWeight:    900,
-              fontSize:      'clamp(3.2rem, 13vw, 5rem)',
-              lineHeight:    0.92,
-              letterSpacing: '-0.04em',
-              display:       'block',
-              marginBottom:  8,
-            }}
+          {/* Eyebrow */}
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+            style={{ color: AMBER, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 16 }}
           >
-            מוצאים שולחן חם
-          </TextShimmer>
-        </motion.div>
+            {profile?.display_name ? `✦ שלום ${profile.display_name} ✦` : '✦ שולחן פתוח ✦'}
+          </motion.p>
 
-        {/* Headline line 2 */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.26, duration: 0.55 }}
-        >
-          <TextShimmer
-            as="h1"
-            baseColor={FIRE}
-            shimmerColor="rgba(255,220,80,0.9)"
-            duration={3.5}
-            spread={4}
-            style={{
-              fontFamily:    "'Frank Ruhl Libre', serif",
-              fontWeight:    900,
-              fontSize:      'clamp(3.2rem, 13vw, 5rem)',
-              lineHeight:    0.92,
-              letterSpacing: '-0.04em',
-              display:       'block',
-              marginBottom:  28,
-            }}
-          >
-            לשבת ולחג
-          </TextShimmer>
-        </motion.div>
-
-        {/* AnimatedNumber stat strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.38, duration: 0.5 }}
-          style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'center' }}
-        >
-          <span
-            style={{
-              fontFamily:    "'Frank Ruhl Libre', serif",
-              fontWeight:    900,
-              fontSize:      'clamp(2.6rem, 10vw, 3.6rem)',
-              color:         TEXT,
-              letterSpacing: '-0.05em',
-              lineHeight:    1,
-            }}
-          >
-            <AnimatedNumber
-              value={loading ? 0 : events.length}
-              springOptions={{ stiffness: 80, damping: 22 }}
-            />
-          </span>
-          <span style={{ fontSize: 14, color: MUTED, fontWeight: 500 }}>
-            ארוחות פתוחות כרגע
-          </span>
-          <motion.span
-            style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: '#22c55e', display: 'inline-block',
-              flexShrink: 0, marginBottom: 2,
-            }}
-            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
-            transition={{ repeat: Infinity, duration: 2.2 }}
-          />
-        </motion.div>
-
-        {/* Scroll cue */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-          style={{
-            marginTop: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            color: MUTED,
-            fontSize: 11,
-            fontWeight: 500,
-            letterSpacing: '0.06em',
-          }}
-        >
-          <motion.div
-            animate={{ y: [0, 4, 0] }}
-            transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-          >
-            <ChevronDown style={{ width: 16, height: 16 }} />
+          {/* Headline line 1 */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.55 }}>
+            <TextShimmer
+              as="h1"
+              baseColor={TEXT}
+              shimmerColor={AMBER}
+              duration={3}
+              spread={4}
+              style={{
+                fontFamily: "'Frank Ruhl Libre', serif",
+                fontWeight: 900,
+                fontSize:   'clamp(3.2rem, 13vw, 5rem)',
+                lineHeight: 0.92,
+                letterSpacing: '-0.04em',
+                display:    'block',
+                marginBottom: 8,
+              }}
+            >
+              מוצאים שולחן חם
+            </TextShimmer>
           </motion.div>
-          <span>גלול לארוחות</span>
-        </motion.div>
-        </div>{/* end maxWidth hero wrapper */}
+
+          {/* Headline line 2 */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.55 }}>
+            <TextShimmer
+              as="h1"
+              baseColor={FIRE}
+              shimmerColor={AMBER}
+              duration={3.5}
+              spread={4}
+              style={{
+                fontFamily: "'Frank Ruhl Libre', serif",
+                fontWeight: 900,
+                fontSize:   'clamp(3.2rem, 13vw, 5rem)',
+                lineHeight: 0.92,
+                letterSpacing: '-0.04em',
+                display:    'block',
+                marginBottom: 28,
+              }}
+            >
+              לשבת ולחג
+            </TextShimmer>
+          </motion.div>
+
+          {/* AnimatedNumber stat strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38, duration: 0.5 }}
+            style={{ display: 'flex', alignItems: 'baseline', gap: 8, justifyContent: 'center' }}
+          >
+            <span style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(2.6rem, 10vw, 3.6rem)', color: FIRE, letterSpacing: '-0.05em', lineHeight: 1 }}>
+              <AnimatedNumber value={loading ? 0 : events.length} springOptions={{ stiffness: 80, damping: 22 }} />
+            </span>
+            <span style={{ fontSize: 14, color: MUTED, fontWeight: 500 }}>ארוחות פתוחות כרגע</span>
+            <motion.span
+              style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', display: 'inline-block', flexShrink: 0, marginBottom: 2 }}
+              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
+              transition={{ repeat: Infinity, duration: 2.2 }}
+            />
+          </motion.div>
+
+          {/* Scroll cue */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            style={{ marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: MUTED, fontSize: 11, fontWeight: 500, letterSpacing: '0.06em' }}
+          >
+            <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}>
+              <ChevronDown style={{ width: 16, height: 16 }} />
+            </motion.div>
+            <span>גלול לארוחות</span>
+          </motion.div>
+        </div>
       </div>
 
-      {/* ── DARK PANEL ─────────────────────────────────────────────────── */}
-      <div
-        style={{
-          position:        'relative',
-          zIndex:          2,
-          background:      VOID,
-          borderRadius:    '20px 20px 0 0',
-          borderTop:       `1px solid ${BORDER_FIRE}`,
-          minHeight:       '100dvh',
-          paddingBottom:   100,
-        }}
-      >
-        <div style={{ maxWidth: 680, margin: '0 auto', padding: '28px 20px 0' }}>
+      {/* ── CONTENT ──────────────────────────────────────────────────────── */}
+      <div style={{ position: 'relative', zIndex: 1, paddingBottom: 100 }}>
+        <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 20px' }}>
 
-          {/* ── Search ──────────────────────────────────────────────────── */}
+          {/* Search */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.45 }}
             style={{
-              background:    SURFACE,
-              border:        `1px solid ${searchFocused ? BORDER_FIRE : BORDER}`,
-              borderRadius:  16,
-              display:       'flex',
-              alignItems:    'center',
-              gap:           8,
-              padding:       '10px 14px',
-              marginBottom:  20,
-              transition:    'border-color 0.2s',
+              ...GLASS,
+              display:    'flex',
+              alignItems: 'center',
+              gap:        8,
+              padding:    '10px 14px',
+              borderRadius: 16,
+              marginBottom: 20,
+              border:     `1px solid ${searchFocused ? BORDER_FIRE : BORDER}`,
+              transition: 'border-color 0.2s',
             }}
           >
             <Search style={{ width: 16, height: 16, color: MUTED, flexShrink: 0 }} />
@@ -282,14 +244,7 @@ export default function Home() {
               onBlur={() => setSearchFocused(false)}
               placeholder="חפש ארוחה, עיר, מארח..."
               dir="rtl"
-              style={{
-                flex:        1,
-                background:  'transparent',
-                color:       TEXT,
-                outline:     'none',
-                fontSize:    14,
-                border:      'none',
-              }}
+              style={{ flex: 1, background: 'transparent', color: TEXT, outline: 'none', fontSize: 14, border: 'none' }}
             />
             <AnimatePresence>
               {search && (
@@ -301,10 +256,9 @@ export default function Home() {
                   onClick={() => setSearch('')}
                   style={{
                     width: 26, height: 26, borderRadius: '50%',
-                    background: 'rgba(255,255,255,0.09)',
+                    background: 'rgba(44,24,8,0.07)',
                     border: 'none', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                   }}
                 >
                   <X style={{ width: 13, height: 13, color: MUTED }} />
@@ -313,7 +267,7 @@ export default function Home() {
             </AnimatePresence>
           </motion.div>
 
-          {/* ── Emil Kowalski Tabs (exact implementation) ───────────────── */}
+          {/* Emil Kowalski Tabs */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -324,7 +278,7 @@ export default function Home() {
               <div
                 style={{
                   display:      'inline-flex',
-                  background:   SURFACE,
+                  background:   'rgba(230,218,208,0.50)',
                   borderRadius: 9999,
                   padding:      3,
                   border:       `1px solid ${BORDER}`,
@@ -337,16 +291,16 @@ export default function Home() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       style={{
-                        position:     'relative',
-                        padding:      '7px 16px',
+                        position:   'relative',
+                        padding:    '7px 16px',
                         borderRadius: 9999,
-                        color:        TEXT,
-                        cursor:       'pointer',
-                        fontSize:     13,
-                        fontWeight:   600,
-                        background:   'transparent',
-                        border:       'none',
-                        outline:      'none',
+                        color:      isActive ? FIRE : MUTED,
+                        cursor:     'pointer',
+                        fontSize:   13,
+                        fontWeight: isActive ? 700 : 500,
+                        background: 'transparent',
+                        border:     'none',
+                        outline:    'none',
                       }}
                       whileTap={{ scale: 0.94 }}
                       transition={SP}
@@ -355,11 +309,11 @@ export default function Home() {
                         <motion.span
                           layoutId="bubble"
                           style={{
-                            position:   'absolute',
-                            inset:      0,
+                            position:  'absolute',
+                            inset:     0,
                             borderRadius: 9999,
-                            background: 'white',
-                            mixBlendMode: 'difference',
+                            background: 'rgba(255,255,255,0.88)',
+                            boxShadow: '0 1px 8px rgba(44,24,8,0.10)',
                           }}
                           transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                         />
@@ -372,7 +326,7 @@ export default function Home() {
             </LayoutGroup>
           </motion.div>
 
-          {/* ── Region filter ────────────────────────────────────────────── */}
+          {/* Region filter */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -382,25 +336,22 @@ export default function Home() {
             <button
               onClick={() => setRegionOpen(p => !p)}
               style={{
-                display:      'flex',
-                alignItems:   'center',
-                gap:          6,
-                background:   SURFACE,
-                border:       `1px solid ${selectedRegion ? BORDER_FIRE : BORDER}`,
+                display:    'flex',
+                alignItems: 'center',
+                gap:        6,
+                ...GLASS,
+                border:     `1px solid ${selectedRegion ? BORDER_FIRE : BORDER}`,
                 borderRadius: 10,
-                padding:      '7px 14px',
-                color:        selectedRegion ? FIRE : MUTED,
-                fontSize:     13,
-                fontWeight:   600,
-                cursor:       'pointer',
+                padding:    '7px 14px',
+                color:      selectedRegion ? FIRE : MUTED,
+                fontSize:   13,
+                fontWeight: 600,
+                cursor:     'pointer',
               }}
             >
               <Users style={{ width: 14, height: 14 }} />
               {activeRegionObj ? activeRegionObj.label : 'כל האזורים'}
-              <motion.div
-                animate={{ rotate: regionOpen ? 180 : 0 }}
-                transition={{ duration: 0.25 }}
-              >
+              <motion.div animate={{ rotate: regionOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
                 <ChevronDown style={{ width: 14, height: 14 }} />
               </motion.div>
             </button>
@@ -412,57 +363,35 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.2 }}
-                  style={{
-                    marginTop:    8,
-                    background:   SURFACE,
-                    border:       `1px solid ${BORDER}`,
-                    borderRadius: 12,
-                    padding:      8,
-                    display:      'flex',
-                    flexWrap:     'wrap',
-                    gap:          6,
-                  }}
+                  style={{ marginTop: 8, ...GLASS, borderRadius: 12, padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}
                 >
-                  {/* Clear option */}
                   <button
                     onClick={() => { setSelectedRegion(''); setRegionOpen(false) }}
                     style={{
-                      padding:      '5px 12px',
-                      borderRadius: 8,
-                      fontSize:     12,
-                      fontWeight:   600,
-                      cursor:       'pointer',
-                      background:   !selectedRegion ? `${FIRE}22` : 'transparent',
-                      border:       `1px solid ${!selectedRegion ? BORDER_FIRE : BORDER}`,
-                      color:        !selectedRegion ? FIRE : MUTED,
+                      padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      background: !selectedRegion ? 'rgba(192,82,42,0.10)' : 'transparent',
+                      border: `1px solid ${!selectedRegion ? BORDER_FIRE : BORDER}`,
+                      color:  !selectedRegion ? FIRE : MUTED,
                     }}
-                  >
-                    הכל
-                  </button>
+                  >הכל</button>
                   {REGIONS.map(r => (
                     <button
                       key={r.id}
                       onClick={() => { setSelectedRegion(r.id); setRegionOpen(false) }}
                       style={{
-                        padding:      '5px 12px',
-                        borderRadius: 8,
-                        fontSize:     12,
-                        fontWeight:   600,
-                        cursor:       'pointer',
-                        background:   selectedRegion === r.id ? `${FIRE}22` : 'transparent',
-                        border:       `1px solid ${selectedRegion === r.id ? BORDER_FIRE : BORDER}`,
-                        color:        selectedRegion === r.id ? FIRE : TEXT,
+                        padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                        background: selectedRegion === r.id ? 'rgba(192,82,42,0.10)' : 'transparent',
+                        border: `1px solid ${selectedRegion === r.id ? BORDER_FIRE : BORDER}`,
+                        color:  selectedRegion === r.id ? FIRE : TEXT,
                       }}
-                    >
-                      {r.label}
-                    </button>
+                    >{r.label}</button>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* ── CTA card (Tilt) ──────────────────────────────────────────── */}
+          {/* CTA card */}
           <InView
             variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
@@ -475,77 +404,25 @@ export default function Home() {
                 style={{
                   borderRadius: 20,
                   overflow:     'hidden',
-                  background:   `linear-gradient(135deg, ${FIRE} 0%, #6E2E17 100%)`,
+                  background:   'linear-gradient(135deg, #C0522A 0%, #7A3018 100%)',
                   padding:      '1.8rem',
                   display:      'block',
                   position:     'relative',
                 }}
               >
-                {/* Backlight */}
-                <div
-                  aria-hidden
-                  style={{
-                    position:   'absolute',
-                    top: -60, right: -50,
-                    width: 220, height: 220,
-                    background: 'radial-gradient(circle, rgba(255,215,130,0.35), transparent 60%)',
-                    filter:     'blur(8px)',
-                    pointerEvents: 'none',
-                  }}
-                />
-
+                <div aria-hidden style={{ position: 'absolute', top: -60, right: -50, width: 220, height: 220, background: 'radial-gradient(circle, rgba(255,215,130,0.35), transparent 60%)', filter: 'blur(8px)', pointerEvents: 'none' }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  {/* Icon + eyebrow */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                    <div
-                      style={{
-                        width: 44, height: 44, borderRadius: 14,
-                        background: 'rgba(255,255,255,0.18)',
-                        border: '1px solid rgba(255,255,255,0.28)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}
-                    >
+                    <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CalendarPlus style={{ width: 22, height: 22, color: 'white' }} strokeWidth={1.75} />
                     </div>
-                    <span
-                      style={{
-                        fontSize: 10, fontWeight: 700,
-                        color: 'rgba(255,255,255,0.5)',
-                        letterSpacing: '0.16em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      מארח שולחן
-                    </span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>מארח שולחן</span>
                   </div>
-
-                  {/* Headline */}
-                  <h2
-                    style={{
-                      fontFamily:    "'Frank Ruhl Libre', serif",
-                      fontWeight:    900,
-                      fontSize:      'clamp(1.9rem, 7vw, 2.6rem)',
-                      color:         'white',
-                      letterSpacing: '-0.034em',
-                      lineHeight:    0.97,
-                      marginBottom:  20,
-                    }}
-                  >
+                  <h2 style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.9rem, 7vw, 2.6rem)', color: 'white', letterSpacing: '-0.034em', lineHeight: 0.97, marginBottom: 20 }}>
                     מארחים<br />בשבת?
                   </h2>
-
-                  {/* CTA button */}
-                  <div
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 8,
-                      background: 'rgba(255,255,255,0.14)',
-                      border: '1.5px solid rgba(255,255,255,0.32)',
-                      borderRadius: 11, padding: '9px 18px',
-                    }}
-                  >
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>
-                      פרסום ארוחה
-                    </span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.14)', border: '1.5px solid rgba(255,255,255,0.32)', borderRadius: 11, padding: '9px 18px' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>פרסום ארוחה</span>
                     <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16 }}>←</span>
                   </div>
                 </div>
@@ -553,48 +430,25 @@ export default function Home() {
             </Link>
           </InView>
 
-          {/* ── Section header ───────────────────────────────────────────── */}
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              marginBottom: 14,
-            }}
-          >
-            <p
-              style={{
-                fontSize: 10, fontWeight: 700,
-                color: MUTED, letterSpacing: '0.18em',
-                textTransform: 'uppercase',
-              }}
-            >
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               {activeRegionObj ? `ארוחות — ${activeRegionObj.label}` : 'ארוחות קרובות'}
             </p>
             {!loading && displayed.length > 0 && (
-              <span
-                style={{
-                  fontSize: 11, fontWeight: 700, borderRadius: 999,
-                  padding: '3px 10px',
-                  background: `${FIRE}14`,
-                  border: `1px solid ${BORDER_FIRE}`,
-                  color: FIRE,
-                }}
-              >
+              <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '3px 10px', background: 'rgba(192,82,42,0.10)', border: `1px solid ${BORDER_FIRE}`, color: FIRE }}>
                 {displayed.length}
               </span>
             )}
           </div>
 
-          {/* ── Event list ───────────────────────────────────────────────── */}
+          {/* Event list */}
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[0, 1, 2].map(i => (
                 <motion.div
                   key={i}
-                  style={{
-                    height: 108, borderRadius: 16,
-                    background: SURFACE,
-                    border: `1px solid ${BORDER}`,
-                  }}
+                  style={{ height: 108, borderRadius: 16, background: 'rgba(255,255,255,0.58)', border: `1px solid ${BORDER}` }}
                   animate={{ opacity: [0.4, 0.75, 0.4] }}
                   transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: i * 0.15 }}
                 />
@@ -602,23 +456,10 @@ export default function Home() {
             </div>
           ) : displayed.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0', textAlign: 'center' }}>
-              <div
-                style={{
-                  width: 60, height: 60, borderRadius: 16, fontSize: 24,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: SURFACE, border: `1px solid ${BORDER}`,
-                  marginBottom: 18,
-                }}
-              >
+              <div style={{ width: 60, height: 60, borderRadius: 16, fontSize: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', ...GLASS, marginBottom: 18 }}>
                 🍽️
               </div>
-              <p
-                style={{
-                  fontFamily: "'Frank Ruhl Libre', serif",
-                  fontWeight: 900, fontSize: 20,
-                  color: TEXT, marginBottom: 8,
-                }}
-              >
+              <p style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 20, color: TEXT, marginBottom: 8 }}>
                 {search ? 'לא נמצאו ארוחות' : 'אין ארוחות כרגע'}
               </p>
               <p style={{ fontSize: 14, color: MUTED, marginBottom: 28 }}>
@@ -629,12 +470,7 @@ export default function Home() {
                   whileHover={{ scale: 1.04 }}
                   whileTap={{ scale: 0.97 }}
                   transition={SP}
-                  style={{
-                    padding:      '11px 28px',
-                    fontSize:     14, fontWeight: 700, color: 'white',
-                    borderRadius: 14, border: 'none', cursor: 'pointer',
-                    background:   `linear-gradient(135deg, ${FIRE}, #6E2E17)`,
-                  }}
+                  style={{ padding: '11px 28px', fontSize: 14, fontWeight: 700, color: 'white', borderRadius: 14, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #C0522A, #7A3018)' }}
                 >
                   פרסם ארוחה ראשונה
                 </motion.button>
@@ -645,15 +481,8 @@ export default function Home() {
               {displayed.map((ev, i) => (
                 <InView
                   key={ev.id}
-                  variants={{
-                    hidden:  { opacity: 0, y: 12 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  transition={{
-                    duration: 0.38,
-                    ease: [0.22, 1, 0.36, 1],
-                    delay: Math.min(i * 0.06, 0.3),
-                  }}
+                  variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
+                  transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1], delay: Math.min(i * 0.06, 0.3) }}
                   viewOptions={{ once: true, margin: '0px 0px -30px 0px' }}
                 >
                   <EventCard event={ev} />
