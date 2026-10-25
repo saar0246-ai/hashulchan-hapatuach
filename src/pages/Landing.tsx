@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Search, CalendarPlus } from 'lucide-react'
@@ -8,31 +7,35 @@ import { InView } from '../components/ui/InView'
 import { Tilt } from '../components/ui/Tilt'
 import { AnimatedNumber } from '../components/ui/AnimatedNumber'
 
-const VOID        = '#0D0D0B'
-const SURFACE     = '#191917'
-const TEXT        = '#F5F3EE'
-const MUTED       = '#8A8278'
-const FIRE        = '#E8601C'
-const BORDER      = 'rgba(255,255,255,0.07)'
-const BORDER_FIRE = 'rgba(232,96,28,0.22)'
-const GREEN       = '#22c55e'
+const BG      = 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)'
+const TEXT    = '#1A1714'
+const MUTED   = '#8C7060'
+const FIRE    = '#C0522A'
+const AMBER   = '#C8860A'
+const BORDER  = 'rgba(232,226,216,0.70)'
+const BORDER_FIRE = 'rgba(192,82,42,0.20)'
+const GREEN   = '#22c55e'
+const GLASS   = {
+  background: 'rgba(255,255,255,0.70)',
+  border: `1px solid ${BORDER}`,
+  boxShadow: '0 4px 24px rgba(44,24,8,0.06), inset 0 1px 0 rgba(255,255,255,0.90)',
+}
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const SPRING = { type: 'spring' as const, stiffness: 350, damping: 25 }
 
-
 const MOCK_EVENTS = [
-  { id: 1, title: 'שישי ביתי ירושלמי',    host: 'משפחת לוי',        city: 'ירושלים', date: '24/10', day: 'שישי', spots: 3, kashrut: 'מהדרין' },
-  { id: 2, title: 'שולחן שישי חם ומכיל',  host: 'רחל ויוסף כהן',    city: 'תל אביב', date: '25/10', day: 'שישי', spots: 5, kashrut: 'כשר' },
-  { id: 3, title: 'ארוחת שבת מרוקאית',    host: 'דינה אביב',         city: 'חיפה',    date: '26/10', day: 'שבת',  spots: 2, kashrut: 'כשר' },
+  { id: 1, title: 'שישי ביתי ירושלמי',    host: 'משפחת לוי',     city: 'ירושלים', date: '24/10', day: 'שישי', spots: 3, kashrut: 'מהדרין' },
+  { id: 2, title: 'שולחן שישי חם ומכיל',  host: 'רחל ויוסף כהן', city: 'תל אביב', date: '25/10', day: 'שישי', spots: 5, kashrut: 'כשר'    },
+  { id: 3, title: 'ארוחת שבת מרוקאית',    host: 'דינה אביב',     city: 'חיפה',    date: '26/10', day: 'שבת',  spots: 2, kashrut: 'כשר'    },
 ]
 
 const TABS_PREVIEW = ['הכל', 'שישי', 'שבת', 'חג', 'חול']
 
 const STEPS = [
   { n: '01', title: 'נרשמים',        desc: 'פרופיל חינמי עם העדפות כשרות ודת — תהליך של 5 דקות.' },
-  { n: '02', title: 'מוצאים ארוחה', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע.' },
-  { n: '03', title: 'מגיעים ונהנים', desc: 'המארח בוחר ושולח כתובת ישירות אחרי האישור.' },
+  { n: '02', title: 'מוצאים ארוחה', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע.'              },
+  { n: '03', title: 'מגיעים ונהנים', desc: 'המארח בוחר ושולח כתובת ישירות אחרי האישור.'           },
 ]
 
 const PERSONAL_ITEMS = [
@@ -45,24 +48,30 @@ const PERSONAL_ITEMS = [
 export default function Landing() {
   const stats = useStats()
 
-  useEffect(() => {
-    const prev = document.body.style.background
-    document.body.style.background = VOID
-    document.body.style.overscrollBehavior = 'none'
-    return () => {
-      document.body.style.background = prev
-      document.body.style.overscrollBehavior = ''
-    }
-  }, [])
-
   return (
-    <div dir="rtl" style={{ minHeight: '100dvh', background: VOID, color: TEXT, overflowX: 'hidden' }}>
+    <div dir="rtl" style={{ minHeight: '100dvh', background: BG, color: TEXT, overflowX: 'hidden' }}>
+
+      {/* ── Luminous orbs ── */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{
+          position: 'absolute', top: '-15%', right: '-10%',
+          width: 700, height: 700, borderRadius: '50%',
+          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.28) 0%, rgba(245,140,10,0.08) 44%, transparent 68%)',
+          filter: 'blur(80px)',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '5%', left: '-12%',
+          width: 580, height: 580, borderRadius: '50%',
+          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.22) 0%, rgba(180,70,30,0.07) 48%, transparent 70%)',
+          filter: 'blur(72px)',
+        }} />
+      </div>
 
       {/* ── Sticky header ── */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 40,
         borderBottom: `1px solid ${BORDER}`,
-        background: 'rgba(13,13,11,0.92)',
+        background: 'rgba(253,249,243,0.90)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
       }}>
@@ -71,7 +80,7 @@ export default function Landing() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60,
         }}>
           <Link to="/about" style={{ textDecoration: 'none' }}>
-            <BrandLogo size="sm" onDark />
+            <BrandLogo size="sm" />
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link to="/auth?mode=login"
@@ -95,33 +104,19 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* ══ Hero — full-bleed, no maxWidth on text ══ */}
+      {/* ══ Hero ══ */}
       <section style={{
+        position: 'relative', zIndex: 1,
         minHeight: 'calc(100dvh - 60px)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
         padding: 'clamp(3rem, 8vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
-        position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Dot-grid */}
+        {/* Dot-grid (dark dots on light bg) */}
         <div aria-hidden style={{
           position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(rgba(44,24,8,0.06) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
-        }} />
-
-        {/* Ambient blooms */}
-        <div aria-hidden style={{
-          position: 'absolute', top: '8%', right: '-6%',
-          width: 700, height: 700, borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
-          background: `radial-gradient(circle, rgba(232,96,28,0.06) 0%, transparent 70%)`,
-          filter: 'blur(88px)',
-        }} />
-        <div aria-hidden style={{
-          position: 'absolute', bottom: '10%', left: '-8%',
-          width: 480, height: 480, borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
-          background: `radial-gradient(circle, rgba(212,160,23,0.045) 0%, transparent 70%)`,
-          filter: 'blur(70px)',
         }} />
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', width: '100%', textAlign: 'center' }}>
@@ -134,7 +129,7 @@ export default function Landing() {
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 'clamp(1rem, 3vw, 2rem)' }}>
             <span style={{
               display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
-              background: FIRE, boxShadow: `0 0 8px ${FIRE}99`,
+              background: FIRE, boxShadow: `0 0 8px ${FIRE}88`,
             }} />
             <span style={{
               fontSize: 11, fontWeight: 700, letterSpacing: '0.16em',
@@ -144,7 +139,7 @@ export default function Landing() {
             </span>
           </motion.div>
 
-          {/* Main headline — full-width, no container cap */}
+          {/* Main headline */}
           <motion.h1
             initial={{ opacity: 0, y: 36 }}
             animate={{ opacity: 1, y: 0 }}
@@ -185,7 +180,7 @@ export default function Landing() {
             style={{
               fontSize: 'clamp(0.95rem, 1.8vw, 1.1rem)',
               color: MUTED, lineHeight: 1.75,
-              maxWidth: 420, marginTop: 0, marginLeft: 'auto', marginRight: 'auto', marginBottom: 'clamp(2rem, 4vw, 3rem)',
+              maxWidth: 420, margin: '0 auto clamp(2rem, 4vw, 3rem)',
             }}>
             מארחים פותחים את ביתם.<br />
             אורחים מוצאים שולחן ביתי אמיתי.
@@ -215,39 +210,37 @@ export default function Landing() {
             <Link to="/auth?mode=login" style={{ textDecoration: 'none' }}>
               <motion.button
                 style={{
-                  background: 'transparent', color: TEXT,
+                  background: 'rgba(255,255,255,0.70)', color: TEXT,
                   border: `1.5px solid ${BORDER}`,
                   borderRadius: 14, padding: '0.9rem 2rem',
                   fontSize: 15, fontWeight: 500, cursor: 'pointer',
                 }}
-                whileHover={{ scale: 1.02, borderColor: 'rgba(255,255,255,0.18)' }}
+                whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.90)' }}
                 whileTap={{ scale: 0.97 }} transition={SPRING}>
                 כניסה
               </motion.button>
             </Link>
           </motion.div>
 
-          {/* Stats */}
+          {/* Live stats */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.55 }}
             style={{ display: 'flex', gap: 'clamp(1.5rem, 5vw, 4rem)', flexWrap: 'wrap', justifyContent: 'center' }}>
             {[
-              { value: stats.events,  label: 'ארוחות שפורסמו', suffix: '' },
-              { value: stats.members, label: 'משתמשים פעילים', suffix: '' },
-              { value: stats.cities,  label: 'ערים ויישובים',  suffix: '' },
+              { value: stats.events,  label: 'ארוחות שפורסמו' },
+              { value: stats.members, label: 'משתמשים פעילים' },
+              { value: stats.cities,  label: 'ערים ויישובים'  },
             ].map((s, i) => (
-              <div key={i}>
+              <div key={i} style={{ textAlign: 'center' }}>
                 <div style={{
                   fontFamily: "'Frank Ruhl Libre', serif",
                   fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-                  fontWeight: 900, color: TEXT,
+                  fontWeight: 900, color: FIRE,
                   letterSpacing: '-0.03em',
-                  display: 'flex', alignItems: 'baseline', gap: 2,
                 }}>
                   <AnimatedNumber value={s.value} />
-                  <span style={{ color: FIRE }}>{s.suffix}</span>
                 </div>
                 <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontWeight: 500, letterSpacing: '0.06em' }}>
                   {s.label}
@@ -260,8 +253,9 @@ export default function Landing() {
 
       {/* ══ App Preview ══ */}
       <section style={{
-        background: SURFACE,
-        borderTop: `1px solid ${BORDER_FIRE}`,
+        position: 'relative', zIndex: 1,
+        background: 'rgba(255,255,255,0.40)',
+        borderTop: `1px solid ${BORDER}`,
         padding: 'clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
       }}>
         <div style={{ maxWidth: 1400, margin: '0 auto' }}>
@@ -286,22 +280,17 @@ export default function Landing() {
             </h2>
           </InView>
 
-          {/* Two-column grid — collapses on mobile, personal items shown first on mobile */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
 
-            {/* Left col: search + tabs + event list — order 2 on mobile, 1 on desktop */}
+            {/* Left col: search + tabs + event list */}
             <InView
               variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
               transition={{ duration: 0.55, ease: EASE }}
               className="order-2 md:order-1">
-              <div style={{
-                background: VOID,
-                border: `1px solid ${BORDER}`,
-                borderRadius: 20, padding: '1.5rem',
-              }}>
-                {/* Search bar (static mockup) */}
+              <div style={{ ...GLASS, borderRadius: 20, padding: '1.5rem' }}>
+                {/* Search bar */}
                 <div style={{
-                  background: SURFACE,
+                  background: 'rgba(244,238,230,0.70)',
                   border: `1px solid ${BORDER}`,
                   borderRadius: 14,
                   display: 'flex', alignItems: 'center', gap: 8,
@@ -314,16 +303,17 @@ export default function Landing() {
                 {/* Tabs */}
                 <div style={{
                   display: 'flex', flexWrap: 'wrap',
-                  background: SURFACE, borderRadius: 9999,
+                  background: 'rgba(230,218,208,0.50)', borderRadius: 9999,
                   padding: 3, border: `1px solid ${BORDER}`,
                   marginBottom: 20, gap: 0, width: 'fit-content',
                 }}>
                   {TABS_PREVIEW.map((tab, i) => (
                     <div key={tab} style={{
                       padding: '6px 14px', borderRadius: 9999,
-                      background: i === 0 ? 'white' : 'transparent',
-                      color: i === 0 ? VOID : TEXT,
-                      fontSize: 12, fontWeight: 600,
+                      background: i === 0 ? 'rgba(255,255,255,0.88)' : 'transparent',
+                      color: i === 0 ? FIRE : MUTED,
+                      fontSize: 12, fontWeight: i === 0 ? 700 : 500,
+                      boxShadow: i === 0 ? '0 1px 6px rgba(44,24,8,0.08)' : 'none',
                     }}>
                       {tab}
                     </div>
@@ -347,7 +337,7 @@ export default function Landing() {
                       variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
                       transition={{ duration: 0.36, delay: i * 0.08, ease: EASE }}>
                       <div style={{
-                        background: SURFACE, border: `1px solid ${BORDER}`,
+                        background: 'rgba(255,255,255,0.80)', border: `1px solid ${BORDER}`,
                         borderRadius: 14, padding: '14px 16px',
                         display: 'flex', flexDirection: 'column', gap: 8,
                       }}>
@@ -358,7 +348,7 @@ export default function Landing() {
                           </div>
                           <span style={{
                             fontSize: 10, fontWeight: 700,
-                            background: `${FIRE}18`, color: FIRE,
+                            background: `rgba(192,82,42,0.10)`, color: FIRE,
                             border: `1px solid ${BORDER_FIRE}`,
                             borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap', flexShrink: 0,
                           }}>
@@ -372,7 +362,7 @@ export default function Landing() {
                           </span>
                           <span style={{ fontSize: 11, color: MUTED }}>{ev.date}</span>
                           <span style={{ fontSize: 11, color: MUTED }}>{ev.spots} מקומות</span>
-                          <span style={{ fontSize: 11, color: 'rgba(212,160,23,0.8)' }}>{ev.kashrut}</span>
+                          <span style={{ fontSize: 11, color: AMBER }}>{ev.kashrut}</span>
                         </div>
                       </div>
                     </InView>
@@ -381,7 +371,7 @@ export default function Landing() {
               </div>
             </InView>
 
-            {/* Right col: host CTA + personal menu — order 1 on mobile (shown first!), 2 on desktop */}
+            {/* Right col: host CTA + personal menu */}
             <InView
               variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
               transition={{ duration: 0.55, ease: EASE, delay: 0.12 }}
@@ -390,7 +380,7 @@ export default function Landing() {
 
                 {/* Host CTA card */}
                 <div style={{
-                  background: `linear-gradient(135deg, ${FIRE} 0%, #6E2E17 100%)`,
+                  background: `linear-gradient(135deg, #C0522A 0%, #7A3018 100%)`,
                   borderRadius: 20, padding: '1.8rem',
                   position: 'relative', overflow: 'hidden',
                 }}>
@@ -439,8 +429,7 @@ export default function Landing() {
 
                 {/* Personal sections */}
                 <div style={{
-                  background: VOID, border: `1px solid ${BORDER}`,
-                  borderRadius: 20, padding: '1.5rem',
+                  ...GLASS, borderRadius: 20, padding: '1.5rem',
                   display: 'flex', flexDirection: 'column', gap: 10,
                 }}>
                   <p style={{
@@ -457,7 +446,7 @@ export default function Landing() {
                       <div style={{
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '10px 12px',
-                        background: SURFACE, border: `1px solid ${BORDER}`,
+                        background: 'rgba(255,255,255,0.65)', border: `1px solid ${BORDER}`,
                         borderRadius: 12,
                       }}>
                         <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
@@ -479,9 +468,9 @@ export default function Landing() {
 
       {/* ══ How it works ══ */}
       <section style={{
+        position: 'relative', zIndex: 1,
         padding: 'clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
         borderTop: `1px solid ${BORDER}`,
-        background: VOID,
       }}>
         <div style={{ maxWidth: 1400, margin: '0 auto' }}>
           <InView
@@ -518,14 +507,14 @@ export default function Landing() {
                   <div style={{
                     fontFamily: "'Frank Ruhl Libre', serif",
                     fontSize: '3.5rem', fontWeight: 900,
-                    color: 'rgba(232,96,28,0.15)', lineHeight: 1,
+                    color: 'rgba(192,82,42,0.18)', lineHeight: 1,
                     letterSpacing: '-0.04em', marginBottom: '0.75rem',
                     userSelect: 'none',
                   }}>
                     {s.n}
                   </div>
-                  <p style={{ fontWeight: 700, fontSize: 15, color: TEXT, marginBottom: '0.5rem', textAlign: 'center' }}>{s.title}</p>
-                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, textAlign: 'center' }}>{s.desc}</p>
+                  <p style={{ fontWeight: 700, fontSize: 15, color: TEXT, marginBottom: '0.5rem' }}>{s.title}</p>
+                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65 }}>{s.desc}</p>
                 </div>
               </InView>
             ))}
@@ -535,6 +524,7 @@ export default function Landing() {
 
       {/* ══ CTA ══ */}
       <section style={{
+        position: 'relative', zIndex: 1,
         padding: '0 clamp(1.25rem, 4vw, 3.5rem) clamp(3.5rem, 7vw, 6rem)',
         maxWidth: 1400, margin: '0 auto',
       }}>
@@ -543,7 +533,8 @@ export default function Landing() {
           transition={{ duration: 0.6, ease: EASE }}>
           <Tilt rotationFactor={4}>
             <div style={{
-              background: SURFACE, border: `1px solid ${BORDER_FIRE}`,
+              ...GLASS,
+              border: `1px solid ${BORDER_FIRE}`,
               borderRadius: 20, padding: 'clamp(2rem, 5vw, 3.5rem)',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem',
               position: 'relative', overflow: 'hidden', textAlign: 'center',
@@ -551,7 +542,7 @@ export default function Landing() {
               <div aria-hidden style={{
                 position: 'absolute', top: -60, right: -60,
                 width: 320, height: 320, borderRadius: '50%', pointerEvents: 'none',
-                background: `radial-gradient(circle, rgba(232,96,28,0.07) 0%, transparent 70%)`,
+                background: `radial-gradient(circle, rgba(192,82,42,0.10) 0%, transparent 70%)`,
                 filter: 'blur(50px)',
               }} />
               <div style={{ position: 'relative' }}>
@@ -589,18 +580,19 @@ export default function Landing() {
       </section>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: `1px solid ${BORDER}`, padding: '2rem 1.5rem' }}>
+      <footer style={{ position: 'relative', zIndex: 1, borderTop: `1px solid ${BORDER}`, padding: '2rem 1.5rem' }}>
         <div style={{
           maxWidth: 1400, margin: '0 auto',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexWrap: 'wrap', gap: 16,
         }}>
-          <BrandLogo size="sm" onDark />
-          <nav style={{ display: 'flex', gap: 24 }}>
+          <BrandLogo size="sm" />
+          <nav style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[
-              { to: '/about',   label: 'אודות'      },
-              { to: '/terms',   label: 'תנאי שימוש' },
-              { to: '/privacy', label: 'פרטיות'     },
+              { to: '/about',         label: 'אודות'         },
+              { to: '/terms',         label: 'תנאי שימוש'    },
+              { to: '/privacy',       label: 'פרטיות'        },
+              { to: '/accessibility', label: 'נגישות'        },
             ].map(({ to, label }) => (
               <Link key={to} to={to}
                 style={{ fontSize: 12, color: MUTED, textDecoration: 'none', fontWeight: 400 }}>
@@ -611,7 +603,7 @@ export default function Landing() {
         </div>
         <p style={{
           textAlign: 'center', fontSize: 10,
-          color: 'rgba(138,130,120,0.32)', marginTop: '1.5rem',
+          color: 'rgba(140,112,96,0.45)', marginTop: '1.5rem',
         }}>
           שולחן פתוח © 2026 — מיזם קהילתי
         </p>
