@@ -11,9 +11,7 @@ type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
 const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
-  background: 'rgba(255,255,255,0.58)',
-  backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
+  background: 'rgba(255,255,255,0.94)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
@@ -113,8 +111,6 @@ export default function Notifications() {
                       style={{
                         background: `${accentColor}12`,
                         border: `1px solid ${accentColor}20`,
-                        backdropFilter: 'blur(8px)',
-                        WebkitBackdropFilter: 'blur(8px)',
                       }}>
                       <NotificationIcon type={n.type} />
                     </div>

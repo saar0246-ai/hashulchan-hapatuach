@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Search, CalendarPlus } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -19,11 +20,6 @@ const GREEN       = '#22c55e'
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const SPRING = { type: 'spring' as const, stiffness: 350, damping: 25 }
 
-const STATS = [
-  { value: 840,  label: 'ארוחות שפורסמו', suffix: '+' },
-  { value: 3200, label: 'משתמשים פעילים', suffix: '+' },
-  { value: 47,   label: 'ערים ויישובים',  suffix: '' },
-]
 
 const MOCK_EVENTS = [
   { id: 1, title: 'שישי ביתי ירושלמי',    host: 'משפחת לוי',        city: 'ירושלים', date: '24/10', day: 'שישי', spots: 3, kashrut: 'מהדרין' },
@@ -47,6 +43,8 @@ const PERSONAL_ITEMS = [
 ]
 
 export default function Landing() {
+  const stats = useStats()
+
   useEffect(() => {
     const prev = document.body.style.background
     document.body.style.background = VOID
@@ -235,7 +233,11 @@ export default function Landing() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: EASE, delay: 0.55 }}
             style={{ display: 'flex', gap: 'clamp(1.5rem, 5vw, 4rem)', flexWrap: 'wrap', justifyContent: 'center' }}>
-            {STATS.map((s, i) => (
+            {[
+              { value: stats.events,  label: 'ארוחות שפורסמו', suffix: '' },
+              { value: stats.members, label: 'משתמשים פעילים', suffix: '' },
+              { value: stats.cities,  label: 'ערים ויישובים',  suffix: '' },
+            ].map((s, i) => (
               <div key={i}>
                 <div style={{
                   fontFamily: "'Frank Ruhl Libre', serif",

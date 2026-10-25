@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { Search, X, CalendarPlus, Users, ChevronDown } from 'lucide-react'
@@ -50,6 +51,7 @@ const SP = { type: 'spring' as const, stiffness: 380, damping: 26 }
 export default function Home() {
   const { user }    = useAuth()
   const { profile } = useProfile(user?.id)
+  const appStats    = useStats()
 
   const [events, setEvents]                 = useState<Event[]>([])
   const [loading, setLoading]               = useState(true)
@@ -490,6 +492,65 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          {/* Live community stats */}
+          <InView
+            variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            viewOptions={{ once: true }}
+            style={{ marginTop: 40 }}
+          >
+            <div style={{ ...GLASS, borderRadius: 20, padding: '1.5rem', textAlign: 'center' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 20 }}>
+                קהילת השולחן הפתוח
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', gap: 8 }}>
+                <div>
+                  <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', color: FIRE, letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    <AnimatedNumber value={appStats.events} />
+                  </div>
+                  <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontWeight: 500 }}>ארוחות סה״כ</div>
+                </div>
+                <div style={{ width: 1, height: 36, background: BORDER, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', color: FIRE, letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    <AnimatedNumber value={appStats.members} />
+                  </div>
+                  <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontWeight: 500 }}>חברים רשומים</div>
+                </div>
+                <div style={{ width: 1, height: 36, background: BORDER, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', color: FIRE, letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    <AnimatedNumber value={appStats.cities} />
+                  </div>
+                  <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontWeight: 500 }}>ערים פעילות</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+                <motion.span
+                  style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
+                  transition={{ repeat: Infinity, duration: 2.2 }}
+                />
+                <span style={{ fontSize: 10, color: MUTED, fontWeight: 500 }}>מתעדכן כל 30 שניות</span>
+              </div>
+            </div>
+          </InView>
+
+          {/* Footer links */}
+          <div style={{ marginTop: 28, paddingTop: 20, borderTop: `1px solid ${BORDER}`, display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: 20 }}>
+            {[
+              { to: '/about',         label: 'אודות' },
+              { to: '/terms',         label: 'תנאי שימוש' },
+              { to: '/privacy',       label: 'פרטיות' },
+              { to: '/accessibility', label: 'נגישות' },
+            ].map(({ to, label }) => (
+              <Link key={to} to={to} style={{ fontSize: 12, color: MUTED, textDecoration: 'none', fontWeight: 500 }}>
+                {label}
+              </Link>
+            ))}
+          </div>
+
         </div>
       </div>
     </div>
