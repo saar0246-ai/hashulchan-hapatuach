@@ -1,570 +1,619 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Calendar, Users, Shield, Heart } from 'lucide-react'
-import { motion, type Variants } from 'framer-motion'
+import { ArrowLeft, Search, CalendarPlus } from 'lucide-react'
+import { motion } from 'framer-motion'
 import BrandLogo from '../components/BrandLogo'
+import { InView } from '../components/ui/InView'
+import { Tilt } from '../components/ui/Tilt'
+import { AnimatedNumber } from '../components/ui/AnimatedNumber'
 
-type BezierEase = [number, number, number, number]
-const EASE: BezierEase = [0.22, 1, 0.36, 1]
+const VOID        = '#0D0D0B'
+const SURFACE     = '#191917'
+const TEXT        = '#F5F3EE'
+const MUTED       = '#8A8278'
+const FIRE        = '#E8601C'
+const BORDER      = 'rgba(255,255,255,0.07)'
+const BORDER_FIRE = 'rgba(232,96,28,0.22)'
+const GREEN       = '#22c55e'
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const SPRING = { type: 'spring' as const, stiffness: 350, damping: 25 }
 
-const BG     = '#FAF8F5'
-const TERRA  = '#C0390A'
-const OLIVE  = '#2D4A1E'
-const TEXT   = '#1C1A17'
-const MUTED  = '#786C63'
-const BORDER = '#E8E2D8'
-
-const GLASS = {
-  background: 'rgba(255,255,255,0.62)',
-  backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
-  border: '1px solid rgba(255,255,255,0.82)',
-  boxShadow: '0 24px 60px rgba(184,93,57,0.08), inset 0 1px 0 rgba(255,255,255,0.92)',
-} as const
-
-const FEATURES = [
-  {
-    Icon: Calendar, color: TERRA,     bg: `${TERRA}0F`,
-    title: 'ארוחות שבת וחגים',
-    desc:  'שישי בערב, ראש השנה, פסח — כל אירוע על שולחן ביתי',
-  },
-  {
-    Icon: Users,    color: OLIVE,     bg: `${OLIVE}0E`,
-    title: 'מארחים מכל הארץ',
-    desc:  'משפחות שפותחות את ביתן לאורחים חדשים — מכל מקום',
-  },
-  {
-    Icon: Shield,   color: '#1e5fa5', bg: 'rgba(30,95,165,0.09)',
-    title: 'פרופילים מאומתים',
-    desc:  'מערכת דירוגים שקופה אחרי כל ארוחה',
-  },
-  {
-    Icon: Heart,    color: '#9b2c2c', bg: 'rgba(155,44,44,0.09)',
-    title: 'חינמי לחלוטין',
-    desc:  'אין עמלות, אין דמי שירות — מיזם קהילתי',
-  },
+const STATS = [
+  { value: 840,  label: 'ארוחות שפורסמו', suffix: '+' },
+  { value: 3200, label: 'משתמשים פעילים', suffix: '+' },
+  { value: 47,   label: 'ערים ויישובים',  suffix: '' },
 ]
 
-const REGIONS = [
-  { name: 'ירושלים',     color: TERRA           },
-  { name: 'תל אביב',     color: OLIVE           },
-  { name: 'חיפה',        color: '#2E70B0'        },
-  { name: 'הנגב',        color: '#8F5A0A'        },
-  { name: 'הגליל',       color: '#4A8C3A'        },
-  { name: 'גוש דן',      color: '#7B4A9E'        },
-  { name: 'ראשון לציון', color: TERRA           },
-  { name: 'באר שבע',     color: '#8F5A0A'        },
-  { name: 'נתניה',       color: '#2E70B0'        },
+const MOCK_EVENTS = [
+  { id: 1, title: 'שישי ביתי ירושלמי',    host: 'משפחת לוי',        city: 'ירושלים', date: '24/10', day: 'שישי', spots: 3, kashrut: 'מהדרין' },
+  { id: 2, title: 'שולחן שישי חם ומכיל',  host: 'רחל ויוסף כהן',    city: 'תל אביב', date: '25/10', day: 'שישי', spots: 5, kashrut: 'כשר' },
+  { id: 3, title: 'ארוחת שבת מרוקאית',    host: 'דינה אביב',         city: 'חיפה',    date: '26/10', day: 'שבת',  spots: 2, kashrut: 'כשר' },
 ]
 
-const stagger: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.09 } } }
-const item: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.52, ease: EASE } },
-}
+const TABS_PREVIEW = ['הכל', 'שישי', 'שבת', 'חג', 'חול']
 
-function CandlelightOrb() {
-  const rings = [320, 256, 196, 144, 100, 62, 32]
-  const opacities = [0.05, 0.09, 0.15, 0.22, 0.32, 0.46, 1]
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: 320, height: 320 }}>
-      {/* Outer ambient */}
-      <div className="absolute inset-0 rounded-full pointer-events-none"
-        style={{
-          background: `radial-gradient(circle, ${TERRA}18 0%, transparent 68%)`,
-          filter: 'blur(48px)',
-        }} aria-hidden />
+const STEPS = [
+  { n: '01', title: 'נרשמים',        desc: 'פרופיל חינמי עם העדפות כשרות ודת — תהליך של 5 דקות.' },
+  { n: '02', title: 'מוצאים ארוחה', desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע.' },
+  { n: '03', title: 'מגיעים ונהנים', desc: 'המארח בוחר ושולח כתובת ישירות אחרי האישור.' },
+]
 
-      {rings.map((size, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: size, height: size,
-            border: `1px solid rgba(192,57,10,${opacities[i]})`,
-            boxShadow: i === rings.length - 1
-              ? `0 0 24px ${TERRA}60, 0 0 8px ${TERRA}80`
-              : 'none',
-          }}
-          animate={{
-            scale: [1, 1 + (rings.length - 1 - i) * 0.018, 1],
-            opacity: [0.7, 1, 0.7],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 2.8 + i * 0.35,
-            ease: 'easeInOut',
-            delay: i * 0.18,
-          }}
-        />
-      ))}
-
-      {/* Central flame core */}
-      <motion.div
-        className="absolute rounded-full"
-        style={{
-          width: 28, height: 28,
-          background: `radial-gradient(circle, #F59E0B, ${TERRA})`,
-          boxShadow: `0 0 14px ${TERRA}90, 0 0 32px ${TERRA}48, 0 0 64px ${TERRA}22`,
-        }}
-        animate={{ scale: [1, 1.18, 0.92, 1.12, 1], opacity: [1, 0.82, 1] }}
-        transition={{ repeat: Infinity, duration: 2.6, ease: 'easeInOut' }}
-      />
-    </div>
-  )
-}
+const PERSONAL_ITEMS = [
+  { icon: '🍽️', label: 'הזמנות שלי',  desc: 'ארוחות שנרשמתי אליהן' },
+  { icon: '🏠', label: 'הארוחות שלי', desc: 'ניהול ארוחות כמארח'    },
+  { icon: '🔔', label: 'התראות',       desc: 'עדכונים ואישורים'      },
+  { icon: '⭐', label: 'דירוגים',      desc: 'ביקורות אחרי ארוחות'  },
+]
 
 export default function Landing() {
+  useEffect(() => {
+    const prev = document.body.style.background
+    document.body.style.background = VOID
+    document.body.style.overscrollBehavior = 'none'
+    return () => {
+      document.body.style.background = prev
+      document.body.style.overscrollBehavior = ''
+    }
+  }, [])
+
   return (
-    <div dir="rtl" className="relative min-h-dvh overflow-x-hidden" style={{ background: BG }}>
+    <div dir="rtl" style={{ minHeight: '100dvh', background: VOID, color: TEXT, overflowX: 'hidden' }}>
 
-      {/* ── Ambient mesh — fixed behind everything ── */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden style={{ zIndex: 0 }}>
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 960, height: 960, top: -380, right: -340,
-            background: `radial-gradient(circle at center, ${TERRA}1E 0%, ${TERRA}0A 40%, transparent 70%)`,
-            filter: 'blur(130px)',
-          }}
-          animate={{ x: [0, 64, -32, 0], y: [0, -56, 34, 0], scale: [1, 1.12, 0.94, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }} />
-
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 760, height: 760, bottom: -220, left: -280,
-            background: `radial-gradient(circle at center, ${OLIVE}16 0%, ${OLIVE}07 45%, transparent 70%)`,
-            filter: 'blur(110px)',
-          }}
-          animate={{ x: [0, -42, 54, 0], y: [0, 66, -42, 0], scale: [1, 0.9, 1.08, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }} />
-
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 580, height: 580, top: '36%', left: '16%',
-            background: 'radial-gradient(circle at center, rgba(245,158,11,0.14) 0%, transparent 70%)',
-            filter: 'blur(96px)',
-          }}
-          animate={{ x: [0, 38, -52, 20, 0], y: [0, -34, 48, -18, 0] }}
-          transition={{ repeat: Infinity, duration: 38, ease: 'easeInOut', delay: 9 }} />
-      </div>
-
-      <div className="relative" style={{ zIndex: 1 }}>
-
-        {/* ── Sticky header ── */}
-        <header className="sticky top-0 w-full" style={{ zIndex: 40 }}>
-          <div className="relative">
-            <div className="absolute inset-0"
-              style={{
-                background: 'rgba(250,248,245,0.84)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                borderBottom: `1px solid ${BORDER}`,
-              }} />
-            <div className="relative flex items-center justify-between px-5 sm:px-8 py-4 max-w-7xl mx-auto">
-              <Link to="/about" className="transition-opacity hover:opacity-70">
-                <BrandLogo size="sm" />
-              </Link>
-              <div className="flex items-center gap-3">
-                <Link to="/auth?mode=login"
-                  className="hidden sm:block text-sm font-medium transition-opacity hover:opacity-70"
-                  style={{ color: MUTED }}>
-                  כניסה
-                </Link>
-                <Link to="/auth?mode=register">
-                  <motion.button
-                    className="text-sm font-bold px-5 py-2.5 rounded-2xl text-white"
-                    style={{
-                      background: `linear-gradient(135deg, ${TERRA}, #8F3A18)`,
-                      boxShadow: `0 4px 18px ${TERRA}38`,
-                    }}
-                    whileHover={{ scale: 1.04, boxShadow: `0 8px 28px ${TERRA}50` }}
-                    whileTap={{ scale: 0.96 }}
-                    transition={SPRING}>
-                    הצטרף
-                  </motion.button>
-                </Link>
-              </div>
-            </div>
+      {/* ── Sticky header ── */}
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        borderBottom: `1px solid ${BORDER}`,
+        background: 'rgba(13,13,11,0.92)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}>
+        <div style={{
+          maxWidth: 1400, margin: '0 auto', padding: '0 1.5rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60,
+        }}>
+          <Link to="/about" style={{ textDecoration: 'none' }}>
+            <BrandLogo size="sm" onDark />
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link to="/auth?mode=login"
+              style={{ fontSize: 13, fontWeight: 500, color: MUTED, textDecoration: 'none' }}>
+              כניסה
+            </Link>
+            <Link to="/auth?mode=register" style={{ textDecoration: 'none' }}>
+              <motion.button
+                style={{
+                  background: FIRE, color: '#fff',
+                  border: 'none', borderRadius: 10,
+                  padding: '0.5rem 1.2rem',
+                  fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                }}
+                whileHover={{ scale: 1.05, filter: 'brightness(1.12)' }}
+                whileTap={{ scale: 0.96 }} transition={SPRING}>
+                הצטרף
+              </motion.button>
+            </Link>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* ══════════════════════════════════════════════
-            HERO — Full-viewport, split-column on desktop.
-            Right column (RTL first): headline + CTAs.
-            Left column (RTL second): animated candlelight.
-        ══════════════════════════════════════════════ */}
-        <section
-          className="relative flex flex-col md:grid md:gap-12 px-5 sm:px-8 max-w-7xl mx-auto"
-          style={{
-            minHeight: 'calc(100dvh - 65px)',
-            alignItems: 'center',
-            paddingTop: '4rem',
-            paddingBottom: '4rem',
-            gridTemplateColumns: '1fr auto',
-          }}>
+      {/* ══ Hero — full-bleed, no maxWidth on text ══ */}
+      <section style={{
+        minHeight: 'calc(100dvh - 60px)',
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        padding: 'clamp(3rem, 8vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Dot-grid */}
+        <div aria-hidden style={{
+          position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }} />
 
-          {/* Text column — right side in RTL */}
+        {/* Ambient blooms */}
+        <div aria-hidden style={{
+          position: 'absolute', top: '8%', right: '-6%',
+          width: 700, height: 700, borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+          background: `radial-gradient(circle, rgba(232,96,28,0.06) 0%, transparent 70%)`,
+          filter: 'blur(88px)',
+        }} />
+        <div aria-hidden style={{
+          position: 'absolute', bottom: '10%', left: '-8%',
+          width: 480, height: 480, borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+          background: `radial-gradient(circle, rgba(212,160,23,0.045) 0%, transparent 70%)`,
+          filter: 'blur(70px)',
+        }} />
+
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 1200, margin: '0 auto', width: '100%', textAlign: 'center' }}>
+
+          {/* Eyebrow */}
           <motion.div
-            className="flex flex-col items-start"
-            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.11 } } }}
-            initial="hidden" animate="show">
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.48, ease: EASE, delay: 0.06 }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 'clamp(1rem, 3vw, 2rem)' }}>
+            <span style={{
+              display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+              background: FIRE, boxShadow: `0 0 8px ${FIRE}99`,
+            }} />
+            <span style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: '0.16em',
+              textTransform: 'uppercase', color: MUTED,
+            }}>
+              שולחן פתוח · חינמי לחלוטין · ללא עמלות
+            </span>
+          </motion.div>
 
-            <motion.div
-              variants={item}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold mb-8 border"
-              style={{ background: `${TERRA}0D`, borderColor: `${TERRA}30`, color: TERRA }}>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-50"
-                  style={{ background: TERRA }} />
-                <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: TERRA }} />
-              </span>
-              חינמי לחלוטין · ללא עמלות
-            </motion.div>
+          {/* Main headline — full-width, no container cap */}
+          <motion.h1
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.72, ease: EASE, delay: 0.12 }}
+            style={{
+              fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 'clamp(3.8rem, 14vw, 11rem)',
+              color: TEXT,
+              lineHeight: 0.88,
+              letterSpacing: '-0.04em',
+              fontWeight: 900,
+              marginBottom: '0.25em',
+            }}>
+            שולחן חם
+          </motion.h1>
 
-            <motion.h1
-              variants={item}
-              style={{
-                fontFamily: "'Frank Ruhl Libre', serif",
-                fontSize: 'clamp(3rem, 8.5vw, 6rem)',
-                color: TEXT,
-                lineHeight: 1.01,
-                letterSpacing: '-0.030em',
-                fontWeight: 900,
-                marginBottom: '1.5rem',
-              }}>
-              שולחן חם<br />
-              <span style={{ color: TERRA }}>לכל שבת וחג</span>
-            </motion.h1>
+          <motion.h1
+            initial={{ opacity: 0, y: 36 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.72, ease: EASE, delay: 0.22 }}
+            style={{
+              fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 'clamp(3.8rem, 14vw, 11rem)',
+              color: FIRE,
+              lineHeight: 0.88,
+              letterSpacing: '-0.04em',
+              fontWeight: 900,
+              marginBottom: 'clamp(1.5rem, 4vw, 2.5rem)',
+            }}>
+            לכל שבת וחג
+          </motion.h1>
 
-            <motion.p
-              variants={item}
-              className="text-base md:text-lg leading-relaxed max-w-sm mb-10"
-              style={{ color: MUTED }}>
-              מארחים פותחים את ביתם.<br />
-              אורחים מוצאים שולחן ביתי אמיתי.
-            </motion.p>
+          {/* Sub */}
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: EASE, delay: 0.32 }}
+            style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1.1rem)',
+              color: MUTED, lineHeight: 1.75,
+              maxWidth: 420, marginTop: 0, marginLeft: 'auto', marginRight: 'auto', marginBottom: 'clamp(2rem, 4vw, 3rem)',
+            }}>
+            מארחים פותחים את ביתם.<br />
+            אורחים מוצאים שולחן ביתי אמיתי.
+          </motion.p>
 
-            <motion.div variants={item} className="flex gap-3 w-full max-w-xs">
-              <Link to="/auth?mode=register" className="flex-1">
-                <motion.button
-                  className="w-full py-4 text-sm font-bold rounded-2xl text-white flex items-center justify-center gap-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${TERRA}, #8F3A18)`,
-                    boxShadow: `0 6px 22px ${TERRA}40`,
-                  }}
-                  whileHover={{ scale: 1.04, boxShadow: `0 10px 30px ${TERRA}52` }}
-                  whileTap={{ scale: 0.96 }} transition={SPRING}>
-                  הצטרף עכשיו
-                  <ArrowLeft className="w-4 h-4" />
-                </motion.button>
-              </Link>
-              <Link to="/auth?mode=login" className="flex-1">
-                <motion.button
-                  className="w-full py-4 text-sm font-medium rounded-2xl"
-                  style={{
-                    border: `1.5px solid ${BORDER}`,
-                    color: TEXT,
-                    background: 'rgba(255,255,255,0.72)',
-                    backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                  }}
-                  whileHover={{ scale: 1.03, borderColor: TERRA }}
-                  whileTap={{ scale: 0.96 }} transition={SPRING}>
-                  כניסה
-                </motion.button>
-              </Link>
-            </motion.div>
+          {/* CTAs */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.48, ease: EASE, delay: 0.4 }}
+            style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 'clamp(2.5rem, 6vw, 4.5rem)' }}>
+            <Link to="/auth?mode=register" style={{ textDecoration: 'none' }}>
+              <motion.button
+                style={{
+                  background: FIRE, color: '#fff',
+                  border: 'none', borderRadius: 14,
+                  padding: '0.9rem 2rem',
+                  fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}
+                whileHover={{ scale: 1.04, filter: 'brightness(1.1)' }}
+                whileTap={{ scale: 0.97 }} transition={SPRING}>
+                הצטרף עכשיו
+                <ArrowLeft size={16} />
+              </motion.button>
+            </Link>
+            <Link to="/auth?mode=login" style={{ textDecoration: 'none' }}>
+              <motion.button
+                style={{
+                  background: 'transparent', color: TEXT,
+                  border: `1.5px solid ${BORDER}`,
+                  borderRadius: 14, padding: '0.9rem 2rem',
+                  fontSize: 15, fontWeight: 500, cursor: 'pointer',
+                }}
+                whileHover={{ scale: 1.02, borderColor: 'rgba(255,255,255,0.18)' }}
+                whileTap={{ scale: 0.97 }} transition={SPRING}>
+                כניסה
+              </motion.button>
+            </Link>
+          </motion.div>
 
-            {/* Value props row */}
-            <motion.div variants={item} className="flex items-center gap-5 mt-10 flex-wrap">
-              {['אפס עמלות', 'כשרות גמישה', 'RTL מלא'].map((label, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: TERRA }} />
-                  <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.55 }}
+            style={{ display: 'flex', gap: 'clamp(1.5rem, 5vw, 4rem)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {STATS.map((s, i) => (
+              <div key={i}>
+                <div style={{
+                  fontFamily: "'Frank Ruhl Libre', serif",
+                  fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+                  fontWeight: 900, color: TEXT,
+                  letterSpacing: '-0.03em',
+                  display: 'flex', alignItems: 'baseline', gap: 2,
+                }}>
+                  <AnimatedNumber value={s.value} />
+                  <span style={{ color: FIRE }}>{s.suffix}</span>
                 </div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Decoration column — left side in RTL, hidden on mobile */}
-          <motion.div
-            className="hidden md:flex items-center justify-center flex-shrink-0"
-            initial={{ opacity: 0, scale: 0.88 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.25 }}>
-            <CandlelightOrb />
-          </motion.div>
-
-          {/* Scroll indicator */}
-          <motion.div
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}>
-            <div className="w-px h-10 rounded-full"
-              style={{ background: `linear-gradient(to bottom, transparent, ${TERRA}40)` }} />
-          </motion.div>
-        </section>
-
-        {/* ── Ticker strip ── */}
-        <div className="overflow-hidden py-3.5 select-none"
-          style={{
-            borderTop: `1px solid ${BORDER}`,
-            borderBottom: `1px solid ${BORDER}`,
-            background: `${TERRA}05`,
-          }}
-          aria-hidden>
-          <motion.div
-            className="flex gap-8 whitespace-nowrap"
-            animate={{ x: ['0%', '-50%'] }}
-            transition={{ repeat: Infinity, duration: 24, ease: 'linear' }}
-            style={{ width: 'max-content' }}>
-            {[...Array(2)].flatMap(() =>
-              ['ירושלים', '·', 'תל אביב', '·', 'חיפה', '·', 'הנגב', '·', 'הגליל', '·',
-               'שבת · חג · חול', '·', 'כולם מוזמנים', '·', 'ללא עמלות', '·']
-            ).map((t, i) => (
-              <span key={i} className="text-xs font-semibold"
-                style={{ color: t === '·' ? `${TERRA}40` : MUTED }}>
-                {t}
-              </span>
+                <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontWeight: 500, letterSpacing: '0.06em' }}>
+                  {s.label}
+                </div>
+              </div>
             ))}
           </motion.div>
         </div>
+      </section>
 
-        {/* ══════════════════════════════════════════════
-            FEATURES — Large glassmorphic cards
-            Heavier glass, larger icon containers,
-            more generous padding than before.
-        ══════════════════════════════════════════════ */}
-        <section style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="px-5 sm:px-8 py-20 max-w-7xl mx-auto">
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.48, ease: EASE }}
-              className="text-[10px] font-bold uppercase tracking-[0.20em] mb-12 text-center"
-              style={{ color: MUTED }}>
-              מה תמצא כאן
-            </motion.p>
+      {/* ══ App Preview ══ */}
+      <section style={{
+        background: SURFACE,
+        borderTop: `1px solid ${BORDER_FIRE}`,
+        padding: 'clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
 
-            <motion.div
-              variants={stagger} initial="hidden"
-              whileInView="show" viewport={{ once: true, margin: '-60px' }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {FEATURES.map(({ Icon, title, desc, color, bg }, i) => (
-                <motion.div
-                  key={i} variants={item}
-                  whileHover={{ y: -8, scale: 1.018, boxShadow: '0 28px 56px rgba(44,24,8,0.11)' }}
-                  transition={SPRING}
-                  className="flex flex-col gap-5 rounded-3xl"
-                  style={{
-                    padding: '1.5rem',
-                    ...GLASS,
-                  }}>
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                    style={{ background: bg }}>
-                    <Icon className="w-7 h-7" style={{ color }} strokeWidth={1.6} />
-                  </div>
-                  <div>
-                    <p className="font-bold text-base mb-2 leading-snug" style={{ color: TEXT }}>
-                      {title}
-                    </p>
-                    <p className="text-sm leading-relaxed" style={{ color: MUTED }}>
-                      {desc}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
+          <InView
+            variants={{ hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.5, ease: EASE }}
+            style={{ marginBottom: 'clamp(2rem, 4vw, 3rem)', textAlign: 'center' }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: MUTED, marginBottom: '0.6rem',
+            }}>
+              כך זה נראה בפנים
+            </p>
+            <h2 style={{
+              fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)',
+              color: TEXT, fontWeight: 900,
+              letterSpacing: '-0.026em', lineHeight: 1.08,
+            }}>
+              הכל ממתין לך אחרי ההרשמה
+            </h2>
+          </InView>
 
-        {/* ══════════════════════════════════════════════
-            HOW IT WORKS — Generous layout, no dividers
-        ══════════════════════════════════════════════ */}
-        <section style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="px-5 sm:px-8 py-20 max-w-7xl mx-auto">
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.48, ease: EASE }}
-              className="text-[10px] font-bold uppercase tracking-[0.20em] mb-14 text-center"
-              style={{ color: MUTED }}>
-              איך זה עובד
-            </motion.p>
+          {/* Two-column grid — collapses on mobile, personal items shown first on mobile */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
 
-            <motion.div
-              variants={stagger} initial="hidden"
-              whileInView="show" viewport={{ once: true, margin: '-60px' }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
-              {[
-                { n: '01', title: 'נרשמים',         desc: 'פרופיל חינמי עם העדפות כשרות ודת — תהליך של 5 דקות.' },
-                { n: '02', title: 'מוצאים ארוחה',  desc: 'מסנן לפי עיר, תאריך, כשרות וסוג האירוע.' },
-                { n: '03', title: 'מגיעים ונהנים', desc: 'המארח בוחר ושולח כתובת ישירות.' },
-              ].map((s, i) => (
-                <motion.div key={i} variants={item} className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-3xl flex items-center justify-center"
-                    style={{ ...GLASS }}>
-                    <span className="font-black text-base"
-                      style={{ color: TERRA, letterSpacing: '-0.04em' }}>
-                      {s.n}
-                    </span>
-                  </div>
-                  <div className="pt-1">
-                    <p className="font-bold text-base mb-2" style={{ color: TEXT }}>{s.title}</p>
-                    <p className="text-sm leading-relaxed" style={{ color: MUTED }}>{s.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ── Regions ── */}
-        <section style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="px-5 sm:px-8 py-20 max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.52, ease: EASE }}
-              className="mb-12 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.20em] mb-4" style={{ color: MUTED }}>
-                פעיל בכל הארץ
-              </p>
-              <h2 style={{
-                fontFamily: "'Frank Ruhl Libre', serif",
-                fontSize: 'clamp(1.8rem, 5vw, 3.4rem)',
-                color: TEXT, fontWeight: 900,
-                letterSpacing: '-0.026em', lineHeight: 1.08,
+            {/* Left col: search + tabs + event list — order 2 on mobile, 1 on desktop */}
+            <InView
+              variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.55, ease: EASE }}
+              className="order-2 md:order-1">
+              <div style={{
+                background: VOID,
+                border: `1px solid ${BORDER}`,
+                borderRadius: 20, padding: '1.5rem',
               }}>
-                מארחים בכל ישראל
-              </h2>
-            </motion.div>
+                {/* Search bar (static mockup) */}
+                <div style={{
+                  background: SURFACE,
+                  border: `1px solid ${BORDER}`,
+                  borderRadius: 14,
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '10px 14px', marginBottom: 16,
+                }}>
+                  <Search style={{ width: 16, height: 16, color: MUTED, flexShrink: 0 }} />
+                  <span style={{ fontSize: 14, color: MUTED }}>חפש ארוחה, עיר, מארח...</span>
+                </div>
 
-            <motion.div
-              variants={stagger} initial="hidden"
-              whileInView="show" viewport={{ once: true, margin: '-60px' }}
-              className="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
-              {REGIONS.map(r => (
-                <motion.div key={r.name} variants={item}>
-                  <Link to="/auth?mode=register">
-                    <motion.div
-                      className="flex flex-col items-center justify-center gap-2.5 rounded-3xl text-center"
-                      style={{
-                        padding: '1rem 0.75rem',
-                        ...GLASS,
-                      }}
-                      whileHover={{
-                        background: `${r.color}0D`,
-                        border: `1px solid ${r.color}36`,
-                        scale: 1.04, y: -4,
-                        boxShadow: `0 16px 40px ${r.color}14`,
-                      }}
-                      whileTap={{ scale: 0.96 }}
-                      transition={SPRING}>
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-40"
-                          style={{ background: r.color }} />
-                        <span className="relative inline-flex rounded-full h-2 w-2" style={{ background: r.color }} />
-                      </span>
-                      <p className="text-xs font-bold" style={{ color: TEXT }}>{r.name}</p>
-                    </motion.div>
-                  </Link>
-                </motion.div>
-              ))}
-              <motion.div variants={item}>
-                <Link to="/auth?mode=register">
-                  <motion.div
-                    className="flex flex-col items-center justify-center gap-1.5 rounded-3xl text-center"
-                    style={{
-                      padding: '1rem 0.75rem',
-                      border: `1.5px dashed ${TERRA}30`,
-                      background: `${TERRA}06`,
-                      minHeight: '80px',
-                    }}
-                    whileHover={{ background: `${TERRA}12`, scale: 1.03 }}
-                    whileTap={{ scale: 0.96 }} transition={SPRING}>
-                    <p className="text-xs font-bold" style={{ color: TERRA }}>פרסם ארוחה</p>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
+                {/* Tabs */}
+                <div style={{
+                  display: 'flex', flexWrap: 'wrap',
+                  background: SURFACE, borderRadius: 9999,
+                  padding: 3, border: `1px solid ${BORDER}`,
+                  marginBottom: 20, gap: 0, width: 'fit-content',
+                }}>
+                  {TABS_PREVIEW.map((tab, i) => (
+                    <div key={tab} style={{
+                      padding: '6px 14px', borderRadius: 9999,
+                      background: i === 0 ? 'white' : 'transparent',
+                      color: i === 0 ? VOID : TEXT,
+                      fontSize: 12, fontWeight: 600,
+                    }}>
+                      {tab}
+                    </div>
+                  ))}
+                </div>
 
-        {/* ══════════════════════════════════════════════
-            FOOTER CTA — Large editorial call to action
-        ══════════════════════════════════════════════ */}
-        <section style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="px-5 sm:px-8 py-20 max-w-7xl mx-auto">
-            <div className="rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-8"
-              style={{ ...GLASS }}>
+                {/* Section label */}
+                <p style={{
+                  fontSize: 10, fontWeight: 700, color: MUTED,
+                  letterSpacing: '0.18em', textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}>
+                  ארוחות קרובות
+                </p>
 
-              {/* Decorative glow inside CTA block */}
-              <div className="absolute pointer-events-none rounded-3xl overflow-hidden inset-0" aria-hidden>
-                <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full"
-                  style={{
-                    background: `radial-gradient(circle, ${TERRA}0C, transparent 70%)`,
-                    filter: 'blur(40px)',
-                  }} />
+                {/* Mock event cards */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {MOCK_EVENTS.map((ev, i) => (
+                    <InView
+                      key={ev.id}
+                      variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                      transition={{ duration: 0.36, delay: i * 0.08, ease: EASE }}>
+                      <div style={{
+                        background: SURFACE, border: `1px solid ${BORDER}`,
+                        borderRadius: 14, padding: '14px 16px',
+                        display: 'flex', flexDirection: 'column', gap: 8,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div>
+                            <p style={{ fontWeight: 700, fontSize: 14, color: TEXT, marginBottom: 2 }}>{ev.title}</p>
+                            <p style={{ fontSize: 12, color: MUTED }}>{ev.host}</p>
+                          </div>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            background: `${FIRE}18`, color: FIRE,
+                            border: `1px solid ${BORDER_FIRE}`,
+                            borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap', flexShrink: 0,
+                          }}>
+                            {ev.day}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 11, color: MUTED, display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: GREEN, display: 'inline-block', flexShrink: 0 }} />
+                            {ev.city}
+                          </span>
+                          <span style={{ fontSize: 11, color: MUTED }}>{ev.date}</span>
+                          <span style={{ fontSize: 11, color: MUTED }}>{ev.spots} מקומות</span>
+                          <span style={{ fontSize: 11, color: 'rgba(212,160,23,0.8)' }}>{ev.kashrut}</span>
+                        </div>
+                      </div>
+                    </InView>
+                  ))}
+                </div>
               </div>
+            </InView>
 
-              <div className="relative z-10">
+            {/* Right col: host CTA + personal menu — order 1 on mobile (shown first!), 2 on desktop */}
+            <InView
+              variants={{ hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.55, ease: EASE, delay: 0.12 }}
+              className="order-1 md:order-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+                {/* Host CTA card */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${FIRE} 0%, #6E2E17 100%)`,
+                  borderRadius: 20, padding: '1.8rem',
+                  position: 'relative', overflow: 'hidden',
+                }}>
+                  <div aria-hidden style={{
+                    position: 'absolute', top: -60, right: -50,
+                    width: 220, height: 220,
+                    background: 'radial-gradient(circle, rgba(255,215,130,0.32), transparent 60%)',
+                    filter: 'blur(10px)', pointerEvents: 'none',
+                  }} />
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+                      <div style={{
+                        width: 44, height: 44, borderRadius: 14,
+                        background: 'rgba(255,255,255,0.18)',
+                        border: '1px solid rgba(255,255,255,0.28)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <CalendarPlus style={{ width: 22, height: 22, color: 'white' }} strokeWidth={1.75} />
+                      </div>
+                      <span style={{
+                        fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)',
+                        letterSpacing: '0.16em', textTransform: 'uppercase',
+                      }}>
+                        מארח שולחן
+                      </span>
+                    </div>
+                    <h3 style={{
+                      fontFamily: "'Frank Ruhl Libre', serif",
+                      fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.4rem)',
+                      color: 'white', letterSpacing: '-0.03em', lineHeight: 0.97,
+                      marginBottom: 18,
+                    }}>
+                      מארחים<br />בשבת?
+                    </h3>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 8,
+                      background: 'rgba(255,255,255,0.14)',
+                      border: '1.5px solid rgba(255,255,255,0.32)',
+                      borderRadius: 11, padding: '9px 18px',
+                    }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>פרסם ארוחה חינם</span>
+                      <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16 }}>←</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Personal sections */}
+                <div style={{
+                  background: VOID, border: `1px solid ${BORDER}`,
+                  borderRadius: 20, padding: '1.5rem',
+                  display: 'flex', flexDirection: 'column', gap: 10,
+                }}>
+                  <p style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: '0.16em',
+                    textTransform: 'uppercase', color: MUTED, marginBottom: 4,
+                  }}>
+                    אזור אישי
+                  </p>
+                  {PERSONAL_ITEMS.map((item, i) => (
+                    <InView
+                      key={i}
+                      variants={{ hidden: { opacity: 0, x: 10 }, visible: { opacity: 1, x: 0 } }}
+                      transition={{ duration: 0.32, delay: i * 0.06, ease: EASE }}>
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 12px',
+                        background: SURFACE, border: `1px solid ${BORDER}`,
+                        borderRadius: 12,
+                      }}>
+                        <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
+                        <div>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: TEXT }}>{item.label}</p>
+                          <p style={{ fontSize: 11, color: MUTED }}>{item.desc}</p>
+                        </div>
+                        <span style={{ marginRight: 'auto', marginLeft: 0, color: MUTED, fontSize: 14, opacity: 0.5 }}>←</span>
+                      </div>
+                    </InView>
+                  ))}
+                </div>
+
+              </div>
+            </InView>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ How it works ══ */}
+      <section style={{
+        padding: 'clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 3.5rem)',
+        borderTop: `1px solid ${BORDER}`,
+        background: VOID,
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <InView
+            variants={{ hidden: { opacity: 0, y: 18 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.5, ease: EASE }}
+            style={{ marginBottom: '3rem', textAlign: 'center' }}>
+            <p style={{
+              fontSize: 10, fontWeight: 700, letterSpacing: '0.18em',
+              textTransform: 'uppercase', color: MUTED, marginBottom: '0.5rem',
+            }}>
+              איך זה עובד
+            </p>
+            <h2 style={{
+              fontFamily: "'Frank Ruhl Libre', serif",
+              fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)',
+              color: TEXT, fontWeight: 900,
+              letterSpacing: '-0.026em', lineHeight: 1.08,
+            }}>
+              שלושה צעדים פשוטים
+            </h2>
+          </InView>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'clamp(2rem, 4vw, 4rem)',
+          }}>
+            {STEPS.map((s, i) => (
+              <InView
+                key={i}
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.48, delay: i * 0.1, ease: EASE }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    fontFamily: "'Frank Ruhl Libre', serif",
+                    fontSize: '3.5rem', fontWeight: 900,
+                    color: 'rgba(232,96,28,0.15)', lineHeight: 1,
+                    letterSpacing: '-0.04em', marginBottom: '0.75rem',
+                    userSelect: 'none',
+                  }}>
+                    {s.n}
+                  </div>
+                  <p style={{ fontWeight: 700, fontSize: 15, color: TEXT, marginBottom: '0.5rem', textAlign: 'center' }}>{s.title}</p>
+                  <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, textAlign: 'center' }}>{s.desc}</p>
+                </div>
+              </InView>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══ CTA ══ */}
+      <section style={{
+        padding: '0 clamp(1.25rem, 4vw, 3.5rem) clamp(3.5rem, 7vw, 6rem)',
+        maxWidth: 1400, margin: '0 auto',
+      }}>
+        <InView
+          variants={{ hidden: { opacity: 0, y: 32 }, visible: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.6, ease: EASE }}>
+          <Tilt rotationFactor={4}>
+            <div style={{
+              background: SURFACE, border: `1px solid ${BORDER_FIRE}`,
+              borderRadius: 20, padding: 'clamp(2rem, 5vw, 3.5rem)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem',
+              position: 'relative', overflow: 'hidden', textAlign: 'center',
+            }}>
+              <div aria-hidden style={{
+                position: 'absolute', top: -60, right: -60,
+                width: 320, height: 320, borderRadius: '50%', pointerEvents: 'none',
+                background: `radial-gradient(circle, rgba(232,96,28,0.07) 0%, transparent 70%)`,
+                filter: 'blur(50px)',
+              }} />
+              <div style={{ position: 'relative' }}>
                 <h3 style={{
                   fontFamily: "'Frank Ruhl Libre', serif",
-                  fontSize: 'clamp(1.6rem, 4.5vw, 2.8rem)',
+                  fontSize: 'clamp(1.8rem, 4.5vw, 3.2rem)',
                   color: TEXT, fontWeight: 900,
-                  letterSpacing: '-0.024em', lineHeight: 1.08,
+                  letterSpacing: '-0.026em', lineHeight: 1.08,
+                  marginBottom: '0.75rem',
                 }}>
                   מוכן לפגוש שולחן חדש?
                 </h3>
-                <p className="text-sm mt-3" style={{ color: MUTED }}>הצטרף לקהילה — חינמי לחלוטין</p>
+                <p style={{ fontSize: 14, color: MUTED }}>הצטרף לקהילה — חינמי לחלוטין</p>
               </div>
-
-              <div className="relative z-10 flex-shrink-0">
-                <Link to="/auth?mode=register">
+              <div style={{ position: 'relative' }}>
+                <Link to="/auth?mode=register" style={{ textDecoration: 'none' }}>
                   <motion.button
-                    className="px-10 py-4 text-base font-bold rounded-2xl text-white flex items-center gap-2.5"
                     style={{
-                      background: `linear-gradient(135deg, ${TERRA}, #8F3A18)`,
-                      boxShadow: `0 8px 28px ${TERRA}40`,
+                      background: FIRE, color: '#fff',
+                      border: 'none', borderRadius: 14,
+                      padding: '1rem 2.5rem',
+                      fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 10,
                     }}
-                    whileHover={{ scale: 1.04, boxShadow: `0 14px 38px ${TERRA}54` }}
-                    whileTap={{ scale: 0.96 }} transition={SPRING}>
+                    whileHover={{ scale: 1.04, filter: 'brightness(1.1)' }}
+                    whileTap={{ scale: 0.97 }} transition={SPRING}>
                     הצטרף עכשיו — חינם
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft size={16} />
                   </motion.button>
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
+          </Tilt>
+        </InView>
+      </section>
 
-        {/* ── Footer ── */}
-        <footer style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="px-5 sm:px-8 py-8 max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
-            <BrandLogo size="sm" />
-            <nav className="flex items-center gap-6">
-              {[
-                { to: '/about',   label: 'אודות',         bold: true  },
-                { to: '/terms',   label: 'תנאי שימוש',    bold: false },
-                { to: '/privacy', label: 'פרטיות',        bold: false },
-              ].map(({ to, label, bold }) => (
-                <Link key={to} to={to}
-                  className="text-xs transition-opacity hover:opacity-70"
-                  style={{ color: bold ? TERRA : MUTED, fontWeight: bold ? 600 : 400 }}>
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <p className="text-center text-[10px] pb-6" style={{ color: 'rgba(120,108,99,0.36)' }}>
-            שולחן פתוח © 2026 — מיזם קהילתי
-          </p>
-        </footer>
-
-      </div>
+      {/* ── Footer ── */}
+      <footer style={{ borderTop: `1px solid ${BORDER}`, padding: '2rem 1.5rem' }}>
+        <div style={{
+          maxWidth: 1400, margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 16,
+        }}>
+          <BrandLogo size="sm" onDark />
+          <nav style={{ display: 'flex', gap: 24 }}>
+            {[
+              { to: '/about',   label: 'אודות'      },
+              { to: '/terms',   label: 'תנאי שימוש' },
+              { to: '/privacy', label: 'פרטיות'     },
+            ].map(({ to, label }) => (
+              <Link key={to} to={to}
+                style={{ fontSize: 12, color: MUTED, textDecoration: 'none', fontWeight: 400 }}>
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <p style={{
+          textAlign: 'center', fontSize: 10,
+          color: 'rgba(138,130,120,0.32)', marginTop: '1.5rem',
+        }}>
+          שולחן פתוח © 2026 — מיזם קהילתי
+        </p>
+      </footer>
     </div>
   )
 }

@@ -200,7 +200,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>ספר לנו עליך</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>פרטים בסיסיים לפרופיל שלך</p>
               </div>
@@ -241,7 +241,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>איפה אתה גר?</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>יעזור למצוא אירועים קרובים אליך</p>
               </div>
@@ -264,7 +264,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>הגדרות שולחן</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>כדי להתאים אותך לארוחות המתאימות</p>
               </div>
@@ -308,7 +308,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>העדפות השתתפות</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>באילו סוגי ארוחות תרצה להשתתף?</p>
               </div>
@@ -343,7 +343,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>קצת עלייך</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>ספר לאורחים ומארחים מי אתה</p>
               </div>
@@ -369,7 +369,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>תמונת פרופיל</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>תמונה יוצרת אמון ומגדילה את הסיכוי לאישור</p>
               </div>
@@ -420,7 +420,7 @@ export default function Onboarding() {
             <motion.div className="space-y-5"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.35, ease: EASE }}>
-              <div>
+              <div className="text-center">
                 <h2 className="font-display font-bold text-2xl" style={{ color: '#1A1714', letterSpacing: '-0.018em' }}>כמעט שם!</h2>
                 <p className="text-sm mt-1" style={{ color: '#8C7060' }}>אשר את תנאי השימוש כדי להצטרף</p>
               </div>
