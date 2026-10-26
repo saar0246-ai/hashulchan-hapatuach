@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, Shield, Star, Users, Instagram, Facebook, Linkedin } from 'lucide-react'
+import { Heart, Shield, Star, Users, Instagram, Facebook, Linkedin, Music2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import BrandLogo from '../components/BrandLogo'
 
@@ -45,7 +45,7 @@ const STEPS = [
   { n: '04', title: 'מגיעים ונהנים', desc: 'ארוחה ביתית, שיחות, חיבורים חדשים. ואחרי — דירוג קצר שעוזר לכולם.' },
 ]
 
-type Social = { label: string; url: string; icon: 'instagram' | 'facebook' | 'linkedin' }
+type Social = { label: string; url: string; icon: 'instagram' | 'facebook' | 'linkedin' | 'tiktok' }
 type Member = {
   name: string; role: string; desc: string | null
   img: string | null; socials: Social[]; placeholder?: boolean
@@ -72,8 +72,13 @@ const TEAM: Member[] = [
     ],
   },
   {
-    name: 'טל', role: 'מייסדת שותפת',
-    desc: null, img: null, socials: [], placeholder: true,
+    name: 'טל אינדה-פורקר', role: 'מייסדת שותפת',
+    desc: 'יוצרת תוכן, יזמית חברתית ומרצה — מאמינה שסיפור אישי יכול לרפא, לחבר ולעורר השראה לפעולה.',
+    img: null,
+    socials: [
+      { label: 'TikTok',    url: 'https://www.tiktok.com/@talindepurker',     icon: 'tiktok'    },
+      { label: 'Instagram', url: 'https://www.instagram.com/talindepurker',   icon: 'instagram' },
+    ],
   },
 ]
 
@@ -88,7 +93,7 @@ function Eyebrow({ label }: { label: string }) {
 }
 
 function SocialPill({ s }: { s: Social }) {
-  const Icon = s.icon === 'instagram' ? Instagram : s.icon === 'facebook' ? Facebook : Linkedin
+  const Icon = s.icon === 'instagram' ? Instagram : s.icon === 'facebook' ? Facebook : s.icon === 'tiktok' ? Music2 : Linkedin
   return (
     <a href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label}
        className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full
