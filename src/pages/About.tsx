@@ -74,7 +74,7 @@ const TEAM: Member[] = [
   {
     name: 'טל אינדה-פורקר', role: 'מייסדת שותפת',
     desc: 'יוצרת תוכן, יזמית חברתית ומרצה — מאמינה שסיפור אישי יכול לרפא, לחבר ולעורר השראה לפעולה.',
-    img: null,
+    img: '/images/team/tal.jpg',
     socials: [
       { label: 'TikTok',    url: 'https://www.tiktok.com/@talindepurker',     icon: 'tiktok'    },
       { label: 'Instagram', url: 'https://www.instagram.com/talindepurker',   icon: 'instagram' },
