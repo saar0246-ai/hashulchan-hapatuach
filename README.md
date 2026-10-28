@@ -77,11 +77,18 @@
 ## 📋 תיעוד מצב הפרויקט (עדכן בכל פתיחת חלון חדש!)
 
 ### 🗓️ נוצר: 28 ספטמבר 2026
-### 🔄 עדכון אחרון: 28 ספטמבר 2026
+### 🔄 עדכון אחרון: 28 אוקטובר 2026
 
 ---
 
 ## ✅ מה נעשה עד כה
+
+### עדכונים אחרונים (28 אוקטובר 2026)
+- [x] הוספת **טל אינדה-פורקר** כמייסדת שותפת בעמוד אודות — ביו, תמונת פרופיל (Instagram), TikTok + Instagram links
+- [x] תמיכה באייקון TikTok בכרטיסי הצוות (`Social` type + `Music2` icon)
+- [x] תיקון שגיאת Windows Script Host — `UseWINSAFER=0` ב-`HKCU\Software\Microsoft\Windows Script Host\Settings` (ה-dialog של "פוליסה של JavaScript" לא יחזור)
+
+---
 
 ### תשתית
 - [x] יצירת פרויקט Supabase חדש (`hashulchan-hapatuach`, region: `eu-central-1`)
