@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   user_id    uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   type       text NOT NULL,
   title      text NOT NULL,
-  body       text,
+  message    text,
   data       jsonb,
   read       boolean DEFAULT false,
   created_at timestamptz DEFAULT now() NOT NULL

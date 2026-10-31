@@ -504,6 +504,25 @@ export default function Admin() {
           <div className="space-y-6">
             <h2 className="font-display font-bold text-xl text-foreground">סקירת פלטפורמה</h2>
 
+            {/* Setup banner — shown when stats look like RLS is blocking data */}
+            {stats && stats.total_users <= 1 && stats.total_events === 0 && (
+              <div className="shulchan-card p-4 border-r-4 border-amber-400 bg-amber-50 space-y-2">
+                <p className="font-bold text-amber-900 text-sm">⚙️ נדרשת הגדרה ראשונית</p>
+                <p className="text-xs text-amber-800">
+                  הנתונים אינם מוצגים כי מדיניות RLS בסופאבייס מסתירה רשומות משאר המשתמשים.
+                  להפעלת לוח הניהול המלא:
+                </p>
+                <ol className="text-xs text-amber-900 space-y-1 list-decimal list-inside">
+                  <li>פתח את <strong>Supabase Dashboard → SQL Editor</strong></li>
+                  <li>הדבק את תוכן הקובץ <code className="bg-amber-100 px-1 rounded">supabase/admin_policies.sql</code></li>
+                  <li>לחץ RUN ואז רענן את הדף</li>
+                </ol>
+                <p className="text-[11px] text-amber-700 mt-1">
+                  הסקריפט יוצר טבלאות, פונקציית is_admin(), ומדיניויות גישה לאדמין.
+                </p>
+              </div>
+            )}
+
             {!stats ? <LoadingSpinner /> : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {[
