@@ -1,11 +1,13 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock, KeyRound } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import BrandLogo from '../components/BrandLogo'
+
+type AuthMode = 'login' | 'register' | 'verify' | 'forgot' | 'forgot_sent' | 'reset'
 
 type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
@@ -44,19 +46,35 @@ export default function Auth() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
-  const [mode, setMode] = useState<'login' | 'register' | 'verify'>(
+
+  const [mode, setMode] = useState<AuthMode>(
     params.get('mode') === 'register' ? 'register' : 'login'
   )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [showNewPass, setShowNewPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
+  // Listen for PASSWORD_RECOVERY event — fires when user clicks reset link in email
   useEffect(() => {
-    if (!authLoading && user) navigate('/home', { replace: true })
-  }, [user, authLoading, navigate])
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setMode('reset')
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
+  // Redirect logged-in users to home — but NOT during password reset
+  useEffect(() => {
+    if (!authLoading && user && mode !== 'reset') navigate('/home', { replace: true })
+  }, [user, authLoading, navigate, mode])
+
+  // ── Register ────────────────────────────────────────────────────────────────
   const handleRegister = async () => {
     if (!agreed) { toast.error('יש לאשר את תנאי השימוש'); return }
     if (password.length < 8) { toast.error('סיסמה חייבת לפחות 8 תווים'); return }
@@ -74,6 +92,7 @@ export default function Auth() {
     setLoading(false)
   }
 
+  // ── Login ───────────────────────────────────────────────────────────────────
   const handleLogin = async () => {
     setLoading(true)
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
@@ -90,6 +109,39 @@ export default function Auth() {
     setLoading(false)
   }
 
+  // ── Forgot password — send reset email ──────────────────────────────────────
+  const handleForgot = async () => {
+    if (!email.trim()) { toast.error('יש להזין כתובת מייל'); return }
+    setLoading(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/auth`,
+    })
+    if (error) {
+      toast.error('שגיאה בשליחת המייל: ' + error.message)
+    } else {
+      setMode('forgot_sent')
+    }
+    setLoading(false)
+  }
+
+  // ── Reset password — set new password after clicking link ───────────────────
+  const handleReset = async () => {
+    if (newPassword.length < 8) { toast.error('סיסמה חייבת לפחות 8 תווים'); return }
+    if (newPassword !== confirmPassword) { toast.error('הסיסמאות אינן תואמות'); return }
+    setLoading(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) {
+      toast.error('שגיאה בעדכון הסיסמה: ' + error.message)
+    } else {
+      toast.success('הסיסמה עודכנה בהצלחה!')
+      navigate('/home', { replace: true })
+    }
+    setLoading(false)
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // Verify screen (after registration)
+  // ════════════════════════════════════════════════════════════════════════════
   if (mode === 'verify') {
     return (
       <div className="relative min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-6"
@@ -113,7 +165,6 @@ export default function Auth() {
           </p>
         </motion.div>
 
-        {/* WhatsApp community invite — only for new registrants */}
         <motion.div
           className="relative z-10 w-full max-w-xs rounded-2xl p-4 text-center"
           style={{ ...GLASS, border: '1px solid rgba(37,211,102,0.30)' }}
@@ -154,6 +205,148 @@ export default function Auth() {
     )
   }
 
+  // ════════════════════════════════════════════════════════════════════════════
+  // Forgot sent screen
+  // ════════════════════════════════════════════════════════════════════════════
+  if (mode === 'forgot_sent') {
+    return (
+      <div className="relative min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-6"
+        style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
+        <Orbs />
+        <style>{`@keyframes auth-verify-pop { from { opacity:0; transform:scale(0.8) } to { opacity:1; transform:scale(1) } }`}</style>
+        <div className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
+          style={{ background: 'rgba(192,82,42,0.12)', border: '2px solid rgba(192,82,42,0.30)', backdropFilter: 'blur(12px)', animation: 'auth-verify-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+          <Mail className="w-9 h-9" style={{ color: '#C0522A' }} />
+        </div>
+        <motion.div className="relative z-10"
+          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: EASE, delay: 0.1 }}>
+          <h1 className="font-display font-black text-3xl mb-3" style={{ color: '#1A1714', letterSpacing: '-0.022em' }}>
+            בדוק את המייל
+          </h1>
+          <p className="text-sm max-w-xs leading-relaxed" style={{ color: '#8C7060' }}>
+            שלחנו קישור לאיפוס הסיסמה ל-<span style={{ color: '#1A1714', fontWeight: 600 }}>{email}</span>.
+            לחץ על הקישור במייל להגדרת סיסמה חדשה.
+          </p>
+          <p className="text-xs mt-3" style={{ color: '#8C7060', opacity: 0.75 }}>
+            לא קיבלת? בדוק את תיקיית הספאם או נסה שוב.
+          </p>
+        </motion.div>
+        <motion.button
+          onClick={() => setMode('login')}
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} transition={SPRING}
+          className="relative z-10 px-10 py-3.5 text-base font-bold text-white rounded-2xl"
+          style={{ background: 'linear-gradient(135deg, #C8860A, #9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.28)' }}>
+          חזור לכניסה
+        </motion.button>
+      </div>
+    )
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // Reset password screen (after clicking link in email)
+  // ════════════════════════════════════════════════════════════════════════════
+  if (mode === 'reset') {
+    return (
+      <div className="relative min-h-dvh flex flex-col"
+        style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
+        <Orbs />
+        <div className="relative flex flex-col flex-1" style={{ zIndex: 1 }}>
+          <div className="flex flex-col items-center pt-12 pb-6 px-6">
+            <BrandLogo size="lg" />
+          </div>
+          <div className="flex-1 mx-4 mb-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: EASE }}
+              className="rounded-3xl p-6 space-y-5"
+              style={{ ...GLASS }}
+            >
+              <div className="text-center mb-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: 'rgba(192,82,42,0.10)', border: '1.5px solid rgba(192,82,42,0.20)' }}>
+                  <KeyRound className="w-7 h-7" style={{ color: '#C0522A' }} />
+                </div>
+                <h2 className="font-display font-bold text-xl" style={{ color: '#1A1714', letterSpacing: '-0.015em' }}>
+                  הגדר סיסמה חדשה
+                </h2>
+                <p className="text-sm mt-1" style={{ color: '#8C7060' }}>
+                  בחר סיסמה חזקה לחשבון שלך
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold mb-2 block uppercase tracking-wide" style={{ color: '#8C7060' }}>
+                  סיסמה חדשה
+                </label>
+                <div className="relative">
+                  <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8C7060' }} />
+                  <input
+                    type={showNewPass ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                    placeholder="לפחות 8 תווים"
+                    className="shulchan-input w-full pr-10 pl-10"
+                    dir="ltr"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPass(!showNewPass)}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                    style={{ color: '#8C7060' }}
+                  >
+                    {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold mb-2 block uppercase tracking-wide" style={{ color: '#8C7060' }}>
+                  אימות סיסמה
+                </label>
+                <div className="relative">
+                  <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8C7060' }} />
+                  <input
+                    type={showNewPass ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="הזן שוב את הסיסמה"
+                    className="shulchan-input w-full pr-10"
+                    dir="ltr"
+                    autoComplete="new-password"
+                    onKeyDown={e => e.key === 'Enter' && handleReset()}
+                  />
+                </div>
+                {confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-xs mt-1.5" style={{ color: '#DC2626' }}>הסיסמאות אינן תואמות</p>
+                )}
+              </div>
+
+              <motion.button
+                onClick={handleReset}
+                disabled={loading || newPassword.length < 8 || newPassword !== confirmPassword}
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} transition={SPRING}
+                className="w-full py-4 text-base font-bold text-white rounded-2xl mt-2 disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #C8860A, #9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.28)' }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    מעדכן...
+                  </span>
+                ) : 'שמור סיסמה חדשה'}
+              </motion.button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // Main login/register/forgot form
+  // ════════════════════════════════════════════════════════════════════════════
   return (
     <div className="relative min-h-dvh flex flex-col"
       style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
@@ -161,10 +354,13 @@ export default function Auth() {
 
       <div className="relative flex flex-col flex-1" style={{ zIndex: 1 }}>
         <div className="px-5 pt-5 pb-2">
-          <Link to="/landing" className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70 text-sm"
+          <Link
+            to={mode === 'forgot' ? '#' : '/landing'}
+            onClick={mode === 'forgot' ? (e) => { e.preventDefault(); setMode('login') } : undefined}
+            className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-70 text-sm"
             style={{ color: '#8C7060' }}>
             <ArrowRight className="w-4 h-4" />
-            חזור
+            {mode === 'forgot' ? 'חזרה לכניסה' : 'חזור'}
           </Link>
         </div>
 
@@ -174,6 +370,7 @@ export default function Auth() {
 
         <div className="flex-1 mx-4 mb-6">
           <motion.div
+            key={mode}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: EASE }}
@@ -182,13 +379,16 @@ export default function Auth() {
           >
             <div className="text-center mb-2">
               <h2 className="font-display font-bold text-xl" style={{ color: '#1A1714', letterSpacing: '-0.015em' }}>
-                {mode === 'login' ? 'ברוך הבא בחזרה' : 'הצטרף לשולחן'}
+                {mode === 'login' ? 'ברוך הבא בחזרה' : mode === 'register' ? 'הצטרף לשולחן' : 'שכחתי סיסמה'}
               </h2>
               <p className="text-sm mt-1" style={{ color: '#8C7060' }}>
-                {mode === 'login' ? 'התחבר לחשבון שלך' : 'צור חשבון חינמי'}
+                {mode === 'login'    ? 'התחבר לחשבון שלך'
+                : mode === 'register' ? 'צור חשבון חינמי'
+                : 'נשלח לך קישור לאיפוס הסיסמה'}
               </p>
             </div>
 
+            {/* Email — shown in all modes */}
             <div>
               <label className="text-xs font-semibold mb-2 block uppercase tracking-wide" style={{ color: '#8C7060' }}>
                 אימייל
@@ -203,36 +403,56 @@ export default function Auth() {
                   className="shulchan-input w-full pr-10"
                   dir="ltr"
                   autoComplete="email"
+                  onKeyDown={e => mode === 'forgot' && e.key === 'Enter' && handleForgot()}
                 />
               </div>
             </div>
 
-            <div>
-              <label className="text-xs font-semibold mb-2 block uppercase tracking-wide" style={{ color: '#8C7060' }}>
-                סיסמה
-              </label>
-              <div className="relative">
-                <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8C7060' }} />
-                <input
-                  type={showPass ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder={mode === 'register' ? 'לפחות 8 תווים' : '••••••••'}
-                  className="shulchan-input w-full pr-10 pl-10"
-                  dir="ltr"
-                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
-                  style={{ color: '#8C7060' }}
-                >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+            {/* Password — only for login/register */}
+            {(mode === 'login' || mode === 'register') && (
+              <div>
+                <label className="text-xs font-semibold mb-2 block uppercase tracking-wide" style={{ color: '#8C7060' }}>
+                  סיסמה
+                </label>
+                <div className="relative">
+                  <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#8C7060' }} />
+                  <input
+                    type={showPass ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder={mode === 'register' ? 'לפחות 8 תווים' : '••••••••'}
+                    className="shulchan-input w-full pr-10 pl-10"
+                    dir="ltr"
+                    autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                    onKeyDown={e => mode === 'login' && e.key === 'Enter' && handleLogin()}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-70"
+                    style={{ color: '#8C7060' }}
+                  >
+                    {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
 
+                {/* Forgot password link — login only */}
+                {mode === 'login' && (
+                  <div className="text-left mt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setMode('forgot')}
+                      className="text-xs hover:opacity-80 transition-opacity"
+                      style={{ color: '#C0522A' }}
+                    >
+                      שכחתי סיסמה
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Terms — register only */}
             {mode === 'register' && (
               <label className="flex items-start gap-3 cursor-pointer select-none">
                 <div
@@ -254,9 +474,14 @@ export default function Auth() {
               </label>
             )}
 
+            {/* Submit button */}
             <motion.button
-              onClick={mode === 'login' ? handleLogin : handleRegister}
-              disabled={loading || !email || !password}
+              onClick={
+                mode === 'login'    ? handleLogin :
+                mode === 'register' ? handleRegister :
+                handleForgot
+              }
+              disabled={loading || !email || (mode !== 'forgot' && !password)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }} transition={SPRING}
               className="w-full py-4 text-base font-bold text-white rounded-2xl mt-2 disabled:opacity-50"
@@ -267,20 +492,25 @@ export default function Auth() {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   אנא המתן...
                 </span>
-              ) : mode === 'login' ? 'כניסה לחשבון' : 'הצטרף עכשיו — חינם'}
+              ) : mode === 'login'    ? 'כניסה לחשבון'
+                : mode === 'register' ? 'הצטרף עכשיו — חינם'
+                : 'שלח קישור לאיפוס'}
             </motion.button>
 
-            <p className="text-center text-sm" style={{ color: '#8C7060' }}>
-              {mode === 'login' ? 'אין לך חשבון עדיין?' : 'כבר יש לך חשבון?'}
-              {' '}
-              <button
-                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-                className="font-semibold hover:opacity-80 transition-opacity"
-                style={{ color: '#C0522A' }}
-              >
-                {mode === 'login' ? 'הצטרף' : 'כניסה'}
-              </button>
-            </p>
+            {/* Toggle login/register — not shown in forgot mode */}
+            {mode !== 'forgot' && (
+              <p className="text-center text-sm" style={{ color: '#8C7060' }}>
+                {mode === 'login' ? 'אין לך חשבון עדיין?' : 'כבר יש לך חשבון?'}
+                {' '}
+                <button
+                  onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                  className="font-semibold hover:opacity-80 transition-opacity"
+                  style={{ color: '#C0522A' }}
+                >
+                  {mode === 'login' ? 'הצטרף' : 'כניסה'}
+                </button>
+              </p>
+            )}
           </motion.div>
         </div>
       </div>
