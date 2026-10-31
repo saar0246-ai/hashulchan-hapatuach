@@ -11,6 +11,7 @@ import { KASHRUT_LABELS, RELIGIOUS_LABELS, GENDER_LABELS, KASHRUT_COLORS, RELIGI
 import TopBar from '../components/TopBar'
 import ProfileAvatar from '../components/ProfileAvatar'
 import StarRating from '../components/StarRating'
+import CropModal from '../components/CropModal'
 
 type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
@@ -30,6 +31,7 @@ export default function Profile() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [avatarUploading, setAvatarUploading] = useState(false)
+  const [cropFile, setCropFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [form, setForm] = useState({
     display_name: '',
@@ -120,14 +122,22 @@ export default function Profile() {
     navigate('/landing')
   }
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !user) return
-    if (file.size > 5 * 1024 * 1024) { toast.error('התמונה גדולה מדי — מקסימום 5MB'); return }
+    if (file.size > 10 * 1024 * 1024) { toast.error('התמונה גדולה מדי — מקסימום 10MB'); return }
+    // Reset input so same file can be re-selected after cancel
+    e.target.value = ''
+    setCropFile(file)
+  }
+
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!user) return
+    setCropFile(null)
     setAvatarUploading(true)
     const { data: up, error: upErr } = await supabase.storage
       .from('avatars')
-      .upload(user.id, file, { upsert: true, contentType: file.type })
+      .upload(user.id, blob, { upsert: true, contentType: 'image/jpeg' })
     if (upErr || !up) { toast.error('שגיאה בהעלאת התמונה'); setAvatarUploading(false); return }
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user.id)
     const { error } = await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', user.id)
@@ -146,6 +156,14 @@ export default function Profile() {
   if (!profile) return null
 
   return (
+    <>
+    {cropFile && (
+      <CropModal
+        file={cropFile}
+        onConfirm={handleCropConfirm}
+        onCancel={() => setCropFile(null)}
+      />
+    )}
     <div className="relative min-h-dvh"
       style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
 
@@ -475,5 +493,6 @@ export default function Profile() {
         </div>
       </div>
     </div>
+    </>
   )
 }
