@@ -21,6 +21,7 @@ import Privacy from './pages/Privacy'
 import Accessibility from './pages/Accessibility'
 import Admin from './pages/Admin'
 import About from './pages/About'
+import FoodPosts from './pages/FoodPosts'
 
 function ThemeInit() {
   useTheme()
@@ -94,6 +95,7 @@ function AppRoutes() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+        <Route path="/food-posts" element={<ProtectedRoute><FoodPosts /></ProtectedRoute>} />
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
 
         {/* Default redirect */}

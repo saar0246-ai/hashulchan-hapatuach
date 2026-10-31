@@ -72,7 +72,13 @@ export default function Home() {
     if (activeTab !== 'all') q = q.eq('event_type', activeTab)
     if (search.trim())       q = q.ilike('title', `%${search.trim()}%`)
     const { data } = await q.limit(50)
-    setEvents(data ?? [])
+    const now = new Date()
+    const filteredByTime = (data ?? []).filter(e => {
+      const eventEnd = new Date(`${e.event_date}T${e.event_time}`)
+      eventEnd.setHours(eventEnd.getHours() + 3)
+      return eventEnd > now
+    })
+    setEvents(filteredByTime)
     setLoading(false)
   }, [activeTab, search])
 
@@ -536,6 +542,21 @@ export default function Home() {
               ))}
             </div>
           )}
+
+          {/* Food Giveaway section */}
+          <InView
+            variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            viewOptions={{ once: true }}
+            style={{ marginTop: 24, marginBottom: 8 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>מסירות אוכל 🍲</p>
+              <Link to="/food-posts" style={{ fontSize: 12, color: FIRE, fontWeight: 700, textDecoration: 'none' }}>
+                ראה הכל ←
+              </Link>
+            </div>
+          </InView>
 
           {/* Live community stats */}
           <InView

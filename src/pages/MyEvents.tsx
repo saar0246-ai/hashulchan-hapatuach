@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarPlus, ChevronLeft, Clock, Users, Star, ArrowRight } from 'lucide-react'
+import { CalendarPlus, ChevronLeft, Clock, Users, Star, ArrowRight, Pencil, Check, X } from 'lucide-react'
 import { format, addDays } from 'date-fns'
 import { he } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import type { Event, EventRegistration } from '../types'
+import type { Event, EventRegistration, KashrutLevel } from '../types'
 import { EVENT_TYPE_LABELS, KASHRUT_LABELS } from '../types'
 import TopBar from '../components/TopBar'
 import GuestCard from '../components/GuestCard'
@@ -47,6 +47,16 @@ export default function MyEvents() {
   const [guestRatingScore, setGuestRatingScore] = useState(5)
   const [guestRatingComment, setGuestRatingComment] = useState('')
   const [guestRatingLoading, setGuestRatingLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editSaving, setEditSaving] = useState(false)
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    max_guests: 0,
+    event_date: '',
+    event_time: '',
+    kashrut_level: '' as KashrutLevel,
+  })
 
   const fetchEvents = useCallback(async () => {
     if (!user) return
@@ -112,6 +122,49 @@ export default function MyEvents() {
       if (selectedEvent?.id === eventId) setSelectedEvent(e => e ? { ...e, status: 'cancelled' } : e)
       toast.success('האירוע בוטל')
     }
+  }
+
+  const startEditEvent = (event: Event) => {
+    setEditForm({
+      title: event.title,
+      description: event.description ?? '',
+      max_guests: event.max_guests,
+      event_date: event.event_date,
+      event_time: event.event_time.slice(0, 5),
+      kashrut_level: event.kashrut_level,
+    })
+    setIsEditing(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!selectedEvent) return
+    setEditSaving(true)
+    const { error } = await supabase.from('events').update({
+      title: editForm.title.trim(),
+      description: editForm.description.trim() || null,
+      max_guests: editForm.max_guests,
+      event_date: editForm.event_date,
+      event_time: editForm.event_time,
+      kashrut_level: editForm.kashrut_level,
+    }).eq('id', selectedEvent.id)
+    if (error) {
+      toast.error('שגיאה בשמירה: ' + error.message)
+    } else {
+      toast.success('האירוע עודכן!')
+      await fetchEvents()
+      // Update selectedEvent locally
+      setSelectedEvent(e => e ? {
+        ...e,
+        title: editForm.title.trim(),
+        description: editForm.description.trim() || null,
+        max_guests: editForm.max_guests,
+        event_date: editForm.event_date,
+        event_time: editForm.event_time,
+        kashrut_level: editForm.kashrut_level,
+      } : e)
+      setIsEditing(false)
+    }
+    setEditSaving(false)
   }
 
   const canRateGuest = (reg: EventRegistration) => {
@@ -272,7 +325,7 @@ export default function MyEvents() {
 
                   {/* Back */}
                   <motion.button
-                    onClick={() => setSelectedEvent(null)}
+                    onClick={() => { setSelectedEvent(null); setIsEditing(false) }}
                     className="flex items-center gap-1.5 text-sm font-medium mb-4"
                     style={{ color: '#8C7060' }}
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={SPRING}
@@ -316,12 +369,123 @@ export default function MyEvents() {
                     </div>
 
                     {selectedEvent.status === 'active' && (
-                      <button onClick={() => handleCancelEvent(selectedEvent.id)}
-                        className="text-xs font-medium" style={{ color: '#DC2626' }}>
-                        ביטול האירוע
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => handleCancelEvent(selectedEvent.id)}
+                          className="text-xs font-medium" style={{ color: '#DC2626' }}>
+                          ביטול האירוע
+                        </button>
+                        <button
+                          onClick={() => startEditEvent(selectedEvent)}
+                          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg"
+                          style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.15)' }}>
+                          <Pencil className="w-3 h-3" /> ערוך
+                        </button>
+                      </div>
                     )}
                   </div>
+
+                  {/* Inline edit form */}
+                  <AnimatePresence>
+                    {isEditing && (
+                      <motion.div
+                        key="edit-form"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="rounded-2xl p-4 space-y-3 mb-4" style={{ ...GLASS, border: '1px solid rgba(192,82,42,0.18)' }}>
+                          <h3 className="text-sm font-bold" style={{ color: '#1A1714' }}>עריכת אירוע</h3>
+
+                          <div>
+                            <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>כותרת</label>
+                            <input
+                              value={editForm.title}
+                              onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                              className="shulchan-input text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>תיאור</label>
+                            <textarea
+                              value={editForm.description}
+                              onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                              className="shulchan-input resize-none h-20 text-sm"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>תאריך</label>
+                              <input
+                                type="date"
+                                value={editForm.event_date}
+                                onChange={e => setEditForm(f => ({ ...f, event_date: e.target.value }))}
+                                className="shulchan-input text-sm"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>שעה</label>
+                              <input
+                                type="time"
+                                value={editForm.event_time}
+                                onChange={e => setEditForm(f => ({ ...f, event_time: e.target.value }))}
+                                className="shulchan-input text-sm"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>
+                              מקסימום אורחים (מינימום: {selectedEvent.current_guests})
+                            </label>
+                            <input
+                              type="number"
+                              min={selectedEvent.current_guests}
+                              value={editForm.max_guests}
+                              onChange={e => setEditForm(f => ({ ...f, max_guests: Math.max(selectedEvent!.current_guests, parseInt(e.target.value) || 1) }))}
+                              className="shulchan-input text-sm"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs font-semibold block mb-1" style={{ color: '#8C7060' }}>כשרות</label>
+                            <select
+                              value={editForm.kashrut_level}
+                              onChange={e => setEditForm(f => ({ ...f, kashrut_level: e.target.value as KashrutLevel }))}
+                              className="shulchan-input text-sm"
+                            >
+                              <option value="mehadrin">מהדרין</option>
+                              <option value="kosher">כשר</option>
+                              <option value="traditional">מסורתי</option>
+                              <option value="none">לא כשר</option>
+                            </select>
+                          </div>
+
+                          <div className="flex gap-2 pt-1">
+                            <button
+                              onClick={() => setIsEditing(false)}
+                              className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-1.5"
+                              style={{ ...GLASS, color: '#8C7060' }}>
+                              <X className="w-3.5 h-3.5" /> ביטול
+                            </button>
+                            <button
+                              onClick={handleSaveEdit}
+                              disabled={editSaving}
+                              className="flex-1 py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-1.5 disabled:opacity-60"
+                              style={{ background: 'linear-gradient(135deg, #C0522A, #8C3318)' }}>
+                              {editSaving
+                                ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                : <><Check className="w-3.5 h-3.5" /> שמור</>
+                              }
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Guests */}
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#8C7060' }}>אורחים</h3>

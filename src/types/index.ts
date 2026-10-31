@@ -171,3 +171,26 @@ export const RELIGIOUS_COLORS: Record<ReligiousLevel, string> = {
   masorti:    'bg-orange-100 text-orange-800',
   hiloni:     'bg-gray-100 text-gray-700',
 }
+
+export interface FoodPost {
+  id: string
+  host_id: string
+  title: string
+  items: string
+  city: string
+  neighborhood: string
+  full_address: string
+  image_url: string | null
+  status: 'active' | 'closed'
+  created_at: string
+  host?: Profile
+}
+
+export interface FoodRequest {
+  id: string
+  post_id: string
+  requester_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  requester?: Profile
+}

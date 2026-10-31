@@ -3,7 +3,6 @@ import { useNotifications } from '../hooks/useNotifications'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import { Check, Users, CheckCircle, XCircle, Star, Bell } from 'lucide-react'
-import { motion } from 'framer-motion'
 import TopBar from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
 import { Component, type ReactNode } from 'react'
@@ -39,9 +38,6 @@ class NotificationsErrorBoundary extends Component<
   }
 }
 
-type BezierEase = [number, number, number, number]
-const EASE: BezierEase = [0.22, 1, 0.36, 1]
-const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
   background: 'rgba(255,255,255,0.94)',
   border: '1px solid rgba(255,255,255,0.80)',
@@ -57,7 +53,7 @@ const ICON_COLOR: Record<string, string> = {
   system:            '#8C7060',
 }
 
-// rgba triplets for each accent — Framer Motion cannot parse 8-char hex (#RRGGBBAA)
+// rgba triplets for each accent
 const ICON_RGB: Record<string, string> = {
   new_guest_request: '192,82,42',
   request_approved:  '5,150,105',
@@ -98,34 +94,56 @@ function NotificationsInner() {
     <div className="relative min-h-dvh"
       style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
 
+      {/* CSS keyframes for animations */}
+      <style>{`
+        @keyframes notif-orb1 {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          38% { transform: translate(60px,-56px) scale(1.14); }
+          66% { transform: translate(-24px,34px) scale(0.9); }
+        }
+        @keyframes notif-orb2 {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          38% { transform: translate(-44px,60px) scale(0.89); }
+          66% { transform: translate(52px,-36px) scale(1.12); }
+        }
+        @keyframes notif-card-in {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .notif-mark-btn:hover {
+          background: rgba(192,82,42,0.14) !important;
+        }
+      `}</style>
+
       {/* Luminous orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <motion.div className="absolute rounded-full"
-          style={{ width: 700, height: 700, top: -260, right: -260,
+        <div className="absolute rounded-full"
+          style={{
+            width: 700, height: 700, top: -260, right: -260,
             background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-            filter: 'blur(80px)' }}
-          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
+            filter: 'blur(80px)',
+            animation: 'notif-orb1 26s ease-in-out infinite',
+          }}
         />
-        <motion.div className="absolute rounded-full"
-          style={{ width: 560, height: 560, bottom: 40, left: -220,
+        <div className="absolute rounded-full"
+          style={{
+            width: 560, height: 560, bottom: 40, left: -220,
             background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-            filter: 'blur(72px)' }}
-          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
+            filter: 'blur(72px)',
+            animation: 'notif-orb2 32s ease-in-out 5s infinite',
+          }}
         />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
         <TopBar title="התראות" showBack right={
           unreadCount > 0 ? (
-            <motion.button
+            <button
               onClick={markAllRead}
-              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.94 }} transition={SPRING}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl"
-              style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.15)' }}>
+              className="notif-mark-btn flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl"
+              style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.15)', cursor: 'pointer', transition: 'background 0.15s' }}>
               <Check className="w-3.5 h-3.5" /> סמן הכל כנקרא
-            </motion.button>
+            </button>
           ) : undefined
         } />
 
@@ -140,12 +158,15 @@ function NotificationsInner() {
             notifications.map((n, i) => {
               const accentColor = ICON_COLOR[n.type] ?? '#8C7060'
               const accentRgb   = ICON_RGB[n.type]   ?? '140,112,96'
+              const delay = Math.min(i * 0.05, 0.25)
               return (
-                <motion.div
+                <div
                   key={n.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.38, ease: EASE, delay: Math.min(i * 0.05, 0.25) }}
+                  style={{
+                    opacity: 0,
+                    animation: `notif-card-in 0.38s ease forwards`,
+                    animationDelay: `${delay}s`,
+                  }}
                 >
                   <button
                     onClick={() => markRead(n.id)}
@@ -196,7 +217,7 @@ function NotificationsInner() {
                       </div>
                     </div>
                   </button>
-                </motion.div>
+                </div>
               )
             })
           )}
