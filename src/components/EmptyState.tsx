@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { motion } from 'framer-motion'
 
 interface EmptyStateProps {
   icon?: ReactNode
@@ -10,12 +9,12 @@ interface EmptyStateProps {
 
 export default function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <motion.div
-      className="flex flex-col items-center justify-center text-center py-14 px-6"
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <>
+      <style>{`@keyframes es-fade-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <div
+        className="flex flex-col items-center justify-center text-center py-14 px-6"
+        style={{ animation: 'es-fade-up 0.42s cubic-bezier(0.22,1,0.36,1) forwards' }}
+      >
       {icon && (
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5"
@@ -40,6 +39,7 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
         </p>
       )}
       {action}
-    </motion.div>
+    </div>
+    </>
   )
 }
