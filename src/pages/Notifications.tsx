@@ -52,6 +52,16 @@ const ICON_COLOR: Record<string, string> = {
   system:            '#8C7060',
 }
 
+// rgba triplets for each accent — Framer Motion cannot parse 8-char hex (#RRGGBBAA)
+const ICON_RGB: Record<string, string> = {
+  new_guest_request: '192,82,42',
+  request_approved:  '5,150,105',
+  request_rejected:  '220,38,38',
+  new_rating:        '200,134,10',
+  event_reminder:    '30,95,165',
+  system:            '140,112,96',
+}
+
 function NotificationIcon({ type }: { type: string }) {
   const color = ICON_COLOR[type] ?? '#8C7060'
   const cls = 'w-5 h-5'
@@ -124,63 +134,64 @@ function NotificationsInner() {
           ) : (
             notifications.map((n, i) => {
               const accentColor = ICON_COLOR[n.type] ?? '#8C7060'
+              const accentRgb   = ICON_RGB[n.type]   ?? '140,112,96'
               return (
-                <motion.button
+                <motion.div
                   key={n.id}
-                  onClick={() => markRead(n.id)}
-                  className="w-full rounded-2xl p-4 text-right"
-                  style={{
-                    ...GLASS,
-                    ...(n.read ? {} : {
-                      background: `rgba(255,255,255,0.68)`,
-                      border: `1px solid ${accentColor}28`,
-                      boxShadow: `0 8px 32px ${accentColor}10, 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)`,
-                    }),
-                  }}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.38, ease: EASE, delay: i * 0.05 }}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.985 }}
+                  transition={{ duration: 0.38, ease: EASE, delay: Math.min(i * 0.05, 0.25) }}
                 >
-                  <div className="flex items-start gap-3">
-                    {/* Icon micro-pill */}
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{
-                        background: `${accentColor}12`,
-                        border: `1px solid ${accentColor}20`,
-                      }}>
-                      <NotificationIcon type={n.type} />
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm leading-snug" style={{
-                          color: '#1A1714',
-                          fontWeight: n.read ? 500 : 700,
-                          letterSpacing: '-0.01em',
+                  <button
+                    onClick={() => markRead(n.id)}
+                    className="w-full rounded-2xl p-4 text-right"
+                    style={{
+                      ...GLASS,
+                      ...(n.read ? {} : {
+                        background: 'rgba(255,255,255,0.68)',
+                        border: `1px solid rgba(${accentRgb},0.16)`,
+                        boxShadow: `0 8px 32px rgba(${accentRgb},0.06), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)`,
+                      }),
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{
+                          background: `rgba(${accentRgb},0.07)`,
+                          border: `1px solid rgba(${accentRgb},0.13)`,
                         }}>
-                          {n.title}
+                        <NotificationIcon type={n.type} />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-sm leading-snug" style={{
+                            color: '#1A1714',
+                            fontWeight: n.read ? 500 : 700,
+                            letterSpacing: '-0.01em',
+                          }}>
+                            {n.title}
+                          </p>
+                          {!n.read && (
+                            <span
+                              className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 inline-block"
+                              style={{ background: accentColor }}
+                            />
+                          )}
+                        </div>
+                        <p className="text-xs leading-relaxed mt-0.5" style={{ color: '#8C7060' }}>
+                          {n.message}
                         </p>
-                        {!n.read && (
-                          <motion.div
-                            initial={{ scale: 0 }} animate={{ scale: 1 }} transition={SPRING}
-                            className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
-                            style={{ background: accentColor, boxShadow: `0 0 6px ${accentColor}80` }}
-                          />
+                        {safeFormat(n.created_at) && (
+                          <p className="text-[10px] mt-1" style={{ color: 'rgba(140,112,96,0.65)' }}>
+                            {safeFormat(n.created_at)}
+                          </p>
                         )}
                       </div>
-                      <p className="text-xs leading-relaxed mt-0.5" style={{ color: '#8C7060' }}>
-                        {n.message}
-                      </p>
-                      {safeFormat(n.created_at) && (
-                        <p className="text-[10px] mt-1" style={{ color: 'rgba(140,112,96,0.65)' }}>
-                          {safeFormat(n.created_at)}
-                        </p>
-                      )}
                     </div>
-                  </div>
-                </motion.button>
+                  </button>
+                </motion.div>
               )
             })
           )}
