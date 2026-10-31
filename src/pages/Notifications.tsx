@@ -37,6 +37,17 @@ function NotificationIcon({ type }: { type: string }) {
   }
 }
 
+function safeFormat(dateStr: string | null | undefined): string {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return ''
+    return format(d, "d בMMM, HH:mm", { locale: he })
+  } catch {
+    return ''
+  }
+}
+
 export default function Notifications() {
   const { user } = useAuth()
   const { notifications, unreadCount, markAllRead, markRead } = useNotifications(user?.id)
@@ -135,9 +146,11 @@ export default function Notifications() {
                       <p className="text-xs leading-relaxed mt-0.5" style={{ color: '#8C7060' }}>
                         {n.message}
                       </p>
-                      <p className="text-[10px] mt-1" style={{ color: 'rgba(140,112,96,0.65)' }}>
-                        {format(new Date(n.created_at), "d בMMM, HH:mm", { locale: he })}
-                      </p>
+                      {safeFormat(n.created_at) && (
+                        <p className="text-[10px] mt-1" style={{ color: 'rgba(140,112,96,0.65)' }}>
+                          {safeFormat(n.created_at)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.button>

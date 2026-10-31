@@ -77,13 +77,41 @@
 ## 📋 תיעוד מצב הפרויקט (עדכן בכל פתיחת חלון חדש!)
 
 ### 🗓️ נוצר: 28 ספטמבר 2026
-### 🔄 עדכון אחרון: 28 אוקטובר 2026
+### 🔄 עדכון אחרון: 31 אוקטובר 2026
 
 ---
 
 ## ✅ מה נעשה עד כה
 
-### עדכונים אחרונים (28 אוקטובר 2026)
+### עדכונים אחרונים (31 אוקטובר 2026 — לילה)
+- [x] **קישור קהילת וואטסאפ** — `https://chat.whatsapp.com/J45vgvDnJhtCOUgKvpmZk8`
+  - מוצג לאחר הרשמה (`Auth.tsx` — מסך `verify`, כרטיס ירוק עם כפתור "הצטרף עכשיו")
+  - מוצג בדף הבית לאחר כניסה (`Home.tsx` — באנר מעל רשימת הארוחות)
+- [x] **תיקון יישור במובייל** (`About.tsx`) — badge "חינמי לחלוטין" תוקן מ-`self-end` ל-`self-center` (לא היה ממורכז במובייל)
+- [x] **תמונות לוגו לקבוצות וואטסאפ** — 4 קבצי JPEG ב-`public/images/`, 512×512px, פלטת המותג:
+  - `whatsapp-updates.jpg` — קבוצת עדכונים (רקע אדום-טרקוטה)
+  - `whatsapp-admins.jpg` — קבוצת מנהלים (רקע כחול כהה)
+  - `whatsapp-vip.jpg` — חברי VIP (רקע זהב-חום)
+  - `whatsapp-community.jpg` — לוגו קהילה כללי (רקע ירוק יער)
+
+### עדכונים (31 אוקטובר 2026 — בוקר)
+- [x] **קישור קהילת וואטסאפ** — `https://chat.whatsapp.com/J45vgvDnJhtCOUgKvpmZk8`
+  - מוצג לאחר הרשמה (`Auth.tsx` — מסך `verify`)
+  - מוצג בדף הבית לאחר כניסה (`Home.tsx` — באנר מעל רשימת הארוחות)
+- [x] **תיקון יישור במובייל** (`About.tsx`) — badge "חינמי לחלוטין": `self-end` → `self-center`
+- [x] **תמונות לוגו לקבוצות וואטסאפ** — 4 קבצי JPEG 512×512 ב-`public/images/` עם לוגו הקשת האמיתי
+- [x] **פביקון** — עודכן מאמוג'י נר לסמל הקשת הרשמי (לבן על טרקוטה)
+
+### עדכונים (31 אוקטובר 2026 — לילה)
+- [x] **PWA — "הוסף למסך הבית"** (`vite-plugin-pwa`):
+  - `manifest.json` אוטומטי: `name=שולחן פתוח`, `display=standalone`, `lang=he`, `dir=rtl`
+  - Service Worker עם Workbox — cache לגופנים ו-assets
+  - אייקוני PNG: `pwa-icon-192.png` + `pwa-icon-512.png` + `apple-touch-icon.png` (לוגו קשת לבן על טרקוטה)
+  - `index.html`: `apple-mobile-web-app-capable`, `apple-mobile-web-app-title=שולחן פתוח`, `theme-color=#C0522A`
+  - **מה זה אומר**: משתמש יכול ללחוץ "הוסף למסך הבית" ב-Safari/Chrome → נפתח כאפליקציה בלי סרגל URL
+- [x] **תיקון קראש התראות במובייל** — `format(new Date(created_at))` זרק כשהתאריך null/undefined → `safeFormat()` עם try/catch + isNaN guard
+
+### עדכונים (28 אוקטובר 2026)
 - [x] הוספת **טל אינדה-פורקר** כמייסדת שותפת בעמוד אודות — ביו, תמונת פרופיל (Instagram), TikTok + Instagram links
 - [x] תמיכה באייקון TikTok בכרטיסי הצוות (`Social` type + `Music2` icon)
 - [x] תיקון שגיאת Windows Script Host — `UseWINSAFER=0` ב-`HKCU\Software\Microsoft\Windows Script Host\Settings` (ה-dialog של "פוליסה של JavaScript" לא יחזור)

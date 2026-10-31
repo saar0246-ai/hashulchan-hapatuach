@@ -189,13 +189,13 @@ export default function About() {
       <div className="relative z-10 max-w-4xl mx-auto px-5 md:px-10 lg:px-14
                       pt-14 pb-12 md:pt-20 md:pb-16 lg:pt-28 lg:pb-20">
 
-        {/* Logo — top right (RTL start) */}
-        <div className="flex justify-end mb-10 md:mb-14">
+        {/* Logo — centered */}
+        <div className="flex justify-center mb-10 md:mb-14">
           <BrandLogo size="sm" />
         </div>
 
         {/* Display headline — signature element */}
-        <h1 className="leading-none mb-5 md:mb-6 text-right stagger-1"
+        <h1 className="leading-none mb-5 md:mb-6 text-center stagger-1"
             style={{
               fontFamily:   "'Frank Ruhl Libre', serif",
               fontSize:     'clamp(58px, 9vw, 104px)',
@@ -209,18 +209,18 @@ export default function About() {
         </h1>
 
         {/* Amber rule — the editorial stamp */}
-        <div className="mb-5 md:mb-6 stagger-2"
+        <div className="mb-5 md:mb-6 stagger-2 mx-auto"
              style={{ width: 48, height: 2, background: C.a }} />
 
         {/* Subtitle + badge */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-end gap-4 stagger-3">
-          <p className="text-sm md:text-base leading-relaxed text-right"
-             style={{ color: C.mid, maxWidth: 320, marginLeft: 'auto' }}>
+        <div className="flex flex-col items-center gap-4 stagger-3">
+          <p className="text-sm md:text-base leading-relaxed text-center"
+             style={{ color: C.mid, maxWidth: 320 }}>
             פלטפורמה קהילתית לחיבור בין מארחים לאורחים —<br className="hidden md:block" />
             לארוחות שבת וחגים ברחבי הארץ
           </p>
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold
-                           px-3 py-1.5 rounded-full self-end md:self-auto flex-shrink-0"
+                           px-3 py-1.5 rounded-full self-center flex-shrink-0"
                 style={{
                   background: `rgba(196,120,42,0.12)`,
                   border:     `1px solid rgba(196,120,42,0.3)`,
@@ -241,11 +241,11 @@ export default function About() {
         {/* על המיזם */}
         <section className="stagger-2">
           <Eyebrow label="על המיזם" />
-          <h2 className="text-xl md:text-3xl font-black mb-4 leading-snug text-right"
+          <h2 className="text-xl md:text-3xl font-black mb-4 leading-snug text-center"
               style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             כמו Airbnb —<br />אבל לשולחן הישראלי
           </h2>
-          <div className="space-y-3 text-sm md:text-base leading-relaxed text-right md:max-w-2xl md:mr-0 md:ml-auto"
+          <div className="space-y-3 text-sm md:text-base leading-relaxed text-center max-w-2xl mx-auto"
                style={{ color: C.mid }}>
             <p>
               מארחים פותחים את ביתם לאורחים חדשים, ואורחים מוצאים שולחן חם לחג,
@@ -280,7 +280,7 @@ export default function About() {
                      style={{ background: v.bg }}>
                   <v.icon className="w-4 h-4" style={{ color: v.color }} />
                 </div>
-                <div className="text-right">
+                <div className="text-center">
                   <p className="font-bold text-sm mb-1" style={{ color: C.fg }}>{v.title}</p>
                   <p className="text-xs leading-relaxed"  style={{ color: C.mid }}>{v.desc}</p>
                 </div>
@@ -299,7 +299,7 @@ export default function About() {
                       style={{ color: C.a, width: 28, textAlign: 'right', letterSpacing: '0.04em' }}>
                   {s.n}
                 </span>
-                <div className="text-right">
+                <div className="text-center">
                   <p className="font-bold text-sm mb-1" style={{ color: C.fg }}>{s.title}</p>
                   <p className="text-xs leading-relaxed" style={{ color: C.mid }}>{s.desc}</p>
                 </div>
@@ -312,11 +312,11 @@ export default function About() {
         <section className="px-5 py-6 md:px-8 rounded-2xl"
                  style={{ background: C.tint, border: `1px solid ${C.bd}` }}>
           <Eyebrow label="כשרות ודת" />
-          <h3 className="font-black text-base md:text-xl mb-2 text-right"
+          <h3 className="font-black text-base md:text-xl mb-2 text-center"
               style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             כל אחד על מקומו
           </h3>
-          <p className="text-sm leading-relaxed text-right md:max-w-xl md:mr-0 md:ml-auto"
+          <p className="text-sm leading-relaxed text-center max-w-xl mx-auto"
              style={{ color: C.mid }}>
             המארח מגדיר את רמת הכשרות ואת הסגנון הדתי של האירוח.
             הסינון מאפשר לכל אחד למצוא שולחן שמתאים לו — חילוני, מסורתי, דתי, חרדי.
@@ -327,7 +327,7 @@ export default function About() {
         {/* הצוות */}
         <section>
           <Eyebrow label="הצוות" />
-          <h2 className="text-lg md:text-2xl font-black mb-6 text-right"
+          <h2 className="text-lg md:text-2xl font-black mb-6 text-center"
               style={{ fontFamily: "'Frank Ruhl Libre', serif", color: C.fg }}>
             האנשים שמאחורי השולחן
           </h2>
@@ -350,7 +350,7 @@ export default function About() {
         </section>
 
         {/* CTA */}
-        <div className="space-y-3 pt-2 max-w-md mx-auto md:max-w-sm md:mx-0 md:mr-auto">
+        <div className="space-y-3 pt-2 max-w-md mx-auto">
           <Link to="/auth?mode=register" className="block">
             <button className="w-full py-4 rounded-xl font-semibold text-base
                                transition-all duration-150 active:scale-[0.97]

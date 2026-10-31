@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #e8e8e8; font-family: Arial, sans-serif; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; width: fit-content; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <canvas id="logo1" width="512" height="512"></canvas>
+  <canvas id="logo2" width="512" height="512"></canvas>
+  <canvas id="logo3" width="512" height="512"></canvas>
+  <canvas id="logo4" width="512" height="512"></canvas>
+</div>
+<script>
+/* Draw the brand arch mark — matches BrandLogo.tsx exactly */
+function drawArch(ctx, cx, cy, size, color) {
+  const scale = size / 44;
+  ctx.save();
+  ctx.translate(cx - 22 * scale, cy - 23 * scale);
+  ctx.scale(scale, scale);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2.6;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+
+  /* Main arch */
+  ctx.beginPath();
+  ctx.moveTo(7, 40);
+  ctx.lineTo(7, 20);
+  ctx.quadraticCurveTo(7, 6, 22, 6);
+  ctx.quadraticCurveTo(37, 6, 37, 20);
+  ctx.lineTo(37, 40);
+  ctx.stroke();
+
+  /* Left foot */
+  ctx.beginPath(); ctx.moveTo(2, 40); ctx.lineTo(11, 40); ctx.stroke();
+  /* Right foot */
+  ctx.beginPath(); ctx.moveTo(33, 40); ctx.lineTo(42, 40); ctx.stroke();
+
+  /* Center dot */
+  ctx.beginPath();
+  ctx.arc(22, 26, 3.2, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawLogo(id, cfg) {
+  const canvas = document.getElementById(id);
+  const ctx    = canvas.getContext('2d');
+  const W = 512, H = 512;
+
+  /* ── Background ── */
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, cfg.bg1);
+  bg.addColorStop(1, cfg.bg2);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Subtle vignette overlay ── */
+  const vig = ctx.createRadialGradient(W/2, H/2, W*0.25, W/2, H/2, W*0.72);
+  vig.addColorStop(0, 'transparent');
+  vig.addColorStop(1, 'rgba(0,0,0,0.28)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Warm glow behind mark ── */
+  const glow = ctx.createRadialGradient(W/2, H*0.38, 0, W/2, H*0.38, 160);
+  glow.addColorStop(0, 'rgba(255,255,255,0.12)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  /* ── Brand mark (arch) ── */
+  ctx.shadowColor = 'rgba(255,255,255,0.35)';
+  ctx.shadowBlur  = 18;
+  drawArch(ctx, W/2, H * 0.36, 130, 'rgba(255,255,255,0.95)');
+  ctx.shadowBlur  = 0;
+
+  /* ── Divider line ── */
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+  ctx.lineWidth   = 1;
+  ctx.beginPath();
+  ctx.moveTo(W*0.2, H*0.62);
+  ctx.lineTo(W*0.8, H*0.62);
+  ctx.stroke();
+  ctx.restore();
+
+  /* ── "שולחן פתוח" ── */
+  ctx.save();
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor  = 'rgba(0,0,0,0.40)';
+  ctx.shadowBlur   = 10;
+
+  /* "שולחן" — white */
+  ctx.font      = 'bold 62px "Arial Hebrew", Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.97)';
+  ctx.fillText('שולחן פתוח', W/2, H * 0.735);
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  /* ── Subtitle (group name) ── */
+  if (cfg.subtitle) {
+    ctx.save();
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = '500 32px "Arial Hebrew", Arial, sans-serif';
+    ctx.fillStyle    = 'rgba(255,255,255,0.72)';
+    ctx.fillText(cfg.subtitle, W/2, H * 0.855);
+    ctx.restore();
+  }
+
+  /* ── Corner accent dots ── */
+  const r = 6;
+  const pad = 28;
+  [[pad, pad],[W-pad, pad],[pad, H-pad],[W-pad, H-pad]].forEach(([x,y]) => {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fill();
+  });
+}
+
+/* 1 — Updates — terracotta/fire */
+drawLogo('logo1', {
+  bg1: '#B0400A', bg2: '#6B1E00',
+  subtitle: 'עדכונים',
+});
+
+/* 2 — Admins — deep navy */
+drawLogo('logo2', {
+  bg1: '#1B3A5C', bg2: '#0C1E30',
+  subtitle: 'מנהלים',
+});
+
+/* 3 — VIP — rich amber/gold */
+drawLogo('logo3', {
+  bg1: '#7A4A00', bg2: '#3A2100',
+  subtitle: 'חברי VIP',
+});
+
+/* 4 — Community — forest green */
+drawLogo('logo4', {
+  bg1: '#2D4A1E', bg2: '#141F0C',
+  subtitle: null,
+});
+</script>
+</body>
+</html>
