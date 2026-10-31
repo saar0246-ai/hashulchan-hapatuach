@@ -1,4 +1,3 @@
-import { useAuth } from '../hooks/useAuth'
 import { useNotifications } from '../hooks/useNotifications'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
@@ -87,8 +86,7 @@ function safeFormat(dateStr: string | null | undefined): string {
 }
 
 function NotificationsInner() {
-  const { user } = useAuth()
-  const { notifications, unreadCount, markAllRead, markRead, error } = useNotifications(user?.id)
+  const { notifications, unreadCount, markAllRead, markRead, error } = useNotifications()
 
   return (
     <div className="relative min-h-dvh"

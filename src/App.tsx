@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { useAuth } from './hooks/useAuth'
 import { useTheme } from './hooks/useTheme'
 import { useProfile } from './hooks/useProfile'
+import { NotificationsProvider } from './hooks/useNotifications'
 import BottomNav from './components/BottomNav'
 
 // Pages
@@ -67,10 +68,21 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
-  const { profile, loading: profileLoading } = useProfile(user?.id)
-  if (loading || profileLoading) return null
   const ADMIN_EMAILS = ['saar0246@gmail.com']
-  if (!user || (profile?.role !== 'admin' && !ADMIN_EMAILS.includes(user.email ?? ''))) return <Navigate to="/home" replace />
+  const isEmailAdmin = !loading && !!user && ADMIN_EMAILS.includes(user.email ?? '')
+  const { profile, loading: profileLoading } = useProfile(isEmailAdmin ? null : user?.id)
+
+  const spinner = (
+    <div className="min-h-dvh bg-background flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+    </div>
+  )
+
+  if (loading) return spinner
+  if (!user) return <Navigate to="/home" replace />
+  if (isEmailAdmin) return <>{children}</>
+  if (profileLoading) return spinner
+  if (profile?.role !== 'admin') return <Navigate to="/home" replace />
   return <>{children}</>
 }
 
@@ -125,11 +137,20 @@ function NotFound() {
   )
 }
 
+function AppWithProviders() {
+  const { user } = useAuth()
+  return (
+    <NotificationsProvider userId={user?.id}>
+      <AppRoutes />
+    </NotificationsProvider>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ThemeInit />
-      <AppRoutes />
+      <AppWithProviders />
     </BrowserRouter>
   )
 }

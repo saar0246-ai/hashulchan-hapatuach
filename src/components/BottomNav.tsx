@@ -1,14 +1,12 @@
 ﻿import { NavLink, useLocation } from 'react-router-dom'
 import { Home, CalendarPlus, BookOpen, Bell, User } from 'lucide-react'
 import { useNotifications } from '../hooks/useNotifications'
-import { useAuth } from '../hooks/useAuth'
 
 const HIDDEN_ON = ['/auth', '/onboarding', '/landing', '/terms', '/privacy', '/accessibility', '/admin', '/about']
 
 export default function BottomNav() {
   const location = useLocation()
-  const { user } = useAuth()
-  const { unreadCount } = useNotifications(user?.id)
+  const { unreadCount } = useNotifications()
 
   if (HIDDEN_ON.some(p => location.pathname.startsWith(p))) return null
 
