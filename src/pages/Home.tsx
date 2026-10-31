@@ -543,20 +543,26 @@ export default function Home() {
             </div>
           )}
 
-          {/* Food Giveaway section */}
-          <InView
-            variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            viewOptions={{ once: true }}
-            style={{ marginTop: 24, marginBottom: 8 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: TEXT }}>מסירות אוכל 🍲</p>
-              <Link to="/food-posts" style={{ fontSize: 12, color: FIRE, fontWeight: 700, textDecoration: 'none' }}>
-                ראה הכל ←
-              </Link>
+          {/* Food Giveaway section — always visible, no InView dependency */}
+          <Link to="/food-posts" style={{ textDecoration: 'none', display: 'block', marginTop: 16 }}>
+            <div style={{
+              ...GLASS,
+              borderRadius: 20,
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              border: '1px solid rgba(192,82,42,0.18)',
+              background: 'rgba(255,248,240,0.92)',
+            }}>
+              <span style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>🍲</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>מסירות אוכל</p>
+                <p style={{ fontSize: 12, color: MUTED, margin: '2px 0 0 0' }}>שיתוף אוכל שנשאר — לקחת או לתת</p>
+              </div>
+              <span style={{ fontSize: 14, color: FIRE, fontWeight: 700, flexShrink: 0 }}>←</span>
             </div>
-          </InView>
+          </Link>
 
           {/* Live community stats */}
           <InView
