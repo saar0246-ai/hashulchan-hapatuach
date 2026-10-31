@@ -40,6 +40,8 @@ export interface Profile {
   rating_count_guest: number
   total_hosted: number
   total_guested: number
+  referral_code: string | null
+  referred_by: string | null
   created_at: string
 }
 

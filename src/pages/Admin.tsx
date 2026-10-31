@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   Users, Calendar, Flag, Home, Shield, Search, Ban, CheckCircle,
   XCircle, Trash2, ChevronLeft, BarChart3, Edit2, X, Clock,
-  TrendingUp, TrendingDown, MessageSquare, CheckSquare,
+  TrendingUp, TrendingDown, MessageSquare, CheckSquare, UserPlus,
 } from 'lucide-react'
 import { format, formatDistanceToNow } from 'date-fns'
 import { he } from 'date-fns/locale'
@@ -24,7 +24,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'analytics' | 'pending' | 'users' | 'events' | 'shabbat' | 'reports'
+type Tab = 'overview' | 'analytics' | 'pending' | 'users' | 'events' | 'shabbat' | 'reports' | 'referrals'
 
 interface AdminUser {
   id: string; display_name: string; email: string; city: string | null
@@ -82,6 +82,12 @@ interface PendingRegistration {
   } | null
 }
 
+interface ReferralStats {
+  total_referred: number
+  top_referrers: { id: string; display_name: string; city: string | null; referral_count: number }[] | null
+  recent_referred: { id: string; display_name: string; city: string | null; created_at: string; referred_by_name: string }[] | null
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function waLink(phone: string | null | undefined): string | null {
@@ -108,6 +114,7 @@ const TAB_CONFIG: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'events',     label: 'אירועים',     icon: Calendar      },
   { id: 'shabbat',    label: 'השבת',        icon: Home          },
   { id: 'reports',    label: 'דיווחים',     icon: Flag          },
+  { id: 'referrals',  label: 'הפניות',      icon: UserPlus      },
 ]
 
 // ─── Analytics bar chart (CSS only) ──────────────────────────────────────────
@@ -159,6 +166,7 @@ export default function Admin() {
   const [analyticsError, setAnalyticsError] = useState<string | null>(null)
   const [pendingRegs, setPendingRegs] = useState<PendingRegistration[]>([])
   const [pendingError, setPendingError] = useState<string | null>(null)
+  const [referralStats, setReferralStats] = useState<ReferralStats | null>(null)
   const [search, setSearch] = useState('')
   const [userFilter, setUserFilter] = useState<'all' | 'admins' | 'banned'>('all')
   const [selectedReport, setSelectedReport] = useState<string | null>(null)
@@ -323,6 +331,51 @@ export default function Admin() {
     setLoading(false)
   }, [])
 
+  const fetchReferrals = useCallback(async () => {
+    setLoading(true)
+    // Try RPC first
+    const { data: rpcData, error: rpcError } = await supabase.rpc('admin_get_referral_stats')
+    if (!rpcError && rpcData) {
+      setReferralStats(rpcData as ReferralStats)
+      setLoading(false)
+      return
+    }
+    // Fallback: direct queries
+    const [totalRes, topRes, recentRes] = await Promise.all([
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).not('referred_by', 'is', null),
+      supabase
+        .from('profiles')
+        .select('id, display_name, city, referred_by')
+        .not('referred_by', 'is', null)
+        .limit(100),
+      supabase
+        .from('profiles')
+        .select('id, display_name, city, created_at, referred_by')
+        .not('referred_by', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(20),
+    ])
+    // Build top referrers from raw data
+    const countMap: Record<string, { display_name: string; city: string | null; count: number }> = {}
+    for (const p of topRes.data ?? []) {
+      const key = String(p.referred_by)
+      if (!countMap[key]) countMap[key] = { display_name: '', city: null, count: 0 }
+      countMap[key].count++
+    }
+    setReferralStats({
+      total_referred: totalRes.count ?? 0,
+      top_referrers: Object.entries(countMap)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 10)
+        .map(([id, v]) => ({ id, display_name: v.display_name || id.slice(0, 8), city: v.city, referral_count: v.count })),
+      recent_referred: (recentRes.data ?? []).map(p => ({
+        id: p.id, display_name: p.display_name, city: p.city,
+        created_at: p.created_at, referred_by_name: '—',
+      })),
+    })
+    setLoading(false)
+  }, [])
+
   useEffect(() => { fetchStats() }, [fetchStats])
   useEffect(() => {
     if (tab === 'analytics') fetchAnalytics()
@@ -331,7 +384,8 @@ export default function Admin() {
     else if (tab === 'events') fetchEvents()
     else if (tab === 'shabbat') fetchShabbat()
     else if (tab === 'reports') fetchReports()
-  }, [tab, fetchAnalytics, fetchPending, fetchUsers, fetchEvents, fetchShabbat, fetchReports])
+    else if (tab === 'referrals') fetchReferrals()
+  }, [tab, fetchAnalytics, fetchPending, fetchUsers, fetchEvents, fetchShabbat, fetchReports, fetchReferrals])
 
   // ── Actions ─────────────────────────────────────────────────────────────────
 
@@ -1367,6 +1421,94 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {/* ════════════════════════════════ Referrals ════════════════════════════════ */}
+        {tab === 'referrals' && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <h2 className="font-display font-bold text-xl text-foreground flex-1">מערכת הפניות</h2>
+              <button onClick={fetchReferrals} className="text-xs text-primary">רענן</button>
+            </div>
+
+            {loading && <LoadingSpinner />}
+
+            {!loading && (
+              <>
+                {/* Summary */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="shulchan-card p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">🔗</span>
+                      <span className="text-2xl font-black text-foreground">{referralStats?.total_referred ?? 0}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">משתמשים שהצטרפו דרך הפניה</p>
+                  </div>
+                  <div className="shulchan-card p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">🏆</span>
+                      <span className="text-2xl font-black text-foreground">
+                        {referralStats?.top_referrers?.[0]?.referral_count ?? 0}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {referralStats?.top_referrers?.[0]?.display_name
+                        ? `שיא הפניות: ${referralStats.top_referrers[0].display_name}`
+                        : 'שיא הפניות'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Top referrers */}
+                {referralStats?.top_referrers && referralStats.top_referrers.length > 0 ? (
+                  <div className="shulchan-card p-4 space-y-3">
+                    <p className="font-semibold text-foreground text-sm">🏅 טופ מפנים</p>
+                    <div className="space-y-2">
+                      {referralStats.top_referrers.map((r, i) => (
+                        <div key={r.id} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
+                          <span className="text-lg font-black text-muted-foreground w-6 text-center">{i + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">{r.display_name}</p>
+                            {r.city && <p className="text-xs text-muted-foreground">{r.city}</p>}
+                          </div>
+                          <span className="text-sm font-bold text-primary">
+                            {r.referral_count} {r.referral_count === 1 ? 'חבר' : 'חברים'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : !loading && (
+                  <div className="shulchan-card p-4 text-center text-muted-foreground text-sm">
+                    <p>אין עדיין הפניות. הריצו קודם את <code className="text-xs bg-muted px-1 rounded">supabase/referral_system.sql</code></p>
+                  </div>
+                )}
+
+                {/* Recent referrals */}
+                {referralStats?.recent_referred && referralStats.recent_referred.length > 0 && (
+                  <div className="shulchan-card p-4 space-y-3">
+                    <p className="font-semibold text-foreground text-sm">🆕 הצטרפויות אחרונות דרך הפניה</p>
+                    <div className="space-y-2">
+                      {referralStats.recent_referred.map(r => (
+                        <div key={r.id} className="flex items-center justify-between py-1.5 border-b border-border/40 last:border-0">
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{r.display_name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              הוזמן ע"י <span className="font-semibold">{r.referred_by_name}</span>
+                            </p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {timeSince(r.created_at)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
       </div>
 
       {/* ════════════════════════════════ Edit Event Modal ════════════════════════════════ */}

@@ -88,7 +88,7 @@ function safeFormat(dateStr: string | null | undefined): string {
 
 function NotificationsInner() {
   const { user } = useAuth()
-  const { notifications, unreadCount, markAllRead, markRead } = useNotifications(user?.id)
+  const { notifications, unreadCount, markAllRead, markRead, error } = useNotifications(user?.id)
 
   return (
     <div className="relative min-h-dvh"
@@ -148,7 +148,23 @@ function NotificationsInner() {
         } />
 
         <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-2.5 md:max-w-2xl">
-          {notifications.length === 0 ? (
+          {error ? (
+            <div className="rounded-2xl p-4 space-y-2 border-r-4 border-amber-400"
+              style={{ background: 'rgba(255,251,235,0.95)', border: '1px solid rgba(251,191,36,0.3)', borderRight: '4px solid #F59E0B' }}>
+              <p className="font-bold text-sm" style={{ color: '#92400E' }}>⚙️ טבלת ההתראות לא הוגדרה עדיין</p>
+              <p className="text-xs" style={{ color: '#78350F' }}>
+                כדי להפעיל התראות, יש להריץ את קובץ ה-SQL:
+              </p>
+              <ol className="text-xs space-y-1 list-decimal list-inside" style={{ color: '#92400E' }}>
+                <li>פתח <strong>Supabase Dashboard → SQL Editor</strong></li>
+                <li>הדבק את תוכן <code className="px-1 rounded" style={{ background: 'rgba(252,211,77,0.3)' }}>supabase/admin_policies.sql</code></li>
+                <li>לחץ RUN ורענן</li>
+              </ol>
+              <p className="text-[10px]" style={{ color: '#B45309', direction: 'ltr', textAlign: 'left' }}>
+                {error}
+              </p>
+            </div>
+          ) : notifications.length === 0 ? (
             <EmptyState
               icon={<Bell className="w-8 h-8" style={{ color: '#8C7060' }} strokeWidth={1.5} />}
               title="אין התראות"

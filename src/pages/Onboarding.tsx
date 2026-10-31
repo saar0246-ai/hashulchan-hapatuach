@@ -109,6 +109,19 @@ export default function Onboarding() {
       }
     }
 
+    // Resolve referral code saved in localStorage during registration
+    let referredById: string | null = null
+    const pendingRef = localStorage.getItem('pending_ref')
+    if (pendingRef) {
+      const { data: refProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('referral_code', pendingRef.toUpperCase())
+        .neq('id', user.id)
+        .maybeSingle()
+      if (refProfile) referredById = refProfile.id
+    }
+
     const upsertPayload: Record<string, unknown> = {
       id: user.id,
       display_name: form.display_name.trim(),
@@ -129,6 +142,7 @@ export default function Onboarding() {
       total_hosted: 0, total_guested: 0,
       ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
       guest_kashrut_prefs: form.guest_kashrut_prefs.length > 0 ? form.guest_kashrut_prefs : null,
+      ...(referredById ? { referred_by: referredById } : {}),
     }
 
     let { error } = await supabase
@@ -147,6 +161,7 @@ export default function Onboarding() {
       return
     }
 
+    localStorage.removeItem('pending_ref')
     toast.success('ברוך הבא לשולחן הפתוח! 🎉')
     await new Promise(r => setTimeout(r, 400))
     navigate('/home', { replace: true })

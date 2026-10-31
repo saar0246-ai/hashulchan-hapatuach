@@ -59,6 +59,12 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [agreed, setAgreed] = useState(false)
 
+  // Capture referral code from URL (?ref=CODE) and persist for onboarding
+  useEffect(() => {
+    const ref = params.get('ref')
+    if (ref) localStorage.setItem('pending_ref', ref)
+  }, [params])
+
   // Listen for PASSWORD_RECOVERY event — fires when user clicks reset link in email
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {

@@ -5,17 +5,25 @@ import type { Notification } from '../types'
 export function useNotifications(userId: string | null | undefined) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!userId) return
 
     const fetchNotifications = async () => {
-      const { data } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(50)
+
+      if (fetchError) {
+        setError(fetchError.message)
+        return
+      }
+
+      setError(null)
       setNotifications(data ?? [])
       setUnreadCount((data ?? []).filter(n => !n.read).length)
     }
@@ -58,5 +66,5 @@ export function useNotifications(userId: string | null | undefined) {
     setUnreadCount(c => Math.max(0, c - 1))
   }
 
-  return { notifications, unreadCount, markAllRead, markRead }
+  return { notifications, unreadCount, markAllRead, markRead, error }
 }

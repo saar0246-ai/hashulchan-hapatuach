@@ -1,7 +1,8 @@
-﻿import { useState, useRef } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, ChevronLeft, Edit2, Check, X, Camera, Home as HomeIcon, FileText, Lock, Shield, Eye } from 'lucide-react'
+import { LogOut, ChevronLeft, Edit2, Check, X, Camera, Home as HomeIcon, FileText, Lock, Shield, Eye, UserPlus, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -28,6 +29,27 @@ export default function Profile() {
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [cropFile, setCropFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [referredByName, setReferredByName] = useState<string | null>(null)
+  const [referralCount, setReferralCount] = useState(0)
+
+  useEffect(() => {
+    if (!profile?.referred_by) return
+    supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', profile.referred_by)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setReferredByName(data.display_name) })
+  }, [profile?.referred_by])
+
+  useEffect(() => {
+    if (!profile?.id) return
+    supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_by', profile.id)
+      .then(({ count }) => setReferralCount(count ?? 0))
+  }, [profile?.id])
   const [form, setForm] = useState({
     display_name: '',
     birthday: '',
@@ -327,6 +349,59 @@ export default function Profile() {
                   }}>
                     <h3 className="text-sm font-semibold mb-2" style={{ color: '#8C7060' }}>עלי</h3>
                     <p className="text-sm leading-relaxed" style={{ color: '#1A1714' }}>{profile.bio}</p>
+                  </div>
+                )}
+
+                {/* Referral section */}
+                {profile.referral_code && (
+                  <div className="rounded-2xl p-4 space-y-3" style={{
+                    ...GLASS,
+                    animation: 'prof-in 0.42s cubic-bezier(0.22,1,0.36,1) 0.18s both',
+                  }}>
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="w-4 h-4" style={{ color: '#C0522A' }} />
+                      <h3 className="text-sm font-semibold" style={{ color: '#8C7060' }}>הזמינו חברים</h3>
+                    </div>
+
+                    {referredByName && (
+                      <p className="text-xs" style={{ color: '#8C7060' }}>
+                        הצטרפת בהמלצת{' '}
+                        <span style={{ color: '#C0522A', fontWeight: 600 }}>{referredByName}</span>
+                      </p>
+                    )}
+
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-3 rounded-2xl" style={{ background: 'white' }}>
+                        <QRCodeSVG
+                          value={`${window.location.origin}/auth?ref=${profile.referral_code}`}
+                          size={148}
+                          fgColor="#1A1714"
+                          bgColor="white"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-xs" style={{ color: '#8C7060' }}>קוד ההפניה שלך</p>
+                        <p className="text-lg font-black mt-0.5 tracking-widest" style={{ color: '#C0522A', fontFamily: 'monospace' }}>
+                          {profile.referral_code}
+                        </p>
+                      </div>
+
+                      {referralCount > 0 && (
+                        <p className="text-xs font-semibold" style={{ color: '#1A1714' }}>
+                          🎉 {referralCount} {referralCount === 1 ? 'חבר' : 'חברים'} הצטרפו דרכך
+                        </p>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          const link = `${window.location.origin}/auth?ref=${profile.referral_code}`
+                          navigator.clipboard.writeText(link).then(() => toast.success('הקישור הועתק!'))
+                        }}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl"
+                        style={{ background: 'rgba(192,82,42,0.09)', color: '#C0522A', border: '1px solid rgba(192,82,42,0.15)' }}>
+                        <Copy className="w-3.5 h-3.5" /> העתק קישור הזמנה
+                      </button>
+                    </div>
                   </div>
                 )}
 
