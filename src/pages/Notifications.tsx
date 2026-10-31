@@ -10,17 +10,22 @@ import { Component, type ReactNode } from 'react'
 
 class NotificationsErrorBoundary extends Component<
   { children: ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; errorMsg: string }
 > {
-  state = { hasError: false }
-  static getDerivedStateFromError() { return { hasError: true } }
+  state = { hasError: false, errorMsg: '' }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, errorMsg: error?.message ?? String(error) }
+  }
   render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6 text-center"
           style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 100%)' }}>
           <Bell className="w-10 h-10" style={{ color: '#C0522A', opacity: 0.5 }} strokeWidth={1.5} />
-          <p style={{ fontWeight: 700, fontSize: 16, color: '#1A1714' }}>אירעה שגיאה בטעינת ההתראות</p>
+          <p style={{ fontWeight: 700, fontSize: 16, color: '#1A1714' }}>שגיאה בהתראות</p>
+          <p style={{ fontSize: 11, color: '#8C7060', wordBreak: 'break-all', maxWidth: 320, direction: 'ltr', textAlign: 'left' }}>
+            {this.state.errorMsg}
+          </p>
           <button
             onClick={() => window.location.reload()}
             style={{ padding: '10px 24px', borderRadius: 12, background: '#C0522A', color: 'white', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer' }}
