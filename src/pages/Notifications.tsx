@@ -6,6 +6,33 @@ import { Check, Users, CheckCircle, XCircle, Star, Bell } from 'lucide-react'
 import { motion } from 'framer-motion'
 import TopBar from '../components/TopBar'
 import EmptyState from '../components/EmptyState'
+import { Component, type ReactNode } from 'react'
+
+class NotificationsErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false }
+  static getDerivedStateFromError() { return { hasError: true } }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-dvh flex flex-col items-center justify-center gap-4 px-6 text-center"
+          style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 100%)' }}>
+          <Bell className="w-10 h-10" style={{ color: '#C0522A', opacity: 0.5 }} strokeWidth={1.5} />
+          <p style={{ fontWeight: 700, fontSize: 16, color: '#1A1714' }}>אירעה שגיאה בטעינת ההתראות</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: '10px 24px', borderRadius: 12, background: '#C0522A', color: 'white', fontWeight: 700, fontSize: 14, border: 'none', cursor: 'pointer' }}
+          >
+            נסה שוב
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 type BezierEase = [number, number, number, number]
 const EASE: BezierEase = [0.22, 1, 0.36, 1]
@@ -48,7 +75,7 @@ function safeFormat(dateStr: string | null | undefined): string {
   }
 }
 
-export default function Notifications() {
+function NotificationsInner() {
   const { user } = useAuth()
   const { notifications, unreadCount, markAllRead, markRead } = useNotifications(user?.id)
 
@@ -75,7 +102,7 @@ export default function Notifications() {
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
-        <TopBar title="התראות" right={
+        <TopBar title="התראות" showBack right={
           unreadCount > 0 ? (
             <motion.button
               onClick={markAllRead}
@@ -113,7 +140,7 @@ export default function Notifications() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.38, ease: EASE, delay: i * 0.05 }}
-                  whileHover={{ y: -3, boxShadow: `0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)` }}
+                  whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.985 }}
                 >
                   <div className="flex items-start gap-3">
@@ -160,5 +187,13 @@ export default function Notifications() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Notifications() {
+  return (
+    <NotificationsErrorBoundary>
+      <NotificationsInner />
+    </NotificationsErrorBoundary>
   )
 }
