@@ -103,24 +103,25 @@ export default function Home() {
     >
       {/* ── Luminous orbs ─────────────────────────────────────────────────── */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 700, height: 700, top: -260, right: -260,
-            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-            filter: 'blur(80px)',
-          }}
-          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-        />
-        <motion.div className="absolute rounded-full"
-          style={{
-            width: 560, height: 560, bottom: 40, left: -220,
-            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-            filter: 'blur(72px)',
-          }}
-          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-        />
+        <style>{`
+          @keyframes home-orb1 { 0%,100%{transform:translate(0,0) scale(1)} 38%{transform:translate(60px,-56px) scale(1.14)} 66%{transform:translate(-24px,34px) scale(0.90)} }
+          @keyframes home-orb2 { 0%,100%{transform:translate(0,0) scale(1)} 38%{transform:translate(-44px,60px) scale(0.89)} 66%{transform:translate(52px,-36px) scale(1.12)} }
+          @keyframes home-fadein-up { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+          @keyframes home-sk { 0%,100%{opacity:.4} 50%{opacity:.78} }
+          @keyframes home-food-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(192,82,42,0.18)} 50%{box-shadow:0 0 0 8px rgba(192,82,42,0)} }
+        `}</style>
+        <div className="absolute rounded-full" style={{
+          width: 700, height: 700, top: -260, right: -260,
+          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+          filter: 'blur(80px)',
+          animation: 'home-orb1 26s ease-in-out infinite',
+        }} />
+        <div className="absolute rounded-full" style={{
+          width: 560, height: 560, bottom: 40, left: -220,
+          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+          filter: 'blur(72px)',
+          animation: 'home-orb2 32s ease-in-out 5s infinite',
+        }} />
       </div>
 
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
@@ -228,10 +229,7 @@ export default function Home() {
         <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 20px' }}>
 
           {/* Search */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.45 }}
+          <div
             style={{
               ...GLASS,
               display:    'flex',
@@ -242,6 +240,7 @@ export default function Home() {
               marginBottom: 20,
               border:     `1px solid ${searchFocused ? BORDER_FIRE : BORDER}`,
               transition: 'border-color 0.2s',
+              animation:  'home-fadein-up 0.45s cubic-bezier(0.22,1,0.36,1) 0.1s both',
             }}
           >
             <Search style={{ width: 16, height: 16, color: MUTED, flexShrink: 0 }} />
@@ -273,7 +272,7 @@ export default function Home() {
                 </motion.button>
               )}
             </AnimatePresence>
-          </motion.div>
+          </div>
 
           {/* Emil Kowalski Tabs */}
           <motion.div
@@ -371,29 +370,31 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.2 }}
-                  style={{ marginTop: 8, ...GLASS, borderRadius: 12, padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}
+                  style={{ marginTop: 8 }}
                 >
-                  <button
-                    onClick={() => { setSelectedRegion(''); setRegionOpen(false) }}
-                    style={{
-                      padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                      background: !selectedRegion ? 'rgba(192,82,42,0.10)' : 'transparent',
-                      border: `1px solid ${!selectedRegion ? BORDER_FIRE : BORDER}`,
-                      color:  !selectedRegion ? FIRE : MUTED,
-                    }}
-                  >הכל</button>
-                  {REGIONS.map(r => (
+                  <div style={{ ...GLASS, borderRadius: 12, padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     <button
-                      key={r.id}
-                      onClick={() => { setSelectedRegion(r.id); setRegionOpen(false) }}
+                      onClick={() => { setSelectedRegion(''); setRegionOpen(false) }}
                       style={{
                         padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                        background: selectedRegion === r.id ? 'rgba(192,82,42,0.10)' : 'transparent',
-                        border: `1px solid ${selectedRegion === r.id ? BORDER_FIRE : BORDER}`,
-                        color:  selectedRegion === r.id ? FIRE : TEXT,
+                        background: !selectedRegion ? 'rgba(192,82,42,0.10)' : 'transparent',
+                        border: `1px solid ${!selectedRegion ? BORDER_FIRE : BORDER}`,
+                        color:  !selectedRegion ? FIRE : MUTED,
                       }}
-                    >{r.label}</button>
-                  ))}
+                    >הכל</button>
+                    {REGIONS.map(r => (
+                      <button
+                        key={r.id}
+                        onClick={() => { setSelectedRegion(r.id); setRegionOpen(false) }}
+                        style={{
+                          padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          background: selectedRegion === r.id ? 'rgba(192,82,42,0.10)' : 'transparent',
+                          border: `1px solid ${selectedRegion === r.id ? BORDER_FIRE : BORDER}`,
+                          color:  selectedRegion === r.id ? FIRE : TEXT,
+                        }}
+                      >{r.label}</button>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -482,6 +483,48 @@ export default function Home() {
             </Link>
           </InView>
 
+          {/* Food Giveaway — prominent banner before events */}
+          <Link to="/food-posts" style={{ textDecoration: 'none', display: 'block', marginBottom: 20 }}>
+            <div style={{
+              borderRadius: 20,
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              background: 'linear-gradient(135deg, rgba(255,248,240,0.98) 0%, rgba(255,238,220,0.95) 100%)',
+              border: '1.5px solid rgba(192,82,42,0.28)',
+              boxShadow: '0 4px 20px rgba(192,82,42,0.12), inset 0 1px 0 rgba(255,255,255,0.9)',
+              animation: 'home-food-pulse 3s ease-in-out infinite',
+            }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+                background: 'linear-gradient(135deg, #C0522A, #8C3318)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(192,82,42,0.35)',
+                fontSize: 26,
+              }}>🍲</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                  <p style={{ fontSize: 15, fontWeight: 800, color: '#1A1714', margin: 0 }}>מסירות אוכל</p>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, color: '#C0522A', letterSpacing: '0.08em',
+                    background: 'rgba(192,82,42,0.10)', border: '1px solid rgba(192,82,42,0.25)',
+                    borderRadius: 6, padding: '2px 6px',
+                  }}>חדש</span>
+                </div>
+                <p style={{ fontSize: 12, color: '#8C7060', margin: 0, lineHeight: 1.4 }}>אוכל שנשאר אחרי השבת — לקחת או לתת</p>
+              </div>
+              <div style={{
+                width: 34, height: 34, borderRadius: 11, flexShrink: 0,
+                background: 'linear-gradient(135deg, #C0522A, #8C3318)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 3px 10px rgba(192,82,42,0.30)',
+              }}>
+                <span style={{ fontSize: 15, color: 'white', fontWeight: 700, lineHeight: 1 }}>←</span>
+              </div>
+            </div>
+          </Link>
+
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: MUTED, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
@@ -498,11 +541,9 @@ export default function Home() {
           {loading ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[0, 1, 2].map(i => (
-                <motion.div
+                <div
                   key={i}
-                  style={{ height: 108, borderRadius: 16, background: 'rgba(255,255,255,0.58)', border: `1px solid ${BORDER}` }}
-                  animate={{ opacity: [0.4, 0.75, 0.4] }}
-                  transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut', delay: i * 0.15 }}
+                  style={{ height: 108, borderRadius: 16, background: 'rgba(255,255,255,0.58)', border: `1px solid ${BORDER}`, animation: `home-sk 1.6s ease-in-out ${i * 0.15}s infinite` }}
                 />
               ))}
             </div>
@@ -542,27 +583,6 @@ export default function Home() {
               ))}
             </div>
           )}
-
-          {/* Food Giveaway section — always visible, no InView dependency */}
-          <Link to="/food-posts" style={{ textDecoration: 'none', display: 'block', marginTop: 16 }}>
-            <div style={{
-              ...GLASS,
-              borderRadius: 20,
-              padding: '14px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              border: '1px solid rgba(192,82,42,0.18)',
-              background: 'rgba(255,248,240,0.92)',
-            }}>
-              <span style={{ fontSize: 26, flexShrink: 0, lineHeight: 1 }}>🍲</span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 14, fontWeight: 700, color: TEXT, margin: 0 }}>מסירות אוכל</p>
-                <p style={{ fontSize: 12, color: MUTED, margin: '2px 0 0 0' }}>שיתוף אוכל שנשאר — לקחת או לתת</p>
-              </div>
-              <span style={{ fontSize: 14, color: FIRE, fontWeight: 700, flexShrink: 0 }}>←</span>
-            </div>
-          </Link>
 
           {/* Live community stats */}
           <InView

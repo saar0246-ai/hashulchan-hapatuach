@@ -160,20 +160,22 @@ export default function Onboarding() {
 
       {/* Luminous orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <motion.div className="absolute rounded-full"
-          style={{ width: 700, height: 700, top: -260, right: -260,
-            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-            filter: 'blur(80px)' }}
-          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-        />
-        <motion.div className="absolute rounded-full"
-          style={{ width: 560, height: 560, bottom: 40, left: -220,
-            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-            filter: 'blur(72px)' }}
-          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-        />
+        <style>{`
+          @keyframes onboarding-orb1 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(60px,-56px)scale(1.14)} 66%{transform:translate(-24px,34px)scale(0.9)} }
+          @keyframes onboarding-orb2 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(-44px,60px)scale(0.89)} 66%{transform:translate(52px,-36px)scale(1.12)} }
+        `}</style>
+        <div className="absolute rounded-full" style={{
+          width: 700, height: 700, top: -260, right: -260,
+          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+          filter: 'blur(80px)',
+          animation: 'onboarding-orb1 26s ease-in-out infinite',
+        }} />
+        <div className="absolute rounded-full" style={{
+          width: 560, height: 560, bottom: 40, left: -220,
+          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+          filter: 'blur(72px)',
+          animation: 'onboarding-orb2 32s ease-in-out infinite',
+        }} />
       </div>
 
       <div className="relative flex flex-col flex-1" style={{ zIndex: 1 }}>
@@ -474,7 +476,7 @@ export default function Onboarding() {
           <motion.button
             onClick={step < TOTAL_STEPS ? () => setStep(s => s + 1) : handleFinish}
             disabled={!canNext() || loading}
-            whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }} transition={SPRING}
             className="flex-1 py-3.5 rounded-2xl flex items-center justify-center gap-2 font-bold text-white disabled:opacity-50"
             style={{ background: 'linear-gradient(135deg, #C0522A, #8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>

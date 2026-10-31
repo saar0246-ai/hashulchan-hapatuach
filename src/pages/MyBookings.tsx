@@ -31,14 +31,13 @@ const STATUS_CONFIG = {
 
 function SkeletonCard() {
   return (
-    <motion.div className="rounded-2xl overflow-hidden" style={{ ...GLASS }}
-      animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
+    <div className="rounded-2xl overflow-hidden" style={{ ...GLASS, animation: 'mybookings-sk 1.6s ease-in-out infinite' }}>
       <div style={{ height: 40, background: 'rgba(232,222,210,0.5)' }} />
       <div className="p-4 space-y-2">
         <div className="h-3 rounded-full w-3/4" style={{ background: 'rgba(232,226,216,0.6)' }} />
         <div className="h-2.5 rounded-full w-1/2" style={{ background: 'rgba(240,235,228,0.5)' }} />
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -99,20 +98,26 @@ export default function MyBookings() {
 
       {/* Luminous orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <motion.div className="absolute rounded-full"
-          style={{ width: 700, height: 700, top: -260, right: -260,
-            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-            filter: 'blur(80px)' }}
-          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-        />
-        <motion.div className="absolute rounded-full"
-          style={{ width: 560, height: 560, bottom: 40, left: -220,
-            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-            filter: 'blur(72px)' }}
-          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-        />
+        <style>{`
+          @keyframes mybookings-orb1 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(60px,-56px)scale(1.14)} 66%{transform:translate(-24px,34px)scale(0.9)} }
+          @keyframes mybookings-orb2 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(-44px,60px)scale(0.89)} 66%{transform:translate(52px,-36px)scale(1.12)} }
+          @keyframes mybookings-sk { 0%,100%{opacity:.5} 50%{opacity:1} }
+          @keyframes mybookings-card-in { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+          .mybookings-card { transition: transform 0.18s ease; }
+          .mybookings-card:hover { transform: translateY(-3px); }
+        `}</style>
+        <div className="absolute rounded-full" style={{
+          width: 700, height: 700, top: -260, right: -260,
+          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+          filter: 'blur(80px)',
+          animation: 'mybookings-orb1 26s ease-in-out infinite',
+        }} />
+        <div className="absolute rounded-full" style={{
+          width: 560, height: 560, bottom: 40, left: -220,
+          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+          filter: 'blur(72px)',
+          animation: 'mybookings-orb2 32s ease-in-out infinite',
+        }} />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
@@ -140,7 +145,7 @@ export default function MyBookings() {
               </p>
               <Link to="/home">
                 <motion.button
-                  whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(143,66,34,0.38)' }}
+                  whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }} transition={SPRING}
                   className="px-6 py-2.5 text-sm font-bold text-white rounded-xl"
                   style={{ background: 'linear-gradient(135deg,#C0522A,#8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>
@@ -149,25 +154,18 @@ export default function MyBookings() {
               </Link>
             </motion.div>
           ) : (
-            <motion.div
-              className="space-y-3"
-              initial="hidden" animate="show"
-              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}
-            >
-              {registrations.map(reg => {
+            <div className="space-y-3">
+              {registrations.map((reg, idx) => {
                 const event = reg.event
                 if (!event) return null
                 const cfg    = STATUS_CONFIG[reg.status]
                 const dateStr = format(new Date(event.event_date + 'T00:00:00'), "EE, d בMMM", { locale: he })
 
                 return (
-                  <motion.div
+                  <div
                     key={reg.id}
-                    className="overflow-hidden rounded-2xl"
-                    style={{ ...GLASS, borderRight: `3px solid ${cfg.border}` }}
-                    variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } } }}
-                    whileHover={{ y: -3, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
-                    transition={SPRING}
+                    className="overflow-hidden rounded-2xl mybookings-card"
+                    style={{ ...GLASS, borderRight: `3px solid ${cfg.border}`, animation: `mybookings-card-in ${0.2 + idx * 0.07}s cubic-bezier(0.22,1,0.36,1) both` }}
                   >
                     {/* Status band */}
                     <div className="px-4 py-2.5 flex items-center justify-between"
@@ -230,10 +228,10 @@ export default function MyBookings() {
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 )
               })}
-            </motion.div>
+            </div>
           )}
         </div>
       </div>
@@ -244,12 +242,10 @@ export default function MyBookings() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end"
-            style={{ background: 'rgba(20,12,6,0.72)', backdropFilter: 'blur(4px)' }}
+            style={{ background: 'rgba(20,12,6,0.72)' }}
             onClick={() => setRatingModal(null)}
           >
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 360, damping: 36 }}
+            <div
               className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-5"
               style={{
                 background: 'rgba(253,249,243,0.95)',
@@ -257,9 +253,11 @@ export default function MyBookings() {
                 WebkitBackdropFilter: 'blur(40px)',
                 boxShadow: '0 -20px 64px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.96)',
                 border: '1px solid rgba(255,255,255,0.88)',
+                animation: 'sheet-slide-up 0.35s cubic-bezier(0.22,1,0.36,1) both',
               }}
               onClick={e => e.stopPropagation()}
             >
+              <style>{`@keyframes sheet-slide-up { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
               <div className="w-10 h-1 rounded-full mx-auto" style={{ background: 'rgba(120,108,99,0.28)' }} />
               <h3 className="font-display font-black text-xl text-center"
                 style={{ color: '#1A1714', letterSpacing: '-0.022em' }}>
@@ -277,7 +275,7 @@ export default function MyBookings() {
               />
               <motion.button
                 onClick={handleRate} disabled={ratingLoading}
-                whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }} transition={SPRING}
                 className="w-full py-4 font-bold text-base text-white rounded-2xl"
                 style={{ background: 'linear-gradient(135deg,#C8860A,#9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.30)' }}>
@@ -285,7 +283,7 @@ export default function MyBookings() {
                   ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin mx-auto" />
                   : 'שלח דירוג'}
               </motion.button>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

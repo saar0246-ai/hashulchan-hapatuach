@@ -40,8 +40,13 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
+          {
+            urlPattern: /\.js(\?.*)?$/i,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'js-runtime', networkTimeoutSeconds: 4, expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 } },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',

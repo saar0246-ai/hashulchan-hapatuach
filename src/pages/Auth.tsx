@@ -21,20 +21,22 @@ const GLASS = {
 function Orbs() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-      <motion.div className="absolute rounded-full"
-        style={{ width: 700, height: 700, top: -260, right: -260,
-          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-          filter: 'blur(80px)' }}
-        animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-        transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-      />
-      <motion.div className="absolute rounded-full"
-        style={{ width: 560, height: 560, bottom: 40, left: -220,
-          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-          filter: 'blur(72px)' }}
-        animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-        transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-      />
+      <style>{`
+        @keyframes auth-orb1 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(60px,-56px)scale(1.14)} 66%{transform:translate(-24px,34px)scale(0.9)} }
+        @keyframes auth-orb2 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(-44px,60px)scale(0.89)} 66%{transform:translate(52px,-36px)scale(1.12)} }
+      `}</style>
+      <div className="absolute rounded-full" style={{
+        width: 700, height: 700, top: -260, right: -260,
+        background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+        filter: 'blur(80px)',
+        animation: 'auth-orb1 26s ease-in-out infinite',
+      }} />
+      <div className="absolute rounded-full" style={{
+        width: 560, height: 560, bottom: 40, left: -220,
+        background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+        filter: 'blur(72px)',
+        animation: 'auth-orb2 32s ease-in-out infinite',
+      }} />
     </div>
   )
 }
@@ -94,12 +96,12 @@ export default function Auth() {
       <div className="relative min-h-dvh flex flex-col items-center justify-center px-6 text-center gap-6"
         style={{ background: 'linear-gradient(145deg, #FDF9F3 0%, #F8F0E6 40%, #FCF5ED 72%, #FFF9F2 100%)' }}>
         <Orbs />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={SPRING}
+        <div
           className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(192,82,42,0.12)', border: '2px solid rgba(192,82,42,0.30)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}>
+          style={{ background: 'rgba(192,82,42,0.12)', border: '2px solid rgba(192,82,42,0.30)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', animation: 'auth-verify-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+          <style>{`@keyframes auth-verify-pop { from { opacity:0; transform:scale(0.8) } to { opacity:1; transform:scale(1) } }`}</style>
           <CheckCircle className="w-9 h-9" style={{ color: '#C0522A' }} />
-        </motion.div>
+        </div>
         <motion.div className="relative z-10"
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: EASE, delay: 0.1 }}>
@@ -143,7 +145,7 @@ export default function Auth() {
 
         <motion.button
           onClick={() => setMode('login')}
-          whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(143,66,34,0.38)' }}
+          whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }} transition={SPRING}
           className="relative z-10 px-10 py-3.5 text-base font-bold text-white rounded-2xl"
           style={{ background: 'linear-gradient(135deg, #C8860A, #9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.28)' }}>
@@ -256,7 +258,7 @@ export default function Auth() {
             <motion.button
               onClick={mode === 'login' ? handleLogin : handleRegister}
               disabled={loading || !email || !password}
-              whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }} transition={SPRING}
               className="w-full py-4 text-base font-bold text-white rounded-2xl mt-2 disabled:opacity-50"
               style={{ background: 'linear-gradient(135deg, #C8860A, #9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.28)' }}

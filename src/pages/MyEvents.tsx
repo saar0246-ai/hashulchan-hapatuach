@@ -27,12 +27,11 @@ const GLASS = {
 
 function SkeletonCard() {
   return (
-    <motion.div className="rounded-2xl overflow-hidden p-4 space-y-2" style={{ ...GLASS }}
-      animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}>
+    <div className="rounded-2xl overflow-hidden p-4 space-y-2" style={{ ...GLASS, animation: 'myevents-sk 1.6s ease-in-out infinite' }}>
       <div className="h-3.5 rounded-full w-2/3" style={{ background: 'rgba(232,226,216,0.7)' }} />
       <div className="h-2.5 rounded-full w-1/2" style={{ background: 'rgba(240,235,228,0.6)' }} />
       <div className="h-2 rounded-full w-1/3" style={{ background: 'rgba(245,240,234,0.5)' }} />
-    </motion.div>
+    </div>
   )
 }
 
@@ -205,20 +204,27 @@ export default function MyEvents() {
 
         {/* Luminous orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-          <motion.div className="absolute rounded-full"
-            style={{ width: 700, height: 700, top: -260, right: -260,
-              background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-              filter: 'blur(80px)' }}
-            animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-            transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-          />
-          <motion.div className="absolute rounded-full"
-            style={{ width: 560, height: 560, bottom: 40, left: -220,
-              background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-              filter: 'blur(72px)' }}
-            animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-            transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-          />
+          <style>{`
+            @keyframes myevents-orb1 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(60px,-56px)scale(1.14)} 66%{transform:translate(-24px,34px)scale(0.9)} }
+            @keyframes myevents-orb2 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(-44px,60px)scale(0.89)} 66%{transform:translate(52px,-36px)scale(1.12)} }
+            @keyframes myevents-card-in { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+            @keyframes myevents-sk { 0%,100%{opacity:.5} 50%{opacity:1} }
+            .myevents-card { cursor:pointer; transition:transform 0.18s ease,box-shadow 0.18s ease; }
+            .myevents-card:hover { transform:translateY(-3px); box-shadow:0 20px 52px rgba(44,24,8,0.11),inset 0 1px 0 rgba(255,255,255,0.96) !important; }
+            .myevents-card:active { transform:scale(0.985); }
+          `}</style>
+          <div className="absolute rounded-full" style={{
+            width: 700, height: 700, top: -260, right: -260,
+            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+            filter: 'blur(80px)',
+            animation: 'myevents-orb1 26s ease-in-out infinite',
+          }} />
+          <div className="absolute rounded-full" style={{
+            width: 560, height: 560, bottom: 40, left: -220,
+            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+            filter: 'blur(72px)',
+            animation: 'myevents-orb2 32s ease-in-out infinite',
+          }} />
         </div>
 
         <div className="relative" style={{ zIndex: 1 }}>
@@ -254,7 +260,7 @@ export default function MyEvents() {
                       action={
                         <Link to="/create-event">
                           <motion.button
-                            whileHover={{ scale: 1.03, boxShadow: '0 12px 32px rgba(143,66,34,0.38)' }}
+                            whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.97 }} transition={SPRING}
                             className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-xl"
                             style={{ background: 'linear-gradient(135deg,#C0522A,#8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>
@@ -264,23 +270,17 @@ export default function MyEvents() {
                       }
                     />
                   ) : (
-                    <motion.div className="space-y-3"
-                      initial="hidden" animate="show"
-                      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }}>
-                      {events.map(event => {
+                    <div className="space-y-3">
+                      {events.map((event, idx) => {
                         const dateStr = format(new Date(event.event_date + 'T00:00:00'), 'd בMMM', { locale: he })
                         const sColor  = statusColor[event.status as keyof typeof statusColor] ?? '#8C7060'
                         const sLabel  = statusLabel[event.status as keyof typeof statusLabel] ?? event.status
                         return (
-                          <motion.button
+                          <button
                             key={event.id}
                             onClick={() => handleSelectEvent(event)}
-                            className="w-full text-right rounded-2xl p-4"
-                            style={{ ...GLASS }}
-                            variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } } }}
-                            whileHover={{ y: -3, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
-                            whileTap={{ scale: 0.985 }}
-                            transition={SPRING}
+                            className="w-full text-right rounded-2xl p-4 myevents-card"
+                            style={{ ...GLASS, animation: `myevents-card-in ${0.2 + idx * 0.07}s cubic-bezier(0.22,1,0.36,1) both` }}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
@@ -311,10 +311,10 @@ export default function MyEvents() {
                                 <ChevronLeft className="w-4 h-4" style={{ color: '#8C7060' }} />
                               </div>
                             </div>
-                          </motion.button>
+                          </button>
                         )
                       })}
-                    </motion.div>
+                    </div>
                   )}
                 </motion.div>
               ) : (
@@ -531,12 +531,10 @@ export default function MyEvents() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end"
-            style={{ background: 'rgba(20,12,6,0.72)', backdropFilter: 'blur(4px)' }}
+            style={{ background: 'rgba(20,12,6,0.72)' }}
             onClick={() => setGuestRatingModal(null)}
           >
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 360, damping: 36 }}
+            <div
               className="w-full max-w-lg mx-auto rounded-t-3xl p-6 space-y-5"
               style={{
                 background: 'rgba(253,249,243,0.95)',
@@ -544,9 +542,11 @@ export default function MyEvents() {
                 WebkitBackdropFilter: 'blur(40px)',
                 boxShadow: '0 -20px 64px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.96)',
                 border: '1px solid rgba(255,255,255,0.88)',
+                animation: 'sheet-slide-up 0.35s cubic-bezier(0.22,1,0.36,1) both',
               }}
               onClick={e => e.stopPropagation()}
             >
+              <style>{`@keyframes sheet-slide-up { from { transform: translateY(100%) } to { transform: translateY(0) } }`}</style>
               <div className="w-10 h-1 rounded-full mx-auto" style={{ background: 'rgba(120,108,99,0.28)' }} />
               <h3 className="font-display font-black text-xl text-center"
                 style={{ color: '#1A1714', letterSpacing: '-0.022em' }}>
@@ -564,7 +564,7 @@ export default function MyEvents() {
               />
               <motion.button
                 onClick={handleRateGuest} disabled={guestRatingLoading}
-                whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }} transition={SPRING}
                 className="w-full py-4 font-bold text-base text-white rounded-2xl"
                 style={{ background: 'linear-gradient(135deg,#C8860A,#9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.30)' }}>
@@ -572,7 +572,7 @@ export default function MyEvents() {
                   ? <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin mx-auto" />
                   : 'שלח דירוג'}
               </motion.button>
-            </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

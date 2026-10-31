@@ -116,7 +116,7 @@ function MemberCard({ m }: { m: Member }) {
         opacity:    m.placeholder ? 0.45 : 1,
         boxShadow:  `0 2px 12px rgba(26,21,16,0.04)`,
       }}
-      whileHover={{ y: -4, boxShadow: '0 16px 40px rgba(26,21,16,0.09)' }}
+      whileHover={{ y: -4 }}
       transition={{ type: 'spring', stiffness: 380, damping: 28 }}
     >
       {/* Header */}

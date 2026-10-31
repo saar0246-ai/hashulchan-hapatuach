@@ -141,20 +141,24 @@ export default function EventDetail() {
 
       {/* Luminous orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }} aria-hidden>
-        <motion.div className="absolute rounded-full"
-          style={{ width: 700, height: 700, top: -260, right: -260,
-            background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
-            filter: 'blur(80px)' }}
-          animate={{ x: [0, 60, -24, 0], y: [0, -56, 34, 0], scale: [1, 1.14, 0.90, 1] }}
-          transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }}
-        />
-        <motion.div className="absolute rounded-full"
-          style={{ width: 560, height: 560, bottom: 40, left: -220,
-            background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
-            filter: 'blur(72px)' }}
-          animate={{ x: [0, -44, 52, 0], y: [0, 60, -36, 0], scale: [1, 0.89, 1.12, 1] }}
-          transition={{ repeat: Infinity, duration: 32, ease: 'easeInOut', delay: 5 }}
-        />
+        <style>{`
+          @keyframes eventdetail-orb1 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(60px,-56px)scale(1.14)} 66%{transform:translate(-24px,34px)scale(0.9)} }
+          @keyframes eventdetail-orb2 { 0%,100%{transform:translate(0,0)scale(1)} 38%{transform:translate(-44px,60px)scale(0.89)} 66%{transform:translate(52px,-36px)scale(1.12)} }
+          .myevents-card { transition: transform 0.18s ease; cursor: pointer; }
+          .myevents-card:hover { transform: translateY(-3px); }
+        `}</style>
+        <div className="absolute rounded-full" style={{
+          width: 700, height: 700, top: -260, right: -260,
+          background: 'radial-gradient(circle at 40% 40%, rgba(248,163,22,0.34) 0%, rgba(245,140,10,0.12) 44%, transparent 68%)',
+          filter: 'blur(80px)',
+          animation: 'eventdetail-orb1 26s ease-in-out infinite',
+        }} />
+        <div className="absolute rounded-full" style={{
+          width: 560, height: 560, bottom: 40, left: -220,
+          background: 'radial-gradient(circle at 58% 54%, rgba(192,82,42,0.30) 0%, rgba(180,70,30,0.10) 48%, transparent 70%)',
+          filter: 'blur(72px)',
+          animation: 'eventdetail-orb2 32s ease-in-out infinite',
+        }} />
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
@@ -220,7 +224,7 @@ export default function EventDetail() {
           {/* Location card */}
           <motion.div custom={1} variants={cardVariants} initial="hidden" animate="visible"
             className="rounded-2xl p-4" style={{ ...GLASS }}
-            whileHover={{ y: -2, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
+            whileHover={{ y: -2 }}
             transition={SPRING}
           >
             <div className="flex items-center gap-2 mb-3">
@@ -249,7 +253,7 @@ export default function EventDetail() {
           {event.description && (
             <motion.div custom={2} variants={cardVariants} initial="hidden" animate="visible"
               className="rounded-2xl p-4" style={{ ...GLASS }}
-              whileHover={{ y: -2, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
+              whileHover={{ y: -2 }}
               transition={SPRING}
             >
               <p className="text-xs font-semibold uppercase tracking-wide mb-2"
@@ -262,10 +266,7 @@ export default function EventDetail() {
           {event.host && (
             <motion.div custom={3} variants={cardVariants} initial="hidden" animate="visible">
               <Link to={`/profile/${event.host.id}`} className="block">
-                <motion.div className="rounded-2xl p-4" style={{ ...GLASS }}
-                  whileHover={{ y: -3, boxShadow: '0 20px 52px rgba(44,24,8,0.11), inset 0 1px 0 rgba(255,255,255,0.96)' }}
-                  transition={SPRING}
-                >
+                <div className="rounded-2xl p-4 myevents-card" style={{ ...GLASS }}>
                   <p className="text-xs font-semibold uppercase tracking-wide mb-3"
                     style={{ color: '#8C7060', letterSpacing: '0.06em' }}>המארח</p>
                   <div className="flex items-center gap-3">
@@ -285,16 +286,16 @@ export default function EventDetail() {
                     </div>
                     <ChevronLeft className="w-4 h-4 flex-shrink-0" style={{ color: '#8C7060' }} />
                   </div>
-                </motion.div>
+                </div>
               </Link>
             </motion.div>
           )}
 
           {/* Disclaimer */}
-          <motion.div custom={4} variants={cardVariants} initial="hidden" animate="visible"
-            className="rounded-2xl p-4"
-            style={{ ...GLASS, borderRight: '3px solid rgba(234,179,8,0.6)', background: 'rgba(255,248,220,0.52)' }}
-          >
+          <motion.div custom={4} variants={cardVariants} initial="hidden" animate="visible">
+            <div className="rounded-2xl p-4"
+              style={{ ...GLASS, borderRight: '3px solid rgba(234,179,8,0.6)', background: 'rgba(255,248,220,0.52)' }}
+            >
             <div className="flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs leading-relaxed" style={{ color: '#8C7060' }}>
@@ -302,6 +303,7 @@ export default function EventDetail() {
                 במקרה של בעיות — פנה למשטרה.
               </p>
             </div>
+          </div>
           </motion.div>
         </div>
       </div>
@@ -361,7 +363,7 @@ export default function EventDetail() {
         ) : (
           <motion.button
             onClick={() => user ? setShowForm(true) : navigate('/auth')}
-            whileHover={{ scale: 1.02, boxShadow: '0 12px 36px rgba(143,66,34,0.42)' }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }} transition={SPRING}
             className="w-full py-4 text-base font-bold text-white rounded-2xl"
             style={{ background: 'linear-gradient(135deg, #C8860A, #9A6005)', boxShadow: '0 4px 18px rgba(200,134,10,0.30)' }}

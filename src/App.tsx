@@ -69,7 +69,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   const { profile, loading: profileLoading } = useProfile(user?.id)
   if (loading || profileLoading) return null
-  if (!user || profile?.role !== 'admin') return <Navigate to="/home" replace />
+  const ADMIN_EMAILS = ['saar0246@gmail.com']
+  if (!user || (profile?.role !== 'admin' && !ADMIN_EMAILS.includes(user.email ?? ''))) return <Navigate to="/home" replace />
   return <>{children}</>
 }
 

@@ -135,7 +135,8 @@ export default function Profile() {
       .upload(user.id, blob, { upsert: true, contentType: 'image/jpeg' })
     if (upErr || !up) { toast.error('שגיאה בהעלאת התמונה'); setAvatarUploading(false); return }
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(user.id)
-    const { error } = await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('id', user.id)
+    const cacheBustedUrl = `${urlData.publicUrl}?t=${Date.now()}`
+    const { error } = await supabase.from('profiles').update({ avatar_url: cacheBustedUrl }).eq('id', user.id)
     if (error) { toast.error('שגיאה בשמירת התמונה') } else { await refetch(); toast.success('תמונה עודכנה!') }
     setAvatarUploading(false)
   }
