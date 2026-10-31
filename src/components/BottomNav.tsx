@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from 'react-router-dom'
+﻿import { NavLink, useLocation } from 'react-router-dom'
 import { Home, CalendarPlus, BookOpen, Bell, User } from 'lucide-react'
 import { useNotifications } from '../hooks/useNotifications'
 import { useAuth } from '../hooks/useAuth'
@@ -26,7 +26,6 @@ export default function BottomNav() {
       style={{
         background: 'hsl(var(--card) / 0.88)',
         backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
         borderTop: '1px solid hsl(var(--border) / 0.5)',
       }}
     >

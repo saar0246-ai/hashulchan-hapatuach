@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, MapPin, Star, Phone, ChevronLeft, UtensilsCrossed } from 'lucide-react'
 import { format, addDays } from 'date-fns'
@@ -17,7 +17,6 @@ const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
   background: 'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
@@ -193,7 +192,6 @@ export default function MyBookings() {
                             background: 'rgba(16,185,129,0.08)',
                             border: '1px solid rgba(16,185,129,0.20)',
                             backdropFilter: 'blur(10px)',
-                            WebkitBackdropFilter: 'blur(10px)',
                           }}>
                           <p className="text-xs font-bold mb-2 flex items-center gap-1" style={{ color: '#059669' }}>
                             <MapPin className="w-3 h-3" /> פרטי המארח
@@ -250,7 +248,6 @@ export default function MyBookings() {
               style={{
                 background: 'rgba(253,249,243,0.95)',
                 backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
                 boxShadow: '0 -20px 64px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.96)',
                 border: '1px solid rgba(255,255,255,0.88)',
                 animation: 'sheet-slide-up 0.35s cubic-bezier(0.22,1,0.36,1) both',

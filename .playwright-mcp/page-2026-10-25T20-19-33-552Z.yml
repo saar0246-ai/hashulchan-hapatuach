@@ -1,0 +1,23 @@
+- generic [ref=f6e4]:
+  - link "חזור" [ref=f6e6] [cursor=pointer]:
+    - /url: /landing
+  - generic "שולחן פתוח" [ref=f6e10]:
+    - generic [ref=f6e14]:
+      - generic [ref=f6e15]: שולחן פתוח
+      - generic [ref=f6e16]: open table
+  - generic [ref=f6e18]:
+    - generic [ref=f6e19]:
+      - heading "ברוך הבא בחזרה" [level=2] [ref=f6e20]
+      - paragraph [ref=f6e21]: התחבר לחשבון שלך
+    - generic [ref=f6e22]:
+      - generic [ref=f6e23]: אימייל
+      - textbox "your@email.com" [ref=f6e28]
+    - generic [ref=f6e29]:
+      - generic [ref=f6e30]: סיסמה
+      - generic [ref=f6e31]:
+        - textbox "••••••••" [ref=f6e35]
+        - button [ref=f6e36] [cursor=pointer]
+    - button "כניסה לחשבון" [disabled] [ref=f6e40]
+    - paragraph [ref=f6e41]:
+      - text: אין לך חשבון עדיין?
+      - button "הצטרף" [ref=f6e42] [cursor=pointer]

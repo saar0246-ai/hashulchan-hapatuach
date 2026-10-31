@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { MapPin, Users, Calendar, Clock, ChevronLeft, AlertTriangle, ArrowRight, Moon, Sun, Star, Utensils, CheckCircle, XCircle, Ban, Hourglass } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -23,7 +23,6 @@ const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
   background: 'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
@@ -229,7 +228,7 @@ export default function EventDetail() {
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(192,82,42,0.10)', border: '1px solid rgba(192,82,42,0.18)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)' }}>
+                style={{ background: 'rgba(192,82,42,0.10)', border: '1px solid rgba(192,82,42,0.18)', backdropFilter: 'blur(6px)' }}>
                 <MapPin className="w-4 h-4" style={{ color: '#C0522A' }} />
               </div>
               <p className="text-sm font-semibold" style={{ color: '#1A1714' }}>מיקום</p>

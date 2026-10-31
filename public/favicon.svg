@@ -1,17 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="14" fill="#C0522A"/>
-  <!-- Arch mark (scaled from 44x44 to 52x52, centered) -->
-  <g transform="translate(6,6) scale(1.18)">
-    <path
-      d="M7 40 L7 20 Q7 6 22 6 Q37 6 37 20 L37 40"
-      stroke="white"
-      stroke-width="2.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      fill="none"
-    />
-    <line x1="2"  y1="40" x2="11" y2="40" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <line x1="33" y1="40" x2="42" y2="40" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
-    <circle cx="22" cy="26" r="3.2" fill="white"/>
-  </g>
+  <!-- Table surface -->
+  <rect x="7" y="24" width="50" height="9" rx="4.5" fill="white"/>
+  <!-- Left leg -->
+  <rect x="12" y="33" width="8" height="16" rx="4" fill="white"/>
+  <!-- Right leg -->
+  <rect x="44" y="33" width="8" height="16" rx="4" fill="white"/>
+  <!-- Plate above table -->
+  <circle cx="32" cy="17" r="7" fill="none" stroke="white" stroke-width="2.5"/>
+  <circle cx="32" cy="17" r="2.5" fill="white"/>
 </svg>

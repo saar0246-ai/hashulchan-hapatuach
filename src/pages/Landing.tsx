@@ -1,4 +1,4 @@
-import { useStats } from '../hooks/useStats'
+﻿import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Search, CalendarPlus } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -73,7 +73,6 @@ export default function Landing() {
         borderBottom: `1px solid ${BORDER}`,
         background: 'rgba(253,249,243,0.90)',
         backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
       }}>
         <div style={{
           maxWidth: 1400, margin: '0 auto', padding: '0 1.5rem',

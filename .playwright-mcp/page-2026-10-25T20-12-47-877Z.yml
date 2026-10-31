@@ -1,0 +1,153 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - link "שולחן פתוח" [ref=f4e6] [cursor=pointer]:
+        - /url: /about
+      - generic [ref=f4e13]:
+        - link "כניסה" [ref=f4e14] [cursor=pointer]:
+          - /url: /auth?mode=login
+        - link [ref=f4e15] [cursor=pointer]:
+          - /url: /auth?mode=register
+          - button "הצטרף" [ref=f4e16]
+  - generic [ref=f4e18]:
+    - generic [ref=f4e19]: שולחן פתוח · חינמי לחלוטין · ללא עמלות
+    - heading "שולחן חם" [level=1] [ref=f4e22]
+    - heading "לכל שבת וחג" [level=1] [ref=f4e23]
+    - paragraph [ref=f4e24]: מארחים פותחים את ביתם.אורחים מוצאים שולחן ביתי אמיתי.
+    - generic [ref=f4e25]:
+      - link [ref=f4e26] [cursor=pointer]:
+        - /url: /auth?mode=register
+        - button "הצטרף עכשיו" [ref=f4e27]
+      - link [ref=f4e30] [cursor=pointer]:
+        - /url: /auth?mode=login
+        - button "כניסה" [ref=f4e31]
+    - generic [ref=f4e32]:
+      - generic [ref=f4e33]:
+        - generic [ref=f4e34]:
+          - generic [ref=f4e35]: "5"
+          - generic [ref=f4e36]: +
+        - generic [ref=f4e37]: ארוחות שפורסמו
+      - generic [ref=f4e38]:
+        - generic [ref=f4e39]:
+          - generic [ref=f4e40]: "17"
+          - generic [ref=f4e41]: +
+        - generic [ref=f4e42]: משתמשים פעילים
+      - generic [ref=f4e43]:
+        - generic [ref=f4e44]: "0"
+        - generic [ref=f4e46]: ערים ויישובים
+  - generic [ref=f4e48]:
+    - generic [ref=f4e49]:
+      - paragraph [ref=f4e50]: כך זה נראה בפנים
+      - heading "הכל ממתין לך אחרי ההרשמה" [level=2] [ref=f4e51]
+    - generic [ref=f4e52]:
+      - generic [ref=f4e54]:
+        - generic [ref=f4e55]: חפש ארוחה, עיר, מארח...
+        - generic [ref=f4e60]:
+          - generic [ref=f4e61]: הכל
+          - generic [ref=f4e62]: שישי
+          - generic [ref=f4e63]: שבת
+          - generic [ref=f4e64]: חג
+          - generic [ref=f4e65]: חול
+        - paragraph [ref=f4e66]: ארוחות קרובות
+        - generic [ref=f4e67]:
+          - generic [ref=f4e69]:
+            - generic [ref=f4e70]:
+              - generic [ref=f4e71]:
+                - paragraph [ref=f4e72]: שישי ביתי ירושלמי
+                - paragraph [ref=f4e73]: משפחת לוי
+              - generic [ref=f4e74]: שישי
+            - generic [ref=f4e75]:
+              - generic [ref=f4e76]: ירושלים
+              - generic [ref=f4e78]: 24/10
+              - generic [ref=f4e79]: 3 מקומות
+              - generic [ref=f4e80]: מהדרין
+          - generic [ref=f4e82]:
+            - generic [ref=f4e83]:
+              - generic [ref=f4e84]:
+                - paragraph [ref=f4e85]: שולחן שישי חם ומכיל
+                - paragraph [ref=f4e86]: רחל ויוסף כהן
+              - generic [ref=f4e87]: שישי
+            - generic [ref=f4e88]:
+              - generic [ref=f4e89]: תל אביב
+              - generic [ref=f4e91]: 25/10
+              - generic [ref=f4e92]: 5 מקומות
+              - generic [ref=f4e93]: כשר
+          - generic [ref=f4e95]:
+            - generic [ref=f4e96]:
+              - generic [ref=f4e97]:
+                - paragraph [ref=f4e98]: ארוחת שבת מרוקאית
+                - paragraph [ref=f4e99]: דינה אביב
+              - generic [ref=f4e100]: שבת
+            - generic [ref=f4e101]:
+              - generic [ref=f4e102]: חיפה
+              - generic [ref=f4e104]: 26/10
+              - generic [ref=f4e105]: 2 מקומות
+              - generic [ref=f4e106]: כשר
+      - generic [ref=f4e108]:
+        - generic [ref=f4e110]:
+          - generic [ref=f4e111]: מארח שולחן
+          - heading "מארחים בשבת?" [level=3] [ref=f4e116]: מארחיםבשבת?
+          - generic [ref=f4e117]:
+            - generic [ref=f4e118]: פרסם ארוחה חינם
+            - generic [ref=f4e119]: ←
+        - generic [ref=f4e120]:
+          - paragraph [ref=f4e121]: אזור אישי
+          - generic [ref=f4e123]:
+            - generic [ref=f4e124]: 🍽️
+            - generic [ref=f4e125]:
+              - paragraph [ref=f4e126]: הזמנות שלי
+              - paragraph [ref=f4e127]: ארוחות שנרשמתי אליהן
+            - generic [ref=f4e128]: ←
+          - generic [ref=f4e130]:
+            - generic [ref=f4e131]: 🏠
+            - generic [ref=f4e132]:
+              - paragraph [ref=f4e133]: הארוחות שלי
+              - paragraph [ref=f4e134]: ניהול ארוחות כמארח
+            - generic [ref=f4e135]: ←
+          - generic [ref=f4e137]:
+            - generic [ref=f4e138]: 🔔
+            - generic [ref=f4e139]:
+              - paragraph [ref=f4e140]: התראות
+              - paragraph [ref=f4e141]: עדכונים ואישורים
+            - generic [ref=f4e142]: ←
+          - generic [ref=f4e144]:
+            - generic [ref=f4e145]: ⭐
+            - generic [ref=f4e146]:
+              - paragraph [ref=f4e147]: דירוגים
+              - paragraph [ref=f4e148]: ביקורות אחרי ארוחות
+            - generic [ref=f4e149]: ←
+  - generic [ref=f4e151]:
+    - generic [ref=f4e152]:
+      - paragraph [ref=f4e153]: איך זה עובד
+      - heading "שלושה צעדים פשוטים" [level=2] [ref=f4e154]
+    - generic [ref=f4e155]:
+      - generic [ref=f4e157]:
+        - generic [ref=f4e158]: "01"
+        - paragraph [ref=f4e159]: נרשמים
+        - paragraph [ref=f4e160]: פרופיל חינמי עם העדפות כשרות ודת — תהליך של 5 דקות.
+      - generic [ref=f4e162]:
+        - generic [ref=f4e163]: "02"
+        - paragraph [ref=f4e164]: מוצאים ארוחה
+        - paragraph [ref=f4e165]: מסנן לפי עיר, תאריך, כשרות וסוג האירוע.
+      - generic [ref=f4e167]:
+        - generic [ref=f4e168]: "03"
+        - paragraph [ref=f4e169]: מגיעים ונהנים
+        - paragraph [ref=f4e170]: המארח בוחר ושולח כתובת ישירות אחרי האישור.
+  - generic [ref=f4e174]:
+    - generic [ref=f4e175]:
+      - heading "מוכן לפגוש שולחן חדש?" [level=3] [ref=f4e176]
+      - paragraph [ref=f4e177]: הצטרף לקהילה — חינמי לחלוטין
+    - link [ref=f4e179] [cursor=pointer]:
+      - /url: /auth?mode=register
+      - button "הצטרף עכשיו — חינם" [ref=f4e180]
+  - contentinfo [ref=f4e183]:
+    - generic [ref=f4e184]:
+      - generic "שולחן פתוח" [ref=f4e185]
+      - navigation [ref=f4e191]:
+        - link "אודות" [ref=f4e192] [cursor=pointer]:
+          - /url: /about
+        - link "תנאי שימוש" [ref=f4e193] [cursor=pointer]:
+          - /url: /terms
+        - link "פרטיות" [ref=f4e194] [cursor=pointer]:
+          - /url: /privacy
+    - paragraph [ref=f4e195]: שולחן פתוח © 2026 — מיזם קהילתי

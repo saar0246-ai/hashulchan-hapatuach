@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Search, X, CalendarPlus, Users, ChevronDown } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
@@ -21,11 +21,10 @@ const AMBER       = '#C8860A'
 const BORDER      = 'rgba(232,226,216,0.70)'
 const BORDER_FIRE = 'rgba(192,82,42,0.20)'
 const GLASS = {
-  background:           'rgba(255,255,255,0.58)',
-  backdropFilter:       'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
-  border:               '1px solid rgba(255,255,255,0.80)',
-  boxShadow:            '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+  background:     'rgba(255,255,255,0.58)',
+  backdropFilter: 'blur(28px)',
+  border:         '1px solid rgba(255,255,255,0.80)',
+  boxShadow:      '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
 
 /* ─── Tabs ──────────────────────────────────────────────────────────────── */
@@ -274,64 +273,44 @@ export default function Home() {
             </AnimatePresence>
           </div>
 
-          {/* Emil Kowalski Tabs */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.4 }}
-            style={{ marginBottom: 20, textAlign: 'center' }}
-          >
-            <LayoutGroup>
-              <div
-                style={{
-                  display:      'inline-flex',
-                  background:   'rgba(230,218,208,0.50)',
-                  borderRadius: 9999,
-                  padding:      3,
-                  border:       `1px solid ${BORDER}`,
-                }}
-              >
-                {TABS.map(tab => {
-                  const isActive = activeTab === tab.id
-                  return (
-                    <motion.button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      style={{
-                        position:   'relative',
-                        padding:    '7px 16px',
-                        borderRadius: 9999,
-                        color:      isActive ? FIRE : MUTED,
-                        cursor:     'pointer',
-                        fontSize:   13,
-                        fontWeight: isActive ? 700 : 500,
-                        background: 'transparent',
-                        border:     'none',
-                        outline:    'none',
-                      }}
-                      whileTap={{ scale: 0.94 }}
-                      transition={SP}
-                    >
-                      {isActive && (
-                        <motion.span
-                          layoutId="bubble"
-                          style={{
-                            position:  'absolute',
-                            inset:     0,
-                            borderRadius: 9999,
-                            background: 'rgba(255,255,255,0.88)',
-                            boxShadow: '0 1px 8px rgba(44,24,8,0.10)',
-                          }}
-                          transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                      <span style={{ position: 'relative', zIndex: 1 }}>{tab.label}</span>
-                    </motion.button>
-                  )
-                })}
-              </div>
-            </LayoutGroup>
-          </motion.div>
+          {/* Tabs */}
+          <div style={{ marginBottom: 20, textAlign: 'center', animation: 'home-fadein-up 0.4s cubic-bezier(0.22,1,0.36,1) 0.15s both' }}>
+            <div
+              style={{
+                display:      'inline-flex',
+                background:   'rgba(230,218,208,0.50)',
+                borderRadius: 9999,
+                padding:      3,
+                border:       `1px solid ${BORDER}`,
+              }}
+            >
+              {TABS.map(tab => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      position:     'relative',
+                      padding:      '7px 16px',
+                      borderRadius: 9999,
+                      color:        isActive ? FIRE : MUTED,
+                      cursor:       'pointer',
+                      fontSize:     13,
+                      fontWeight:   isActive ? 700 : 500,
+                      background:   isActive ? 'rgba(255,255,255,0.88)' : 'transparent',
+                      border:       'none',
+                      outline:      'none',
+                      boxShadow:    isActive ? '0 1px 8px rgba(44,24,8,0.10)' : 'none',
+                      transition:   'background 0.25s, color 0.25s, box-shadow 0.25s',
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {/* Region filter */}
           <motion.div

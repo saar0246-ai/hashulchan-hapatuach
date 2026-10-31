@@ -1,0 +1,12 @@
+- navigation [ref=f7e3]:
+  - generic [ref=f7e4]:
+    - link "גלה" [ref=f7e5] [cursor=pointer]:
+      - /url: /home
+    - link "הזמנות" [ref=f7e12] [cursor=pointer]:
+      - /url: /my-bookings
+    - link "פרסם" [ref=f7e17] [cursor=pointer]:
+      - /url: /create-event
+    - link "התראות" [ref=f7e22] [cursor=pointer]:
+      - /url: /notifications
+    - link "פרופיל" [ref=f7e28] [cursor=pointer]:
+      - /url: /profile

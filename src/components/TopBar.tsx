@@ -1,4 +1,4 @@
-import { useNavigate, Link } from 'react-router-dom'
+﻿import { useNavigate, Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import BrandLogo from './BrandLogo'
 
@@ -19,7 +19,6 @@ export default function TopBar({ title, showBack = false, right, transparent = f
       style={transparent ? undefined : {
         background: 'hsl(var(--card) / 0.92)',
         backdropFilter: 'blur(20px) saturate(160%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(160%)',
         borderBottom: '1px solid hsl(var(--border) / 0.8)',
       }}
     >

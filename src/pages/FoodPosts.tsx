@@ -11,11 +11,10 @@ import TopBar from '../components/TopBar'
 import ProfileAvatar from '../components/ProfileAvatar'
 
 const GLASS = {
-  background: 'rgba(255,255,255,0.58)',
+  background:     'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
-  border: '1px solid rgba(255,255,255,0.80)',
-  boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
+  border:         '1px solid rgba(255,255,255,0.80)',
+  boxShadow:      '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 } as const
 
 interface PostWithRequests extends FoodPost {
@@ -55,6 +54,12 @@ export default function FoodPosts() {
       .limit(50)
 
     if (error) {
+      // Table doesn't exist yet — show empty state silently
+      if (error.code === '42P01' || (error.message && (error.message.includes('does not exist') || error.message.includes('relation')))) {
+        setPosts([])
+        setLoading(false)
+        return
+      }
       toast.error('שגיאה בטעינת המסירות')
       setLoading(false)
       return
@@ -635,9 +640,6 @@ export default function FoodPosts() {
             </div>
           )}
 
-          <p className="text-center text-xs mt-8" style={{ color: '#8C7060' }}>
-            * יש ליצור את bucket ‎'food-images'‎ בלוח Supabase Storage לפני העלאת תמונות
-          </p>
         </div>
       </div>
     </div>

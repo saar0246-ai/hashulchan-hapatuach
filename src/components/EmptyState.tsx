@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+﻿import type { ReactNode } from 'react'
 
 interface EmptyStateProps {
   icon?: ReactNode
@@ -23,7 +23,6 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
             border: '1px solid rgba(255,255,255,0.80)',
             boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
             backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)',
           }}
         >
           {icon}

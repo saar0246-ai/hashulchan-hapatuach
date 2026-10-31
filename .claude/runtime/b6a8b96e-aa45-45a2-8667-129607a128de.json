@@ -1,0 +1,242 @@
+{
+  "version": 1,
+  "sessionId": "b6a8b96e-aa45-45a2-8667-129607a128de",
+  "profileId": "conservative",
+  "observedActions": [
+    {
+      "fingerprint": "553fa8b9b3b01d4a1fc320bb1f90e65fed615602",
+      "toolName": "ConfigChange",
+      "workItem": "ConfigChange source=user_settings file=C:\\Users\\PC\\.claude\\settings.json",
+      "domainId": "auth_security_surfaces",
+      "domainLabel": "Auth / security surfaces",
+      "autonomyLevel": "HARD_STOP",
+      "operationType": "config_change",
+      "approvalState": "config_change_blocked",
+      "firstObservedAt": "2026-10-17T23:04:38.352Z",
+      "lastObservedAt": "2026-10-17T23:04:38.352Z"
+    }
+  ],
+  "blockedAttempts": [],
+  "chainEntries": [
+    {
+      "chainId": "hook_chain_b6a8b96e-aa45-45a2-8667-129607a128de",
+      "entryId": "hook_config_change_b6a8b96e-aa45-45a2-8667-129607a128de_0001",
+      "entryType": "OPERATOR_ACTION",
+      "recordedAt": "2026-10-17T23:04:38.352Z",
+      "sessionId": "b6a8b96e-aa45-45a2-8667-129607a128de",
+      "sourceArtifact": "hook:ConfigChange",
+      "sourceLocation": "source:user_settings",
+      "payload": {
+        "action": "config_change_blocked",
+        "source": "user_settings",
+        "filePath": "C:\\Users\\PC\\.claude\\settings.json"
+      },
+      "linkedEntryRefs": []
+    }
+  ],
+  "nextChainCounter": 2,
+  "activePermits": [],
+  "activeAuthorizations": [],
+  "loadedInstructions": [],
+  "activeSubagents": [],
+  "trackedTasks": [],
+  "stopGate": {
+    "lastBlockedSignature": null,
+    "lastBlockedAt": null
+  },
+  "subagentStopGate": {
+    "lastBlockedSignature": null,
+    "lastBlockedAt": null,
+    "lastAgentId": null
+  },
+  "persistedBrief": {
+    "briefId": "hook_brief_b6a8b96e-aa45-45a2-8667-129607a128de",
+    "inScope": [],
+    "outOfScope": [],
+    "controlRodProfile": {
+      "profileId": "conservative",
+      "profileLabel": "Conservative",
+      "domainRules": [
+        {
+          "domainId": "pricing_quote_logic",
+          "label": "Pricing / quote logic",
+          "filePatterns": [
+            "**/*pricing*.*",
+            "**/*quote*.*"
+          ],
+          "operationTypes": [
+            "modify_logic",
+            "change_rules"
+          ],
+          "autonomyLevel": "HARD_STOP",
+          "justification": "Starter profile 'conservative' posture for Pricing / quote logic."
+        },
+        {
+          "domainId": "customer_data_pii",
+          "label": "Customer data / PII",
+          "filePatterns": [
+            "**/*customer*.*",
+            "**/*pii*.*"
+          ],
+          "operationTypes": [
+            "read_data",
+            "write_data"
+          ],
+          "autonomyLevel": "HARD_STOP",
+          "justification": "Starter profile 'conservative' posture for Customer data / PII."
+        },
+        {
+          "domainId": "database_schema",
+          "label": "Database schema",
+          "filePatterns": [
+            "**/*schema*.*",
+            "migrations/**"
+          ],
+          "operationTypes": [
+            "ddl_change",
+            "migration_change"
+          ],
+          "autonomyLevel": "HARD_STOP",
+          "justification": "Starter profile 'conservative' posture for Database schema."
+        },
+        {
+          "domainId": "protected_destructive_ops",
+          "label": "Protected / destructive ops",
+          "filePatterns": [
+            "**/*"
+          ],
+          "operationTypes": [
+            "delete",
+            "destructive_operation"
+          ],
+          "autonomyLevel": "HARD_STOP",
+          "justification": "Starter profile 'conservative' posture for Protected / destructive ops."
+        },
+        {
+          "domainId": "auth_security_surfaces",
+          "label": "Auth / security surfaces",
+          "filePatterns": [
+            "**/auth.*",
+            "**/auth-*.*",
+            "**/auth_*.*",
+            "**/*-auth.*",
+            "**/*_auth.*",
+            "**/*.auth.*",
+            "**/*oauth*.*",
+            "**/*authent*.*",
+            "**/*authoriz*.*",
+            "**/*authz*.*",
+            "**/*security*.*"
+          ],
+          "operationTypes": [
+            "auth_change",
+            "security_change"
+          ],
+          "autonomyLevel": "HARD_STOP",
+          "justification": "Starter profile 'conservative' posture for Auth / security surfaces."
+        },
+        {
+          "domainId": "existing_file_modification",
+          "label": "Existing file modification",
+          "filePatterns": [
+            "**/*"
+          ],
+          "operationTypes": [
+            "modify_existing_file"
+          ],
+          "autonomyLevel": "SUPERVISED",
+          "justification": "Starter profile 'conservative' posture for Existing file modification."
+        },
+        {
+          "domainId": "new_file_creation",
+          "label": "New file creation",
+          "filePatterns": [
+            "**/*"
+          ],
+          "operationTypes": [
+            "create_new_file"
+          ],
+          "autonomyLevel": "SUPERVISED",
+          "justification": "Starter profile 'conservative' posture for New file creation."
+        },
+        {
+          "domainId": "ui_styling_content",
+          "label": "UI / styling / content",
+          "filePatterns": [
+            "**/*ui*.*",
+            "**/*style*.*",
+            "**/*.css",
+            "**/*.html"
+          ],
+          "operationTypes": [
+            "ui_change",
+            "content_change"
+          ],
+          "autonomyLevel": "SUPERVISED",
+          "justification": "Starter profile 'conservative' posture for UI / styling / content."
+        },
+        {
+          "domainId": "documentation_comments",
+          "label": "Documentation / comments",
+          "filePatterns": [
+            "docs/**",
+            "**/*.md"
+          ],
+          "operationTypes": [
+            "documentation_change",
+            "comment_change"
+          ],
+          "autonomyLevel": "FULL_AUTO",
+          "justification": "Starter profile 'conservative' posture for Documentation / comments."
+        },
+        {
+          "domainId": "test_files",
+          "label": "Test files",
+          "filePatterns": [
+            "tests/**",
+            "**/*.test.*",
+            "**/*.spec.*"
+          ],
+          "operationTypes": [
+            "test_change",
+            "test_creation"
+          ],
+          "autonomyLevel": "SUPERVISED",
+          "justification": "Starter profile 'conservative' posture for Test files."
+        }
+      ]
+    },
+    "source": "hook_runtime",
+    "createdAt": "2026-10-17T23:01:58.490Z"
+  },
+  "persistedReceipt": null,
+  "lastWalk": null,
+  "lastFireBreak": null,
+  "lastUserPromptSubmit": null,
+  "lastConfigChange": {
+    "source": "user_settings",
+    "filePath": "C:\\Users\\PC\\.claude\\settings.json",
+    "decision": "block",
+    "observedAt": "2026-10-17T23:04:38.352Z"
+  },
+  "lastPermissionDenied": null,
+  "lastNotification": null,
+  "lastSubagentStop": null,
+  "lastTaskLifecycle": null,
+  "lastTeammateIdle": null,
+  "lastStopFailure": null,
+  "lastPostCompact": null,
+  "lastSessionEnd": null,
+  "lastElicitation": null,
+  "lastElicitationResult": null,
+  "sessionStart": {
+    "source": "startup",
+    "startedAt": "2026-10-17T23:01:58.490Z"
+  },
+  "recovery": {
+    "status": "not_required",
+    "detail": "No compaction recovery required for this startup source.",
+    "source": "startup",
+    "checkedAt": "2026-10-17T23:01:58.490Z"
+  }
+}

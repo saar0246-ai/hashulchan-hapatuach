@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Eye, EyeOff, ArrowRight, CheckCircle, Mail, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -13,7 +13,6 @@ const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
   background: 'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
@@ -98,7 +97,7 @@ export default function Auth() {
         <Orbs />
         <div
           className="relative z-10 w-20 h-20 rounded-full flex items-center justify-center"
-          style={{ background: 'rgba(192,82,42,0.12)', border: '2px solid rgba(192,82,42,0.30)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', animation: 'auth-verify-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+          style={{ background: 'rgba(192,82,42,0.12)', border: '2px solid rgba(192,82,42,0.30)', backdropFilter: 'blur(12px)', animation: 'auth-verify-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>
           <style>{`@keyframes auth-verify-pop { from { opacity:0; transform:scale(0.8) } to { opacity:1; transform:scale(1) } }`}</style>
           <CheckCircle className="w-9 h-9" style={{ color: '#C0522A' }} />
         </div>

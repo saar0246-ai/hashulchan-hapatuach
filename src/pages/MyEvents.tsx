@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarPlus, ChevronLeft, Clock, Users, Star, ArrowRight, Pencil, Check, X } from 'lucide-react'
 import { format, addDays } from 'date-fns'
@@ -20,7 +20,6 @@ const SPRING = { type: 'spring' as const, stiffness: 400, damping: 28 }
 const GLASS = {
   background: 'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
@@ -539,7 +538,6 @@ export default function MyEvents() {
               style={{
                 background: 'rgba(253,249,243,0.95)',
                 backdropFilter: 'blur(40px)',
-                WebkitBackdropFilter: 'blur(40px)',
                 boxShadow: '0 -20px 64px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.96)',
                 border: '1px solid rgba(255,255,255,0.88)',
                 animation: 'sheet-slide-up 0.35s cubic-bezier(0.22,1,0.36,1) both',

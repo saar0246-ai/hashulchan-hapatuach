@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { LogOut, ChevronLeft, Edit2, Check, X, Camera, Home as HomeIcon, FileText, Lock, Shield, Eye } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -15,7 +15,6 @@ import CropModal from '../components/CropModal'
 const GLASS = {
   background: 'rgba(255,255,255,0.58)',
   backdropFilter: 'blur(28px)',
-  WebkitBackdropFilter: 'blur(28px)',
   border: '1px solid rgba(255,255,255,0.80)',
   boxShadow: '0 8px 32px rgba(44,24,8,0.07), 0 2px 6px rgba(44,24,8,0.03), inset 0 1px 0 rgba(255,255,255,0.90)',
 }
