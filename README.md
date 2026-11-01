@@ -77,11 +77,29 @@
 ## 📋 תיעוד מצב הפרויקט (עדכן בכל פתיחת חלון חדש!)
 
 ### 🗓️ נוצר: 28 ספטמבר 2026
-### 🔄 עדכון אחרון: 31 אוקטובר 2026 (session 2)
+### 🔄 עדכון אחרון: 1 נובמבר 2026
 
 ---
 
 ## ✅ מה נעשה עד כה
+
+### עדכונים (1 נובמבר 2026 — session)
+
+- [x] **תיקון שגיאת ההתראות אחת ולתמיד** — שגיאה: `cannot add postgres_changes callbacks for realtime:notifications:... after subscribe()`.
+  - **סיבה**: `BottomNav` + עמוד ההתראות שניהם קראו ל-`useNotifications(userId)` בנפרד → שני channels עם שם זהה נוצרו → הקריאה השנייה ל-`.on()` אחרי `.subscribe()` קרסה.
+  - **תיקון frontend**: ה-hook הפך ל-React Context. `NotificationsProvider` עולה פעם אחת ב-`App.tsx` ועוטף את כל הנתיבים. `BottomNav`, עמוד ההתראות וכל רכיב אחר קוראים ל-`useNotifications()` ללא ארגומנטים — קוראים מ-Context משותף, channel בודד.
+  - **תיקון שם ה-channel**: `notifications:${userId}` → `notif_${userId}` (למנוע התנגשות עם subscriptions ישנים שנשארו בדפדפן).
+  - **קובץ נמחק**: `src/hooks/useNotifications.ts` → **הוחלף ב**: `src/hooks/useNotifications.tsx` (JSX דורש `.tsx`).
+  - **קבצים ששונו**: `src/App.tsx`, `src/components/BottomNav.tsx`, `src/pages/Notifications.tsx`.
+- [x] **תיקון triggers ב-DB** — `supabase/notifications_fix.sql` הורץ על הפרויקט:
+  - `notify_host_new_guest` שונה ל-`SECURITY DEFINER` (ה-trigger רץ תחת JWT של האורח → RLS חסם הכנסה לטבלת notifications של המארח).
+  - נוסף `notify_guest_registration_update` + trigger `on_registration_status_change` על `event_registrations` — שולח התראה לאורח כשהמארח מאשר/דוחה.
+  - נוקו policies כפולים (`notif_select_own`, `notif_update_own`).
+- [x] **הריצו migrations נוספים**:
+  - `supabase/admin_policies.sql` — יצר טבלאות `notifications`, `food_posts`, `food_requests`; פונקצית `is_admin()`; policies לאדמין.
+  - `supabase/referral_system.sql` — עמודות `guest_kashrut_prefs`, `referral_code`, `referred_by` לפרופילים; trigger ליצירת קוד הפניה אוטומטי; RPC `admin_get_referral_stats()`.
+
+---
 
 ### עדכונים (31 אוקטובר 2026 — session 2)
 - [x] **תיקון קראש התראות במובייל** — שני תיקונים:
