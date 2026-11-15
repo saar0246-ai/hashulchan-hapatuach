@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useStats } from '../hooks/useStats'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, X, CalendarPlus, Users, ChevronDown } from 'lucide-react'
+import { Search, X, CalendarPlus, Users, ChevronDown, Moon, Gamepad2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useProfile } from '../hooks/useProfile'
@@ -219,7 +219,7 @@ export default function Home() {
             <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}>
               <ChevronDown style={{ width: 16, height: 16 }} />
             </motion.div>
-            <span>גלול לארוחות</span>
+            <span>גלול למפגשים</span>
           </motion.div>
         </div>
       </div>
@@ -424,43 +424,73 @@ export default function Home() {
             </div>
           </motion.a>
 
-          {/* CTA card */}
+          {/* CTA card — host a meal or leisure event */}
           <InView
             variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             viewOptions={{ once: true, margin: '0px 0px -20px 0px' }}
           >
-            <Link to="/create-event" style={{ display: 'block', marginBottom: 28 }}>
+            <div style={{ marginBottom: 28 }}>
               <Tilt
-                rotationFactor={6}
+                rotationFactor={5}
                 springOptions={{ stiffness: 260, damping: 24 }}
                 style={{
                   borderRadius: 20,
                   overflow:     'hidden',
                   background:   'linear-gradient(135deg, #C0522A 0%, #7A3018 100%)',
                   padding:      '1.8rem',
-                  display:      'block',
                   position:     'relative',
                 }}
               >
                 <div aria-hidden style={{ position: 'absolute', top: -60, right: -50, width: 220, height: 220, background: 'radial-gradient(circle, rgba(255,215,130,0.35), transparent 60%)', filter: 'blur(8px)', pointerEvents: 'none' }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+
+                  {/* Header */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                     <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.28)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <CalendarPlus style={{ width: 22, height: 22, color: 'white' }} strokeWidth={1.75} />
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>מארח שולחן</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.50)', letterSpacing: '0.16em', textTransform: 'uppercase' }}>מארח שולחן</span>
                   </div>
-                  <h2 style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.9rem, 7vw, 2.6rem)', color: 'white', letterSpacing: '-0.034em', lineHeight: 0.97, marginBottom: 20 }}>
-                    מארחים<br />בשבת?
+
+                  <h2 style={{ fontFamily: "'Frank Ruhl Libre', serif", fontWeight: 900, fontSize: 'clamp(1.9rem, 7vw, 2.6rem)', color: 'white', letterSpacing: '-0.034em', lineHeight: 0.97, marginBottom: 8 }}>
+                    רוצה<br />לארח?
                   </h2>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.14)', border: '1.5px solid rgba(255,255,255,0.32)', borderRadius: 11, padding: '9px 18px' }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.92)' }}>פרסום ארוחה</span>
-                    <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 16 }}>←</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.62)', marginBottom: 22, fontWeight: 500 }}>
+                    בחר את סוג המפגש שתרצה לפרסם
+                  </p>
+
+                  {/* Two option buttons */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <Link to="/create-event?type=shabbat_dinner" style={{ textDecoration: 'none' }}>
+                      <motion.div
+                        whileHover={{ background: 'rgba(255,255,255,0.22)' }}
+                        whileTap={{ scale: 0.96 }}
+                        transition={SP}
+                        style={{ background: 'rgba(255,255,255,0.14)', border: '1.5px solid rgba(255,255,255,0.28)', borderRadius: 14, padding: '16px 12px', textAlign: 'center', cursor: 'pointer' }}
+                      >
+                        <Moon style={{ width: 24, height: 24, color: 'rgba(255,255,255,0.90)', margin: '0 auto 10px', display: 'block' }} strokeWidth={1.75} />
+                        <div style={{ fontSize: 15, fontWeight: 800, color: 'white', marginBottom: 5 }}>ארוחה</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.58)', lineHeight: 1.5 }}>שישי · שבת · חג · חול</div>
+                      </motion.div>
+                    </Link>
+                    <Link to="/create-event?type=leisure" style={{ textDecoration: 'none' }}>
+                      <motion.div
+                        whileHover={{ background: 'rgba(255,255,255,0.22)' }}
+                        whileTap={{ scale: 0.96 }}
+                        transition={SP}
+                        style={{ background: 'rgba(255,255,255,0.14)', border: '1.5px solid rgba(255,255,255,0.28)', borderRadius: 14, padding: '16px 12px', textAlign: 'center', cursor: 'pointer' }}
+                      >
+                        <Gamepad2 style={{ width: 24, height: 24, color: 'rgba(255,255,255,0.90)', margin: '0 auto 10px', display: 'block' }} strokeWidth={1.75} />
+                        <div style={{ fontSize: 15, fontWeight: 800, color: 'white', marginBottom: 5 }}>פנאי</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.58)', lineHeight: 1.5 }}>משחקים · חלה · קולנוע</div>
+                      </motion.div>
+                    </Link>
                   </div>
+
                 </div>
               </Tilt>
-            </Link>
+            </div>
           </InView>
 
           {/* Food Giveaway — prominent banner before events */}

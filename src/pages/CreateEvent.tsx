@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CalendarPlus, Info, Moon, Sun, Star, Utensils, Gamepad2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -27,14 +27,20 @@ const EVENT_TYPE_ICON: Record<string, React.ReactNode> = {
   leisure:        <Gamepad2 className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
 }
 
+const VALID_TYPES: EventType[] = ['shabbat_dinner', 'shabbat_lunch', 'holiday', 'weekday', 'leisure']
+
 export default function CreateEvent() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [loading, setLoading] = useState(false)
+
+  const rawType = searchParams.get('type') as EventType
+  const initialType: EventType = VALID_TYPES.includes(rawType) ? rawType : 'shabbat_dinner'
 
   const [form, setForm] = useState({
     title: '',
-    event_type: 'shabbat_dinner' as EventType,
+    event_type: initialType,
     holiday_name: '',
     event_date: '',
     event_time: '19:30',
