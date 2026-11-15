@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Users, Calendar, Moon, Sun, Star, Utensils } from 'lucide-react'
+import { MapPin, Users, Calendar, Moon, Sun, Star, Utensils, Gamepad2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
@@ -23,6 +23,7 @@ const EVENT_TYPE_ICON: Record<string, LucideIcon> = {
   shabbat_lunch:  Sun,
   holiday:        Star,
   weekday:        Utensils,
+  leisure:        Gamepad2,
 }
 
 const EVENT_TYPE_GRADIENT: Record<string, string> = {
@@ -30,6 +31,7 @@ const EVENT_TYPE_GRADIENT: Record<string, string> = {
   shabbat_lunch:  'linear-gradient(135deg, #B87A10 0%, #7A5200 100%)',
   holiday:        'linear-gradient(135deg, #4A8C3A 0%, #2C5422 100%)',
   weekday:        'linear-gradient(135deg, #8C6240 0%, #5C3A20 100%)',
+  leisure:        'linear-gradient(135deg, #1A6B8A 0%, #0D3D52 100%)',
 }
 
 export default function EventCard({ event, className = '' }: EventCardProps) {

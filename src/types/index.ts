@@ -1,7 +1,7 @@
 export type KashrutLevel = 'mehadrin' | 'kosher' | 'traditional' | 'none'
 export type ReligiousLevel = 'haredi' | 'hardali' | 'dati' | 'dati_leumi' | 'dati_light' | 'masorti' | 'hiloni'
 export type Gender = 'male' | 'female' | 'other'
-export type EventType = 'shabbat_dinner' | 'shabbat_lunch' | 'holiday' | 'weekday'
+export type EventType = 'shabbat_dinner' | 'shabbat_lunch' | 'holiday' | 'weekday' | 'leisure'
 export type RegistrationStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
 export type EventStatus = 'active' | 'full' | 'cancelled' | 'completed'
 export type NotificationType =
@@ -155,6 +155,7 @@ export const EVENT_TYPE_LABELS: Record<EventType, string> = {
   shabbat_lunch: 'ארוחת שבת',
   holiday: 'חג',
   weekday: 'אמצע שבוע',
+  leisure: 'פנאי',
 }
 
 export const KASHRUT_COLORS: Record<KashrutLevel, string> = {

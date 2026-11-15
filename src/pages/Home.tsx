@@ -34,6 +34,7 @@ const TABS = [
   { id: 'shabbat_lunch',  label: 'שבת'  },
   { id: 'holiday',        label: 'חג'   },
   { id: 'weekday',        label: 'חול'  },
+  { id: 'leisure',        label: 'פנאי' },
 ]
 
 /* ─── Region filter ─────────────────────────────────────────────────────── */

@@ -1,6 +1,6 @@
 ﻿import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CalendarPlus, Info, Moon, Sun, Star, Utensils } from 'lucide-react'
+import { CalendarPlus, Info, Moon, Sun, Star, Utensils, Gamepad2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
@@ -24,6 +24,7 @@ const EVENT_TYPE_ICON: Record<string, React.ReactNode> = {
   shabbat_lunch:  <Sun className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
   holiday:        <Star className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
   weekday:        <Utensils className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
+  leisure:        <Gamepad2 className="w-4 h-4 inline-block ml-1.5" strokeWidth={1.75} />,
 }
 
 export default function CreateEvent() {
@@ -74,7 +75,7 @@ export default function CreateEvent() {
       host_id: user.id,
       title: form.title.trim(),
       event_type: form.event_type,
-      holiday_name: form.event_type === 'holiday' ? form.holiday_name.trim() || null : null,
+      holiday_name: (form.event_type === 'holiday' || form.event_type === 'leisure') ? form.holiday_name.trim() || null : null,
       event_date: form.event_date,
       event_time: form.event_time,
       city: form.city.trim(),
@@ -94,7 +95,7 @@ export default function CreateEvent() {
     if (error) {
       toast.error('שגיאה ביצירת האירוע')
     } else {
-      toast.success('הארוחה פורסמה!')
+      toast.success(form.event_type === 'leisure' ? 'המפגש פורסם!' : 'הארוחה פורסמה!')
       navigate(`/events/${data.id}`)
     }
     setLoading(false)
@@ -125,13 +126,13 @@ export default function CreateEvent() {
       </div>
 
       <div className="relative" style={{ zIndex: 1 }}>
-        <TopBar title="פרסם ארוחה" showBack />
+        <TopBar title={form.event_type === 'leisure' ? 'פרסם מפגש' : 'פרסם ארוחה'} showBack />
 
         <div className="max-w-lg mx-auto px-4 pb-28 pt-4 space-y-5">
 
           {/* Event type */}
           <div className="rounded-2xl p-4 space-y-3" style={{ ...GLASS }}>
-            <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>סוג הארוחה *</label>
+            <label className="text-sm font-semibold block" style={{ color: '#1A1714' }}>סוג המפגש *</label>
             <div className="grid grid-cols-2 gap-2">
               {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map(t => (
                 <button key={t} type="button" onClick={() => update('event_type', t)}
@@ -152,20 +153,26 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          {form.event_type === 'holiday' && (
+          {(form.event_type === 'holiday' || form.event_type === 'leisure') && (
             <div className="rounded-2xl p-4" style={{ ...GLASS }}>
-              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>שם החג</label>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>
+                {form.event_type === 'leisure' ? 'שם הפעילות' : 'שם החג'}
+              </label>
               <input value={form.holiday_name} onChange={e => update('holiday_name', e.target.value)}
-                placeholder="פסח, ראש השנה, שבועות..." className="shulchan-input" />
+                placeholder={form.event_type === 'leisure' ? 'הפרשת חלה, משחקי קופסה, ערב קולנוע...' : 'פסח, ראש השנה, שבועות...'}
+                className="shulchan-input" />
             </div>
           )}
 
           {/* Basic info */}
           <div className="rounded-2xl p-4 space-y-4" style={{ ...GLASS }}>
             <div>
-              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>כותרת הארוחה *</label>
+              <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>
+                {form.event_type === 'leisure' ? 'כותרת המפגש *' : 'כותרת הארוחה *'}
+              </label>
               <input value={form.title} onChange={e => update('title', e.target.value)}
-                placeholder="ארוחת שישי חמה בסלון, כולם מוזמנים!" className="shulchan-input" maxLength={80} />
+                placeholder={form.event_type === 'leisure' ? 'ערב משחקים קליל, כולם מוזמנים!' : 'ארוחת שישי חמה בסלון, כולם מוזמנים!'}
+                className="shulchan-input" maxLength={80} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -297,9 +304,11 @@ export default function CreateEvent() {
 
           {/* Description */}
           <div className="rounded-2xl p-4" style={{ ...GLASS }}>
-            <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>תיאור הארוחה</label>
+            <label className="text-sm font-semibold mb-1.5 block" style={{ color: '#1A1714' }}>
+              {form.event_type === 'leisure' ? 'תיאור המפגש' : 'תיאור הארוחה'}
+            </label>
             <textarea value={form.description} onChange={e => update('description', e.target.value)}
-              placeholder="ספר על הארוחה — מה מגישים, האווירה, מה מצפה לאורחים..."
+              placeholder={form.event_type === 'leisure' ? 'ספר על הפעילות — מה עושים, האווירה, מה מצפה למשתתפים...' : 'ספר על הארוחה — מה מגישים, האווירה, מה מצפה לאורחים...'}
               className="shulchan-input resize-none h-28" maxLength={500} />
             <p className="text-xs mt-1" style={{ color: '#8C7060' }}>{form.description.length}/500</p>
           </div>
@@ -313,7 +322,7 @@ export default function CreateEvent() {
             style={{ background: 'linear-gradient(135deg, #C0522A, #8C3318)', boxShadow: '0 4px 16px rgba(192,82,42,0.28)' }}>
             {loading
               ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              : <><CalendarPlus className="w-5 h-5" /> פרסם את הארוחה!</>
+              : <><CalendarPlus className="w-5 h-5" /> {form.event_type === 'leisure' ? 'פרסם את המפגש!' : 'פרסם את הארוחה!'}</>
             }
           </motion.button>
         </div>
