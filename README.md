@@ -77,11 +77,22 @@
 ## 📋 תיעוד מצב הפרויקט (עדכן בכל פתיחת חלון חדש!)
 
 ### 🗓️ נוצר: 28 ספטמבר 2026
-### 🔄 עדכון אחרון: 1 נובמבר 2026
+### 🔄 עדכון אחרון: 15 נובמבר 2026
 
 ---
 
 ## ✅ מה נעשה עד כה
+
+### עדכונים (15 נובמבר 2026 — session)
+
+- [x] **הוספת סוג אירוע "פנאי"** — `EventType` הורחב מ-4 ל-5 ערכים (`leisure` נוסף).
+  - **`src/types/index.ts`**: `EventType` union + `EVENT_TYPE_LABELS` (`leisure: 'פנאי'`)
+  - **`src/pages/CreateEvent.tsx`**: אייקון `Gamepad2`, תווית "שם הפעילות" (במקום "שם החג") כשנבחר leisure, placeholder מותאם לכותרת ולתיאור, toast "המפגש פורסם!", כפתור "פרסם את המפגש!"
+  - **`src/pages/Home.tsx`**: טאב "פנאי" נוסף ל-TABS
+  - **`src/components/EventCard.tsx`** + **`src/pages/EventDetail.tsx`**: אייקון `Gamepad2` + גרדיאנט ים (`#1A6B8A → #0D3D52`) עבור `leisure`
+  - **`supabase/add_leisure_event_type.sql`**: מיגרציה שמוסיפה `'leisure'` ל-CHECK constraint של `events.event_type` — **יש להריץ ב-Supabase SQL Editor לפני שמפרסמים אירוע פנאי ראשון**
+  - **שדה DB שנוצל מחדש**: `holiday_name` → מכיל שם הפעילות עבור `leisure` (כגון "הפרשת חלה", "משחקי קופסה") — אפס שינוי בסכמת ה-DB
+  - **QA עבר**: `tsc --noEmit` ← 0 שגיאות; כל 5 ערכי EventType מכוסים ב-icon map + gradient map + labels
 
 ### עדכונים (1 נובמבר 2026 — session)
 
